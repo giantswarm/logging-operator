@@ -7,4 +7,10 @@ layout:
 - go.kubebuilder.io/v4
 projectName: logging-operator
 repo: github.com/giantswarm/logging-operator
+resources:
+- controller: true
+  domain: x-k8s.io
+  group: cluster
+  kind: Cluster
+  version: v1beta1
 version: "3"
