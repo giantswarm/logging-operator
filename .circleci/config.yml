@@ -8,15 +8,15 @@ workflows:
     jobs:
       - architect/go-build:
           name: go-build
-          binary: template-operator
+          binary: logging-operator
           filters:
             tags:
               only: /^v.*/
 
       - architect/push-to-docker:
           context: "architect"
-          name: push-template-operator-to-docker
-          image: "docker.io/giantswarm/template-operator"
+          name: push-logging-operator-to-docker
+          image: "docker.io/giantswarm/logging-operator"
           username_envar: "DOCKER_USERNAME"
           password_envar: "DOCKER_PASSWORD"
           requires:
@@ -28,8 +28,8 @@ workflows:
 
       - architect/push-to-docker:
           context: "architect"
-          name: push-template-operator-to-quay
-          image: "quay.io/giantswarm/template-operator"
+          name: push-logging-operator-to-quay
+          image: "quay.io/giantswarm/logging-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           requires:
@@ -41,8 +41,8 @@ workflows:
 
       - architect/push-to-docker:
           context: "architect"
-          name: push-template-operator-to-aliyun
-          image: "giantswarm-registry.cn-shanghai.cr.aliyuncs.com/giantswarm/template-operator"
+          name: push-logging-operator-to-aliyun
+          image: "giantswarm-registry.cn-shanghai.cr.aliyuncs.com/giantswarm/logging-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           requires:
@@ -55,13 +55,13 @@ workflows:
 
       - architect/push-to-app-catalog:
           context: "architect"
-          name: push-template-operator-to-app-catalog
+          name: push-logging-operator-to-app-catalog
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
-          chart: "template-operator"
+          chart: "logging-operator"
           requires:
-            - push-template-operator-to-docker
-            - push-template-operator-to-quay
+            - push-logging-operator-to-docker
+            - push-logging-operator-to-quay
           # Needed to trigger job also on git tag.
           filters:
             tags:

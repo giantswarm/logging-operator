@@ -1,4 +1,4 @@
-module github.com/giantswarm/template-operator
+module github.com/giantswarm/logging-operator
 
 go 1.18
 

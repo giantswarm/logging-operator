@@ -1,7 +1,7 @@
 registry:
   domain: docker.io
 image:
-  name: "giantswarm/template-operator"
+  name: "giantswarm/logging-operator"
   tag: "[[ .Version ]]"
 pod:
   user:
