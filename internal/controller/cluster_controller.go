@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 
+	clusterhelpers "github.com/giantswarm/logging-operator/pkg/resource/cluster-helpers"
 	"k8s.io/apimachinery/pkg/runtime"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,9 +47,14 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
+	logger.Info("coucou")
 
-	// TODO(user): your logic here
+	if clusterhelpers.IsLoggingEnabled() {
+		// TODO: ensure logging is setup
+	} else {
+		// TODO: ensure logging is disabled
+	}
 
 	return ctrl.Result{}, nil
 }
