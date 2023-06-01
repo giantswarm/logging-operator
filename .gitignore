@@ -1,4 +1,5 @@
 *.swp
 TODO
+/bin
 /logging-operator
 !vendor/**
