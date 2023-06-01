@@ -18,9 +18,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	clusterhelpers "github.com/giantswarm/logging-operator/pkg/resource/cluster-helpers"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,12 +50,22 @@ type ClusterReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("coucou")
 
-	if clusterhelpers.IsLoggingEnabled() {
+	foundClusterCR := &capiv1beta1.Cluster{}
+	err := r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundClusterCR)
+
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	logger.Info(fmt.Sprintf("Name %s", foundClusterCR.GetName()))
+
+	if clusterhelpers.IsLoggingEnabled(*foundClusterCR) {
 		// TODO: ensure logging is setup
+		logger.Info("LOGGING enabled")
 	} else {
 		// TODO: ensure logging is disabled
+		logger.Info("LOGGING disabled")
 	}
 
 	return ctrl.Result{}, nil
