@@ -31,7 +31,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster capiv1beta1.Cl
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info(fmt.Sprintf("promtailtoggle checking %s/%s", desiredConfigMap.GetName(), desiredConfigMap.GetNamespace()))
+	logger.Info(fmt.Sprintf("promtailtoggle checking %s/%s", desiredConfigMap.GetNamespace(), desiredConfigMap.GetName()))
 	var currentConfigMap v1.ConfigMap
 	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredConfigMap.GetName(), Namespace: desiredConfigMap.GetNamespace()}, &currentConfigMap)
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster capiv1beta1.Cl
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info(fmt.Sprintf("promtailtoggle deleting %s/%s", desiredConfigMap.GetName(), desiredConfigMap.GetNamespace()))
+	logger.Info(fmt.Sprintf("promtailtoggle deleting %s/%s", desiredConfigMap.GetNamespace(), desiredConfigMap.GetName()))
 	err = r.Client.Delete(ctx, &desiredConfigMap)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {

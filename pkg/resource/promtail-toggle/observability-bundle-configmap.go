@@ -18,6 +18,13 @@ type app struct {
 	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
+func ObservabilityBundleConfigMapMeta(cluster capiv1beta1.Cluster) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:      fmt.Sprintf("%s-observability-bundle-user-values", cluster.GetName()),
+		Namespace: cluster.GetName(),
+	}
+}
+
 func GenerateObservabilityBundleConfigMap(cluster capiv1beta1.Cluster) (v1.ConfigMap, error) {
 	values := Values{
 		Apps: map[string]app{
@@ -33,10 +40,7 @@ func GenerateObservabilityBundleConfigMap(cluster capiv1beta1.Cluster) (v1.Confi
 	}
 
 	configmap := v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-observability-bundle-user-values", cluster.GetName()),
-			Namespace: cluster.GetName(),
-		},
+		ObjectMeta: ObservabilityBundleConfigMapMeta(cluster),
 		Data: map[string]string{
 			"values": string(v),
 		},
