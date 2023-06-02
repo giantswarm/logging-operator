@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
 	"github.com/pkg/errors"
@@ -23,7 +24,9 @@ func (r *ClusterReconciler) reconcileDelete(ctx context.Context, cluster capiv1b
 	}
 
 	// Finalizer handling needs to come last
+	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
 	if controllerutil.ContainsFinalizer(&cluster, key.Finalizer) {
+		logger.Info(fmt.Sprintf("removing finalizer %s", key.Finalizer))
 		controllerutil.RemoveFinalizer(&cluster, key.Finalizer)
 		err := r.Client.Update(ctx, &cluster)
 		if err != nil {
