@@ -15,7 +15,12 @@ func (r *ClusterReconciler) reconcileDelete(ctx context.Context, cluster capiv1b
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING disabled")
 
-	// TODO(theo): logic goes here
+	for _, reconciler := range r.Reconcilers {
+		_, err := reconciler.ReconcileDelete(ctx, cluster)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
 
 	// Finalizer handling needs to come last
 	if controllerutil.ContainsFinalizer(&cluster, key.Finalizer) {

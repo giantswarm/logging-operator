@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	clusterhelpers "github.com/giantswarm/logging-operator/pkg/resource/cluster-helpers"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,7 +34,8 @@ import (
 // ClusterReconciler reconciles a Cluster object
 type ClusterReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme      *runtime.Scheme
+	Reconcilers []reconciler.Interface
 }
 
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters,verbs=get;list;watch;create;update;patch;delete

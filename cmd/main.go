@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
+	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	//+kubebuilder:scaffold:imports
 )
 

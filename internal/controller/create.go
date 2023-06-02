@@ -24,7 +24,12 @@ func (r *ClusterReconciler) reconcileCreate(ctx context.Context, cluster capiv1b
 		}
 	}
 
-	// TODO(theo): logic goes here
+	for _, reconciler := range r.Reconcilers {
+		_, err := reconciler.ReconcileCreate(ctx, cluster)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
