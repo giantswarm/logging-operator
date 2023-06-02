@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	clusterhelpers "github.com/giantswarm/logging-operator/pkg/resource/cluster-helpers"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
@@ -48,24 +49,38 @@ type ClusterReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
-func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
 	foundClusterCR := &capiv1beta1.Cluster{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundClusterCR)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundClusterCR)
 
 	if err != nil {
-		return ctrl.Result{}, err
+		// TODO(theo): might need to ignore when objects are not found since we cannot do anything
+		//             see https://book.kubebuilder.io/reference/using-finalizers.html
+		//if r.Client.IsNotFound(err) {
+		//	return ctrl.Result{}, nil
+		//}
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	logger.Info(fmt.Sprintf("Name %s", foundClusterCR.GetName()))
 
-	if clusterhelpers.IsLoggingEnabled(*foundClusterCR) {
-		// TODO: ensure logging is setup
-		logger.Info("LOGGING enabled")
+	// Logging should be disable in case:
+	//   - logging is disabled via label
+	//   - the cluster is being deleted
+	disableCondition := !clusterhelpers.IsLoggingEnabled(*foundClusterCR) || !foundClusterCR.DeletionTimestamp.IsZero()
+
+	if disableCondition {
+		result, err = r.reconcileDelete(ctx, *foundClusterCR)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	} else {
-		// TODO: ensure logging is disabled
-		logger.Info("LOGGING disabled")
+		result, err = r.reconcileCreate(ctx, *foundClusterCR)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	return ctrl.Result{}, nil
