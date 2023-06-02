@@ -20,54 +20,56 @@ import (
 	"context"
 	"fmt"
 
-	clusterhelpers "github.com/giantswarm/logging-operator/pkg/resource/cluster-helpers"
+	servicek8shelpers "github.com/giantswarm/logging-operator/pkg/resource/service-k8s-helpers"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// ClusterReconciler reconciles a Cluster object
-type ClusterReconciler struct {
+// ServiceReconciler reconciles a Service object
+type ServiceReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters,verbs=get;list;watch
-//+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters/status,verbs=get
+//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
+//+kubebuilder:rbac:groups=core,resources=services/status,verbs=get
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the Cluster object against the actual cluster state, and then
+// the Service object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
-func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	foundClusterCR := &capiv1beta1.Cluster{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundClusterCR)
+	if req.Namespace == "default" {
+		foundService := &corev1.Service{}
+		err := r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundService)
 
-	if err != nil {
-		return ctrl.Result{}, err
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		logger.Info(fmt.Sprintf("Name %s", foundService.GetName()))
+
+		loggingEnabled := servicek8shelpers.IsLoggingEnabled(*foundService)
+		logger.Info(fmt.Sprintf("Logging enabled = %t", loggingEnabled))
 	}
-
-	logger.Info(fmt.Sprintf("Name %s", foundClusterCR.GetName()))
-
-	loggingEnabled := clusterhelpers.IsLoggingEnabled(*foundClusterCR)
-	logger.Info(fmt.Sprintf("Logging enabled = %t", loggingEnabled))
 
 	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&capiv1beta1.Cluster{}).
+		For(&corev1.Service{}).
 		Complete(r)
 }
