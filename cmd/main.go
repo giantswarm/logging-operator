@@ -34,6 +34,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -90,9 +91,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	promtailReconciler := promtailtoggle.Reconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
+
 	if err = (&controller.ClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Reconcilers: []reconciler.Interface{
+			&promtailReconciler,
+		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 		os.Exit(1)

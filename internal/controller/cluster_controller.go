@@ -56,7 +56,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 
 	foundClusterCR := &capiv1beta1.Cluster{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundClusterCR)
-
 	if err != nil {
 		// TODO(theo): might need to ignore when objects are not found since we cannot do anything
 		//             see https://book.kubebuilder.io/reference/using-finalizers.html
