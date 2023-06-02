@@ -32,9 +32,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
+	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -46,6 +48,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(capiv1beta1.AddToScheme(scheme))
+	utilruntime.Must(appv1.AddToScheme(scheme))
 
 	//+kubebuilder:scaffold:scheme
 }
@@ -96,11 +99,17 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}
 
+	promtailWiring := promtailwiring.Reconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
+
 	if err = (&controller.ClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
 			&promtailReconciler,
+			&promtailWiring,
 		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Cluster")
