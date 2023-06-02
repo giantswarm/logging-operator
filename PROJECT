@@ -13,4 +13,13 @@ resources:
   group: cluster
   kind: Cluster
   version: v1beta1
+- controller: true
+  domain: x-k8s.io
+  kind: Service
+  version: v1
+- controller: true
+  group: core
+  kind: Service
+  path: k8s.io/api/core/v1
+  version: v1
 version: "3"

@@ -10,24 +10,26 @@ rules:
   resources:
   - clusters
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
-- apiGroups:
-  - cluster.x-k8s.io
-  resources:
-  - clusters/finalizers
-  verbs:
-  - update
 - apiGroups:
   - cluster.x-k8s.io
   resources:
   - clusters/status
   verbs:
   - get
-  - patch
-  - update
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - get
