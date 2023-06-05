@@ -53,6 +53,21 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster capiv1beta1.Cl
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring delete")
 
+	appMeta := ObservabilityBundleAppMeta(cluster)
+
+	var currentApp appv1.App
+	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	currentApp.Spec.UserConfig.ConfigMap.Name = ""
+	currentApp.Spec.UserConfig.ConfigMap.Namespace = ""
+	err = r.Client.Update(ctx, &currentApp)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	return ctrl.Result{}, nil
 }
 
