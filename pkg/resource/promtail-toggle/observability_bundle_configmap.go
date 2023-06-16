@@ -18,6 +18,7 @@ type app struct {
 	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
+// ObservabilityBundleConfigMapMeta returns metadata for the observability bundle user value configmap.
 func ObservabilityBundleConfigMapMeta(cluster capiv1beta1.Cluster) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		Name:      fmt.Sprintf("%s-observability-bundle-user-values", cluster.GetName()),
@@ -25,6 +26,8 @@ func ObservabilityBundleConfigMapMeta(cluster capiv1beta1.Cluster) metav1.Object
 	}
 }
 
+// GenerateObservabilityBundleConfigMap returns a configmap for
+// the observabilitybundle application to enable promtail.
 func GenerateObservabilityBundleConfigMap(cluster capiv1beta1.Cluster) (v1.ConfigMap, error) {
 	values := Values{
 		Apps: map[string]app{
