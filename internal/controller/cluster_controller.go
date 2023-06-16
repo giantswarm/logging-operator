@@ -93,7 +93,7 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-// reconcileCreate handles creation/update logic by calling ReconcileCreate method on all registered r.Reconcilers.
+// reconcileCreate handles creation/update logic by calling ReconcileCreate method on all r.Reconcilers.
 func (r *ClusterReconciler) reconcileCreate(ctx context.Context, cluster capiv1beta1.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING enabled")
@@ -120,7 +120,7 @@ func (r *ClusterReconciler) reconcileCreate(ctx context.Context, cluster capiv1b
 	return ctrl.Result{}, nil
 }
 
-// reconcileDelete handles deletion logic by calling reconcileDelete method on all registered r.Reconcilers.
+// reconcileDelete handles deletion logic by calling reconcileDelete method on all r.Reconcilers.
 func (r *ClusterReconciler) reconcileDelete(ctx context.Context, cluster capiv1beta1.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING disabled")
