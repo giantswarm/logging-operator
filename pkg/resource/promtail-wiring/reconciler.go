@@ -50,7 +50,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster capiv1beta1.Cl
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		logger.info("promtailwiring up to date")
+		logger.Info("promtailwiring up to date")
 	}
 
 	return ctrl.Result{}, nil
