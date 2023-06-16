@@ -111,6 +111,7 @@ func (r *ClusterReconciler) reconcileCreate(ctx context.Context, cluster capiv1b
 
 	// Call all reconcilers ReconcileCreate methods.
 	for _, reconciler := range r.Reconcilers {
+		// TODO(theo): add handling for returned ctrl.Result value.
 		_, err := reconciler.ReconcileCreate(ctx, cluster)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
@@ -127,6 +128,7 @@ func (r *ClusterReconciler) reconcileDelete(ctx context.Context, cluster capiv1b
 
 	// Call all reconcilers ReconcileDelete methods.
 	for _, reconciler := range r.Reconcilers {
+		// TODO(theo): add handling for returned ctrl.Result value.
 		_, err := reconciler.ReconcileDelete(ctx, cluster)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
