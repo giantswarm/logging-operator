@@ -34,6 +34,7 @@ import (
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/logging-operator/internal/controller"
+	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
@@ -104,20 +105,27 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}
 
-	if err = (&controller.ClusterReconciler{
+	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
 			&promtailReconciler,
 			&promtailWiring,
 		},
+	}
+
+	if err = (&controller.ClusterReconciler{
+		Client:            mgr.GetClient(),
+		Scheme:            mgr.GetScheme(),
+		LoggingReconciler: loggingReconciler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 		os.Exit(1)
 	}
 	if err = (&controller.ServiceReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:            mgr.GetClient(),
+		Scheme:            mgr.GetScheme(),
+		LoggingReconciler: loggingReconciler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Service")
 		os.Exit(1)

@@ -2,11 +2,11 @@ package clusterhelpers
 
 import (
 	common "github.com/giantswarm/logging-operator/pkg/common"
-	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func IsLoggingEnabled(cluster capiv1beta1.Cluster) bool {
-	labels := cluster.GetLabels()
+func IsLoggingEnabled(object client.Object) bool {
+	labels := object.GetLabels()
 
 	return common.IsLoggingEnabled(labels)
 }
