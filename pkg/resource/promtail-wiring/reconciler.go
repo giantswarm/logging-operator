@@ -7,6 +7,7 @@ import (
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	"github.com/pkg/errors"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -37,6 +38,10 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, object client.Object) 
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
+		// Handle case where the app is not found.
+		if apimachineryerrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
