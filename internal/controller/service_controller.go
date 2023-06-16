@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	servicek8shelpers "github.com/giantswarm/logging-operator/pkg/resource/service-k8s-helpers"
+	servicek8shelpers "github.com/giantswarm/logging-operator/pkg/service-k8s-helpers"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"

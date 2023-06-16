@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	clusterhelpers "github.com/giantswarm/logging-operator/pkg/cluster-helpers"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
-	clusterhelpers "github.com/giantswarm/logging-operator/pkg/resource/cluster-helpers"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
