@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	clusterhelpers "github.com/giantswarm/logging-operator/pkg/cluster-helpers"
+	"github.com/giantswarm/logging-operator/pkg/key"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,6 +29,7 @@ import (
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -43,10 +45,9 @@ type ClusterReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Cluster object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
+// It compares the state specified by the Cluster object against the actual
+// cluster state, and then perform operations to make the cluster state reflect
+// the desired state.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
@@ -67,10 +68,9 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	logger.Info(fmt.Sprintf("Name %s", foundClusterCR.GetName()))
 
 	// Logging should be disable in case:
-	//   - logging is disabled via label
-	//   - the cluster is being deleted
+	//   - logging is disabled via a label on the Cluster object
+	//   - Cluster object is being deleted
 	disableCondition := !clusterhelpers.IsLoggingEnabled(*foundClusterCR) || !foundClusterCR.DeletionTimestamp.IsZero()
-
 	if disableCondition {
 		result, err = r.reconcileDelete(ctx, *foundClusterCR)
 		if err != nil {
@@ -91,4 +91,58 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&capiv1beta1.Cluster{}).
 		Complete(r)
+}
+
+// reconcileCreate handles creation/update logic by calling ReconcileCreate method on all registered r.Reconcilers.
+func (r *ClusterReconciler) reconcileCreate(ctx context.Context, cluster capiv1beta1.Cluster) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	logger.Info("LOGGING enabled")
+
+	// Finalizer handling needs to come first.
+	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
+	if !controllerutil.ContainsFinalizer(&cluster, key.Finalizer) {
+		logger.Info(fmt.Sprintf("adding finalizer %s", key.Finalizer))
+		controllerutil.AddFinalizer(&cluster, key.Finalizer)
+		err := r.Client.Update(ctx, &cluster)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
+
+	// Call all reconcilers ReconcileCreate methods.
+	for _, reconciler := range r.Reconcilers {
+		_, err := reconciler.ReconcileCreate(ctx, cluster)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// reconcileDelete handles deletion logic by calling reconcileDelete method on all registered r.Reconcilers.
+func (r *ClusterReconciler) reconcileDelete(ctx context.Context, cluster capiv1beta1.Cluster) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	logger.Info("LOGGING disabled")
+
+	// Call all reconcilers ReconcileDelete methods.
+	for _, reconciler := range r.Reconcilers {
+		_, err := reconciler.ReconcileDelete(ctx, cluster)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
+
+	// Finalizer handling needs to come last.
+	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
+	if controllerutil.ContainsFinalizer(&cluster, key.Finalizer) {
+		logger.Info(fmt.Sprintf("removing finalizer %s", key.Finalizer))
+		controllerutil.RemoveFinalizer(&cluster, key.Finalizer)
+		err := r.Client.Update(ctx, &cluster)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
+
+	return ctrl.Result{}, nil
 }
