@@ -70,13 +70,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 
 	logger.Info(fmt.Sprintf("Reconciling Management cluster"))
 
-	// TODO(theo): Pass the IsLoggingEnabled function as a parameter into the LoggingReconciler
-	// So we can have different detection logic to enable logging for Vintage MC and CAPI cluster.
-	// On Vintage MC we determine if logging is enabled based on a global installation
-	// level setting which need to be passed as a flag to this operator.
-	// IsLoggingEnabled for this controller would only check the given flag, while the CAPI controller
-	// would check both the flag and the label.
-
 	result, err = r.LoggingReconciler.Reconcile(ctx, service)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)

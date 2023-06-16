@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
+	clusterhelpers "github.com/giantswarm/logging-operator/pkg/cluster-helpers"
 	"github.com/giantswarm/logging-operator/pkg/key"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/pkg/errors"
@@ -23,20 +23,20 @@ type LoggingReconciler struct {
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, object client.Object) (result ctrl.Result, err error) {
-	// Logging should be enabled when all conditions are met:
-	//   - logging label is set and true on the object
-	//   - object is not being deleted
-	//   - TODO(theo) global logging flag is enabled
-	loggingEnabled := common.IsLoggingEnabled(object) && object.GetDeletionTimestamp().IsZero()
+
+	// Logging should be disable in case:
+	//   - logging is disabled via a label on the Cluster object
+	//   - Cluster object is being deleted
+	loggingEnabled := clusterhelpers.IsLoggingEnabled(object) && object.GetDeletionTimestamp().IsZero()
 
 	if loggingEnabled {
-		// TODO: handle returned ctrl.Result
+
+		// TODO: manage result
 		_, err = l.reconcileCreate(ctx, object)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		// TODO: handle returned ctrl.Result
 		_, err = l.reconcileDelete(ctx, object)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
@@ -60,8 +60,6 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object client.O
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-	} else {
-		logger.Info(fmt.Sprintf("finalizer already added"))
 	}
 
 	// Call all reconcilers ReconcileCreate methods.
@@ -99,8 +97,6 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, object client.O
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-	} else {
-		logger.Info(fmt.Sprintf("finalizer already removed"))
 	}
 
 	return ctrl.Result{}, nil
