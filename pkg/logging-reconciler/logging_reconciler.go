@@ -60,6 +60,8 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object client.O
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
+	} else {
+		logger.Info(fmt.Sprintf("finalizer already added"))
 	}
 
 	// Call all reconcilers ReconcileCreate methods.
@@ -97,6 +99,8 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, object client.O
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
+	} else {
+		logger.Info(fmt.Sprintf("finalizer already removed"))
 	}
 
 	return ctrl.Result{}, nil

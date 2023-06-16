@@ -70,6 +70,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, object client.Object) 
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("promtailwiring - app not found")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
