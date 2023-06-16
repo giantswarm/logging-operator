@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	clusterhelpers "github.com/giantswarm/logging-operator/pkg/cluster-helpers"
+	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/key"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/pkg/errors"
