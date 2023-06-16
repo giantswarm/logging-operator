@@ -3,28 +3,22 @@
 
 # logging-operator
 
-This is a template repository containing files for a giantswarm
-operator repository.
+This operator is in charge of handling the setup and configuration of the logging stack at Giant Swarm.
 
-To use it just hit `Use this template` button or [this
-link][generate].
+It does reconcile `cluster.cluster.x-k8s.io` object and make sure each Cluster is provided with a [`promtail`](https://github.com/giantswarm/promtail-app/) instance and the necessary configuration to ship Log into [`loki`](https://github.com/giantswarm/loki-app).
 
-1. Run`devctl replace -i "logging-operator" "$(basename $(git rev-parse
-   --show-toplevel))" --ignore '.git/**' '**'`.
-2. Run `devctl replace -i "logging-operator" "$(basename $(git rev-parse
-   --show-toplevel))" --ignore '.git/**' '**'`.
-3. Go to https://github.com/giantswarm/logging-operator/settings and make sure `Allow
-   merge commits` box is unchecked and `Automatically delete head branches` box
-   is checked.
-4. Go to https://github.com/giantswarm/logging-operator/settings/access and add
-   `giantswarm/bots` with `Write` access and `giantswarm/employees` with
-   `Admin` access.
-5. Add this repository to https://github.com/giantswarm/github.
-6. Create quay.io docker repository if needed.
-7. Add the project to the CircleCI:
-   https://circleci.com/setup-project/gh/giantswarm/logging-operator
-8. Change the badge (with style=shield):
-   https://circleci.com/gh/giantswarm/logging-operator.svg?style=shield&circle-token=TOKEN_FOR_PRIVATE_REPO
-   If this is a private repository token with scope `status` will be needed.
+## Getting started
 
-[generate]: https://github.com/giantswarm/logging-operator/generate
+Get the code and built it via :
+
+```bash
+git clone https://github.com/giantswarm/logging-operator.git
+cd logging-operator
+make
+```
+
+See `make help` for help.
+
+## Credits
+
+This operator was built using [`kubeduiler`](https://book.kubebuilder.io/quick-start.html).

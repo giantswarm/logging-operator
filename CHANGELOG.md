@@ -7,4 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Implement promtrail-wiring resource
+- Implement promtail-toggle resource
+- Implement finalizer handling
+- Add reconciler.Interface
+- Add controller for Vintage Management Cluster via corev1.Service
+- Add controller for Cluster API, cluster.x-k8s.io/v1beta1
+- Add operator basics with kubebuilder
+
 [Unreleased]: https://github.com/giantswarm/logging-operator/tree/master
