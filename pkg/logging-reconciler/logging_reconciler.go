@@ -23,21 +23,20 @@ type LoggingReconciler struct {
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, object client.Object) (result ctrl.Result, err error) {
-
-	// Logging should be disable in case:
-	//   - logging is disabled via a label on the Cluster object
-	//   - Cluster object is being deleted
-	loggingEnabled := clusterhelpers.IsLoggingEnabled(object) && object.GetDeletionTimestamp().IsZero()
+	// Logging should be enabled when all conditions are met:
+	//   - logging label is set and true on the object
+	//   - object is not being deleted
+	//   - TODO(theo) global logging flag is enabled
+	loggingEnabled := common.IsLoggingEnabled(object) && object.GetDeletionTimestamp().IsZero()
 
 	if loggingEnabled {
-
-		// TODO: manage result
+		// TODO: handle returned ctrl.Result
 		_, err = l.reconcileCreate(ctx, object)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-
+		// TODO: handle returned ctrl.Result
 		_, err = l.reconcileDelete(ctx, object)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
