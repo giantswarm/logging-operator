@@ -1,6 +1,6 @@
 package key
 
 const (
-	Finalizer    = "logging-operator.finalizers.giantswarm.io"
+	Finalizer    = "giantswarm.io/logging-operator"
 	LoggingLabel = "giantswarm.io/logging"
 )
