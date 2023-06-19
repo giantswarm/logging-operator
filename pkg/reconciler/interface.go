@@ -3,8 +3,8 @@ package reconciler
 import (
 	"context"
 
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Interface provides a reconciler interface which is the controller core logic
@@ -14,7 +14,7 @@ import (
 //
 // NOTE: the returned ctrl.Result is currently ignored
 type Interface interface {
-	ReconcileCreate(ctx context.Context, object client.Object) (ctrl.Result, error)
+	ReconcileCreate(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error)
 
-	ReconcileDelete(ctx context.Context, object client.Object) (ctrl.Result, error)
+	ReconcileDelete(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error)
 }
