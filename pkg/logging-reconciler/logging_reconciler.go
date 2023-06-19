@@ -6,6 +6,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/key"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -22,12 +23,12 @@ type LoggingReconciler struct {
 	Reconcilers []reconciler.Interface
 }
 
-func (l *LoggingReconciler) Reconcile(ctx context.Context, object client.Object) (result ctrl.Result, err error) {
+func (l *LoggingReconciler) Reconcile(ctx context.Context, object loggedcluster.Interface) (result ctrl.Result, err error) {
 	// Logging should be enabled when all conditions are met:
 	//   - logging label is set and true on the object
 	//   - object is not being deleted
 	//   - TODO(theo) global logging flag is enabled
-	loggingEnabled := common.IsLoggingEnabled(object) && object.GetDeletionTimestamp().IsZero()
+	loggingEnabled := common.IsLoggingEnabled(object)
 
 	if loggingEnabled {
 		// TODO: handle returned ctrl.Result
@@ -46,7 +47,7 @@ func (l *LoggingReconciler) Reconcile(ctx context.Context, object client.Object)
 }
 
 // reconcileCreate handles creation/update logic by calling ReconcileCreate method on all l.Reconcilers.
-func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object client.Object) (ctrl.Result, error) {
+func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING enabled")
 
@@ -76,7 +77,7 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object client.O
 }
 
 // reconcileDelete handles deletion logic by calling reconcileDelete method on all l.Reconcilers.
-func (l *LoggingReconciler) reconcileDelete(ctx context.Context, object client.Object) (ctrl.Result, error) {
+func (l *LoggingReconciler) reconcileDelete(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING disabled")
 

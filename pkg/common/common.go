@@ -1,13 +1,10 @@
 package common
 
 import (
-	"github.com/giantswarm/logging-operator/pkg/key"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
-func IsLoggingEnabled(object client.Object) bool {
-	labels := object.GetLabels()
-	value, ok := labels[key.LoggingLabel]
+func IsLoggingEnabled(object loggedcluster.Interface) bool {
 
-	return ok && value == "true"
+	return object.GetLoggingLabel() == "true" && object.GetDeletionTimestamp().IsZero()
 }
