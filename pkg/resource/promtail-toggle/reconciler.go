@@ -11,7 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
-	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -25,12 +24,12 @@ type Reconciler struct {
 }
 
 // ReconcileCreate ensure Promtail is enabled in the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster capiv1beta1.Cluster) (ctrl.Result, error) {
+func (r *Reconciler) ReconcileCreate(ctx context.Context, object client.Object) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailtoggle create")
 
 	// Get desired configmap to enable promtail.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(cluster)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(object)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -67,12 +66,12 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster capiv1beta1.Cl
 }
 
 // ReconcileDelete ensure Promtail is disabled for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster capiv1beta1.Cluster) (ctrl.Result, error) {
+func (r *Reconciler) ReconcileDelete(ctx context.Context, object client.Object) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailtoggle delete")
 
 	// Get expected configmap.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(cluster)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(object)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

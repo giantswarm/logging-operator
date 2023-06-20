@@ -20,7 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	servicek8shelpers "github.com/giantswarm/logging-operator/pkg/service-k8s-helpers"
+	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -32,7 +33,8 @@ import (
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme            *runtime.Scheme
+	LoggingReconciler loggingreconciler.LoggingReconciler
 }
 
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
@@ -47,21 +49,37 @@ type ServiceReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
-func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
-	if req.Namespace == "default" {
-		foundService := &corev1.Service{}
-		err := r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, foundService)
+	// We only want to watch 1 service, kubernetes in default NS.
+	if req.Namespace != "default" || req.Name != "kubernetes" {
+		return ctrl.Result{}, nil
+	}
 
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	service := &corev1.Service{}
+	err = r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, service)
+	if err != nil {
+		// TODO(theo): might need to ignore when objects are not found since we cannot do anything
+		//             see https://book.kubebuilder.io/reference/using-finalizers.html
+		//if r.Client.IsNotFound(err) {
+		//  return ctrl.Result{}, nil
+		//}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
 
-		logger.Info(fmt.Sprintf("Name %s", foundService.GetName()))
+	logger.Info(fmt.Sprintf("Reconciling Management cluster"))
 
-		loggingEnabled := servicek8shelpers.IsLoggingEnabled(*foundService)
-		logger.Info(fmt.Sprintf("Logging enabled = %t", loggingEnabled))
+	// TODO(theo): Pass the IsLoggingEnabled function as a parameter into the LoggingReconciler
+	// So we can have different detection logic to enable logging for Vintage MC and CAPI cluster.
+	// On Vintage MC we determine if logging is enabled based on a global installation
+	// level setting which need to be passed as a flag to this operator.
+	// IsLoggingEnabled for this controller would only check the given flag, while the CAPI controller
+	// would check both the flag and the label.
+
+	result, err = r.LoggingReconciler.Reconcile(ctx, service)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	return ctrl.Result{}, nil
