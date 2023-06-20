@@ -8,7 +8,7 @@ import (
 // ObservabilityBundleAppMeta returns metadata for the observability bundle app.
 func ObservabilityBundleAppMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      lc.GetAppName("observability-bundle"),
+		Name:      lc.AppConfigName("observability-bundle"),
 		Namespace: lc.GetAppsNamespace(),
 	}
 }

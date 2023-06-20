@@ -23,6 +23,6 @@ func (o Object) GetAppsNamespace() string {
 	return o.Object.GetNamespace()
 }
 
-func (o Object) GetAppName(app string) string {
+func (o Object) AppConfigName(app string) string {
 	return fmt.Sprintf("%s-%s", o.GetName(), app)
 }

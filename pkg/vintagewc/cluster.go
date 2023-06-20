@@ -21,6 +21,6 @@ func (o Object) GetAppsNamespace() string {
 	return o.Object.GetName()
 }
 
-func (o Object) GetAppName(app string) string {
+func (o Object) AppConfigName(app string) string {
 	return app
 }

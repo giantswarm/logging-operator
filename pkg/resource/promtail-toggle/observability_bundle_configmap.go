@@ -19,7 +19,7 @@ type app struct {
 // ObservabilityBundleConfigMapMeta returns metadata for the observability bundle user value configmap.
 func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      lc.GetAppName("observability-bundle-user-values"),
+		Name:      lc.AppConfigName("observability-bundle-user-values"),
 		Namespace: lc.GetAppsNamespace(),
 	}
 }

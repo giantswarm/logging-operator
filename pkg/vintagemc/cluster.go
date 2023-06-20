@@ -16,6 +16,6 @@ func (o Object) GetAppsNamespace() string {
 	return "giantswarm"
 }
 
-func (o Object) GetAppName(app string) string {
+func (o Object) AppConfigName(app string) string {
 	return app
 }
