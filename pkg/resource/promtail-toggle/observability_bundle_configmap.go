@@ -17,16 +17,16 @@ type app struct {
 }
 
 // ObservabilityBundleConfigMapMeta returns metadata for the observability bundle user value configmap.
-func ObservabilityBundleConfigMapMeta(object loggedcluster.Interface) metav1.ObjectMeta {
+func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      object.GetAppName("observability-bundle-user-values"),
-		Namespace: object.GetAppsNamespace(),
+		Name:      lc.GetAppName("observability-bundle-user-values"),
+		Namespace: lc.GetAppsNamespace(),
 	}
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable promtail.
-func GenerateObservabilityBundleConfigMap(object loggedcluster.Interface) (v1.ConfigMap, error) {
+func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 	values := Values{
 		Apps: map[string]app{
 			"promtail-app": {
@@ -41,7 +41,7 @@ func GenerateObservabilityBundleConfigMap(object loggedcluster.Interface) (v1.Co
 	}
 
 	configmap := v1.ConfigMap{
-		ObjectMeta: ObservabilityBundleConfigMapMeta(object),
+		ObjectMeta: ObservabilityBundleConfigMapMeta(lc),
 		Data: map[string]string{
 			"values": string(v),
 		},

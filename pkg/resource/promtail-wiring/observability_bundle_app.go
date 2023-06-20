@@ -6,9 +6,9 @@ import (
 )
 
 // ObservabilityBundleAppMeta returns metadata for the observability bundle app.
-func ObservabilityBundleAppMeta(object loggedcluster.Interface) metav1.ObjectMeta {
+func ObservabilityBundleAppMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      object.GetAppName("observability-bundle"),
-		Namespace: object.GetAppsNamespace(),
+		Name:      lc.GetAppName("observability-bundle"),
+		Namespace: lc.GetAppsNamespace(),
 	}
 }

@@ -23,21 +23,21 @@ type LoggingReconciler struct {
 	Reconcilers []reconciler.Interface
 }
 
-func (l *LoggingReconciler) Reconcile(ctx context.Context, object loggedcluster.Interface) (result ctrl.Result, err error) {
+func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
 	// Logging should be enabled when all conditions are met:
-	//   - logging label is set and true on the object
-	//   - object is not being deleted
+	//   - logging label is set and true on the lc
+	//   - lc is not being deleted
 	//   - TODO(theo) global logging flag is enabled
-	loggingEnabled := common.IsLoggingEnabled(object)
+	loggingEnabled := common.IsLoggingEnabled(lc)
 
 	if loggingEnabled {
 		// TODO: handle returned ctrl.Result
-		_, err = l.reconcileCreate(ctx, object)
+		_, err = l.reconcileCreate(ctx, lc)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		_, err = l.reconcileDelete(ctx, object)
+		_, err = l.reconcileDelete(ctx, lc)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -47,16 +47,16 @@ func (l *LoggingReconciler) Reconcile(ctx context.Context, object loggedcluster.
 }
 
 // reconcileCreate handles creation/update logic by calling ReconcileCreate method on all l.Reconcilers.
-func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
+func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING enabled")
 
 	// Finalizer handling needs to come first.
 	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
-	if !controllerutil.ContainsFinalizer(object, key.Finalizer) {
+	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info(fmt.Sprintf("adding finalizer %s", key.Finalizer))
-		controllerutil.AddFinalizer(object, key.Finalizer)
-		err := l.Client.Update(ctx, object)
+		controllerutil.AddFinalizer(lc, key.Finalizer)
+		err := l.Client.Update(ctx, lc)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -67,7 +67,7 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object loggedcl
 	// Call all reconcilers ReconcileCreate methods.
 	for _, reconciler := range l.Reconcilers {
 		// TODO(theo): add handling for returned ctrl.Result value.
-		_, err := reconciler.ReconcileCreate(ctx, object)
+		_, err := reconciler.ReconcileCreate(ctx, lc)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -77,14 +77,14 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, object loggedcl
 }
 
 // reconcileDelete handles deletion logic by calling reconcileDelete method on all l.Reconcilers.
-func (l *LoggingReconciler) reconcileDelete(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
+func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING disabled")
 
 	// Call all reconcilers ReconcileDelete methods.
 	for _, reconciler := range l.Reconcilers {
 		// TODO(theo): add handling for returned ctrl.Result value.
-		_, err := reconciler.ReconcileDelete(ctx, object)
+		_, err := reconciler.ReconcileDelete(ctx, lc)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -92,10 +92,10 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, object loggedcl
 
 	// Finalizer handling needs to come last.
 	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
-	if controllerutil.ContainsFinalizer(object, key.Finalizer) {
+	if controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info(fmt.Sprintf("removing finalizer %s", key.Finalizer))
-		controllerutil.RemoveFinalizer(object, key.Finalizer)
-		err := l.Client.Update(ctx, object)
+		controllerutil.RemoveFinalizer(lc, key.Finalizer)
+		err := l.Client.Update(ctx, lc)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}

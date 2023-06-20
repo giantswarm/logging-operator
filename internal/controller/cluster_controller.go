@@ -65,10 +65,10 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 
 	logger.Info(fmt.Sprintf("Name %s", cluster.GetName()))
 
-	object := capicluster.Object{
+	loggedCluster := capicluster.Object{
 		Object: cluster,
 	}
-	result, err = r.LoggingReconciler.Reconcile(ctx, object)
+	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

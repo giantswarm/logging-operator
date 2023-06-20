@@ -14,7 +14,7 @@ import (
 //
 // NOTE: the returned ctrl.Result is currently ignored
 type Interface interface {
-	ReconcileCreate(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error)
+	ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error)
 
-	ReconcileDelete(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error)
+	ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error)
 }

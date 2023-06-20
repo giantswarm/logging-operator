@@ -78,10 +78,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	// IsLoggingEnabled for this controller would only check the given flag, while the CAPI controller
 	// would check both the flag and the label.
 
-	object := vintagemc.Object{
+	loggedCluster := vintagemc.Object{
 		Object: service,
 	}
-	result, err = r.LoggingReconciler.Reconcile(ctx, object)
+	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

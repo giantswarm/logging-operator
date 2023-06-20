@@ -25,12 +25,12 @@ type Reconciler struct {
 }
 
 // ReconcileCreate ensure Promtail is enabled in the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailtoggle create")
 
 	// Get desired configmap to enable promtail.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(object)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -67,12 +67,12 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, object loggedcluster.I
 }
 
 // ReconcileDelete ensure Promtail is disabled for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailtoggle delete")
 
 	// Get expected configmap.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(object)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

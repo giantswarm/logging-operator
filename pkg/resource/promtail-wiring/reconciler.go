@@ -27,12 +27,12 @@ type Reconciler struct {
 
 // ReconcileCreate ensure user value configmap is set in observability bundle
 // for the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring create")
 
 	// Get observability bundle app metadata.
-	appMeta := ObservabilityBundleAppMeta(object)
+	appMeta := ObservabilityBundleAppMeta(lc)
 
 	// Retrieve the app.
 	logger.Info(fmt.Sprintf("promtailwiring checking app %s/%s", appMeta.GetNamespace(), appMeta.GetName()))
@@ -43,7 +43,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, object loggedcluster.I
 	}
 
 	// Set user value configmap in the app.
-	if setUserConfig(&currentApp, object) {
+	if setUserConfig(&currentApp, lc) {
 		logger.Info("promtailwiring updating")
 		// Update the app.
 		err := r.Client.Update(ctx, &currentApp)
@@ -59,12 +59,12 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, object loggedcluster.I
 
 // ReconcileCreate ensure user value configmap is unset in observability bundle
 // for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, object loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring delete")
 
 	// Get observability bundle app metadata.
-	appMeta := ObservabilityBundleAppMeta(object)
+	appMeta := ObservabilityBundleAppMeta(lc)
 
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
@@ -78,7 +78,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, object loggedcluster.I
 	}
 
 	// Unset user value configmap in the app.
-	if unsetUserConfig(&currentApp, object) {
+	if unsetUserConfig(&currentApp, lc) {
 		logger.Info("promtailwiring updating")
 		// Update the app.
 		err = r.Client.Update(ctx, &currentApp)
@@ -94,8 +94,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, object loggedcluster.I
 
 // setUserConfig set the user value confimap in the app.
 // It returns true in case something was changed.
-func setUserConfig(app *appv1.App, object loggedcluster.Interface) bool {
-	observabilityBundleConfigMapMeta := promtailtoggle.ObservabilityBundleConfigMapMeta(object)
+func setUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
+	observabilityBundleConfigMapMeta := promtailtoggle.ObservabilityBundleConfigMapMeta(lc)
 	updated := app.Spec.UserConfig.ConfigMap.Name != observabilityBundleConfigMapMeta.GetName() || app.Spec.UserConfig.ConfigMap.Namespace != observabilityBundleConfigMapMeta.GetNamespace()
 
 	app.Spec.UserConfig.ConfigMap.Name = observabilityBundleConfigMapMeta.GetName()
@@ -106,8 +106,8 @@ func setUserConfig(app *appv1.App, object loggedcluster.Interface) bool {
 
 // unsetUserConfig unset the user value confimap in the app.
 // It returns true in case something was changed.
-func unsetUserConfig(app *appv1.App, object loggedcluster.Interface) bool {
-	observabilityBundleConfigMapMeta := promtailtoggle.ObservabilityBundleConfigMapMeta(object)
+func unsetUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
+	observabilityBundleConfigMapMeta := promtailtoggle.ObservabilityBundleConfigMapMeta(lc)
 	updated := app.Spec.UserConfig.ConfigMap.Name == observabilityBundleConfigMapMeta.GetName() || app.Spec.UserConfig.ConfigMap.Namespace == observabilityBundleConfigMapMeta.GetNamespace()
 
 	app.Spec.UserConfig.ConfigMap.Name = ""
