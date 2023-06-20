@@ -24,10 +24,7 @@ type LoggingReconciler struct {
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
-	// Logging should be enabled when all conditions are met:
-	//   - logging label is set and true on the lc
-	//   - lc is not being deleted
-	//   - TODO(theo) global logging flag is enabled
+
 	loggingEnabled := common.IsLoggingEnabled(lc)
 
 	if loggingEnabled {
