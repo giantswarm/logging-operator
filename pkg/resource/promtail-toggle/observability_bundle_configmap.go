@@ -1,8 +1,6 @@
 package promtailtoggle
 
 import (
-	"fmt"
-
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -21,7 +19,7 @@ type app struct {
 // ObservabilityBundleConfigMapMeta returns metadata for the observability bundle user value configmap.
 func ObservabilityBundleConfigMapMeta(object loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-observability-bundle-user-values", object.GetName()),
+		Name:      object.GetAppName("observability-bundle-user-values"),
 		Namespace: object.GetAppsNamespace(),
 	}
 }

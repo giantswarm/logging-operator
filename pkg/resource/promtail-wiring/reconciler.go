@@ -35,7 +35,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, object loggedcluster.I
 	appMeta := ObservabilityBundleAppMeta(object)
 
 	// Retrieve the app.
-	logger.Info(fmt.Sprintf("promtailwiring checking %s/%s", appMeta.GetNamespace(), appMeta.GetName()))
+	logger.Info(fmt.Sprintf("promtailwiring checking app %s/%s", appMeta.GetNamespace(), appMeta.GetName()))
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {

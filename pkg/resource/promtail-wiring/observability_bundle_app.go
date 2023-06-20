@@ -1,8 +1,6 @@
 package promtailwiring
 
 import (
-	"fmt"
-
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -10,7 +8,7 @@ import (
 // ObservabilityBundleAppMeta returns metadata for the observability bundle app.
 func ObservabilityBundleAppMeta(object loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-observability-bundle", object.GetName()),
-		Namespace: object.GetNamespace(),
+		Name:      object.GetAppName("observability-bundle"),
+		Namespace: object.GetAppsNamespace(),
 	}
 }

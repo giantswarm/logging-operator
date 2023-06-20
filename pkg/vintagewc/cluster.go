@@ -20,3 +20,7 @@ func (o Object) GetLoggingLabel() string {
 func (o Object) GetAppsNamespace() string {
 	return o.Object.GetName()
 }
+
+func (o Object) GetAppName(app string) string {
+	return app
+}

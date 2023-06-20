@@ -15,3 +15,7 @@ func (o Object) GetLoggingLabel() string {
 func (o Object) GetAppsNamespace() string {
 	return "giantswarm"
 }
+
+func (o Object) GetAppName(app string) string {
+	return app
+}

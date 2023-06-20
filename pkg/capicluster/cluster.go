@@ -1,6 +1,8 @@
 package capicluster
 
 import (
+	"fmt"
+
 	"github.com/giantswarm/logging-operator/pkg/key"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -19,4 +21,8 @@ func (o Object) GetLoggingLabel() string {
 
 func (o Object) GetAppsNamespace() string {
 	return o.Object.GetNamespace()
+}
+
+func (o Object) GetAppName(app string) string {
+	return fmt.Sprintf("%s-%s", o.GetName(), app)
 }
