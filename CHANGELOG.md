@@ -17,5 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add controller for Vintage Management Cluster via corev1.Service
 - Add controller for Cluster API, cluster.x-k8s.io/v1beta1
 - Add operator basics with kubebuilder
+- Add '--vintage' toggle
 
 [Unreleased]: https://github.com/giantswarm/logging-operator/tree/master
