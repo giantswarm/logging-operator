@@ -7,4 +7,5 @@ type Interface interface {
 	GetLoggingLabel() string
 	GetAppsNamespace() string
 	AppConfigName(app string) string
+	GetObject() client.Object
 }

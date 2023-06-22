@@ -26,3 +26,7 @@ func (o Object) GetAppsNamespace() string {
 func (o Object) AppConfigName(app string) string {
 	return fmt.Sprintf("%s-%s", o.GetName(), app)
 }
+
+func (o Object) GetObject() client.Object {
+	return o.Object
+}
