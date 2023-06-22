@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
+	"github.com/giantswarm/logging-operator/pkg/vintagemc"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -77,7 +78,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	// IsLoggingEnabled for this controller would only check the given flag, while the CAPI controller
 	// would check both the flag and the label.
 
-	result, err = r.LoggingReconciler.Reconcile(ctx, service)
+	loggedCluster := vintagemc.Object{
+		Object: service,
+	}
+	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

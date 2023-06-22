@@ -1,13 +1,15 @@
 package common
 
 import (
-	"github.com/giantswarm/logging-operator/pkg/key"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
-func IsLoggingEnabled(object client.Object) bool {
-	labels := object.GetLabels()
-	value, ok := labels[key.LoggingLabel]
+func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 
-	return ok && value == "true"
+	// Logging should be enabled when all conditions are met:
+	//   - logging label is set and true on the cluster
+	//   - cluster is not being deleted
+	//   - TODO(theo) global logging flag is enabled
+
+	return lc.GetLoggingLabel() == "true" && lc.GetDeletionTimestamp().IsZero()
 }
