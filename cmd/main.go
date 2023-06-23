@@ -118,23 +118,31 @@ func main() {
 
 	if vintageMode {
 
-		if err = (&controller.ServiceReconciler{
+		if err = (&controller.VintageMCReconciler{
 			Client:            mgr.GetClient(),
 			Scheme:            mgr.GetScheme(),
 			LoggingReconciler: loggingReconciler,
 		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Service")
+			setupLog.Error(err, "unable to create Vintage MC controller", "controller", "Service")
+			os.Exit(1)
+		}
+		if err = (&controller.VintageWCReconciler{
+			Client:            mgr.GetClient(),
+			Scheme:            mgr.GetScheme(),
+			LoggingReconciler: loggingReconciler,
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
 			os.Exit(1)
 		}
 
 	} else {
 
-		if err = (&controller.ClusterReconciler{
+		if err = (&controller.CapiClusterReconciler{
 			Client:            mgr.GetClient(),
 			Scheme:            mgr.GetScheme(),
 			LoggingReconciler: loggingReconciler,
 		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Cluster")
+			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 			os.Exit(1)
 		}
 	}

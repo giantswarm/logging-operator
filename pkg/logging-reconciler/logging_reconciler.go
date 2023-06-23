@@ -53,7 +53,7 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info(fmt.Sprintf("adding finalizer %s", key.Finalizer))
 		controllerutil.AddFinalizer(lc, key.Finalizer)
-		err := l.Client.Update(ctx, lc)
+		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -92,7 +92,7 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 	if controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info(fmt.Sprintf("removing finalizer %s", key.Finalizer))
 		controllerutil.RemoveFinalizer(lc, key.Finalizer)
-		err := l.Client.Update(ctx, lc)
+		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
