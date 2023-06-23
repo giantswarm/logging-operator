@@ -16,11 +16,15 @@ type app struct {
 	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
-// ObservabilityBundleConfigMapMeta returns metadata for the observability bundle user value configmap.
+// ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
 func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      lc.AppConfigName("observability-bundle-user-values"),
+		Name:      lc.AppConfigName(lc.GetObservabilityBundleConfigMap()),
 		Namespace: lc.GetAppsNamespace(),
+		Labels: map[string]string{
+			// This label is used by cluster-operator to find extraconfig
+			"app.kubernetes.io/name": lc.AppConfigName("observability-bundle"),
+		},
 	}
 }
 
