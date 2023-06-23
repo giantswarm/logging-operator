@@ -23,3 +23,8 @@ func (o Object) AppConfigName(app string) string {
 func (o Object) GetObject() client.Object {
 	return o.Object
 }
+
+// On vintage MC, there's no support for extraconfig so we should use standard user values
+func (o Object) GetObservabilityBundleConfigMap() string {
+	return "observability-bundle-user-values"
+}

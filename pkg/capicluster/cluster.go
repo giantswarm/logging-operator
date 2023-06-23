@@ -30,3 +30,8 @@ func (o Object) AppConfigName(app string) string {
 func (o Object) GetObject() client.Object {
 	return o.Object
 }
+
+// On capi clusters, use an extraconfig
+func (o Object) GetObservabilityBundleConfigMap() string {
+	return "observability-bundle-logging-values"
+}

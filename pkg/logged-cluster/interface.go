@@ -8,4 +8,5 @@ type Interface interface {
 	GetAppsNamespace() string
 	AppConfigName(app string) string
 	GetObject() client.Object
+	GetObservabilityBundleConfigMap() string
 }
