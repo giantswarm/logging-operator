@@ -36,6 +36,7 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
@@ -107,12 +108,18 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}
 
+	loggingSecrets := loggingcredentials.Reconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
+
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
 			&promtailReconciler,
 			&promtailWiring,
+			&loggingSecrets,
 		},
 	}
 
