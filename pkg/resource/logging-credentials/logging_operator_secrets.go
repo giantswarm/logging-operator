@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,10 +13,14 @@ import (
 
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
 func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
-	return metav1.ObjectMeta{
+	metadata := metav1.ObjectMeta{
 		Name:      "logging-credentials",
 		Namespace: "monitoring",
+		Labels:    map[string]string{},
 	}
+
+	common.AddCommonLabels(metadata.Labels)
+	return metadata
 }
 
 // Generate a random 20-characters password

@@ -13,3 +13,7 @@ func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 
 	return lc.GetLoggingLabel() == "true" && lc.GetDeletionTimestamp().IsZero()
 }
+
+func AddCommonLabels(labels map[string]string) {
+	labels["giantswarm.io/managed-by"] = "logging-operator"
+}

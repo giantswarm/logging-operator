@@ -97,5 +97,5 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 // needUpdate return true if current.Data and desired.Data do not match.
 func needUpdate(current, desired v1.ConfigMap) bool {
-	return !reflect.DeepEqual(current.Data, desired.Data)
+	return !reflect.DeepEqual(current.Data, desired.Data) || !reflect.DeepEqual(current.ObjectMeta.Labels, desired.ObjectMeta.Labels)
 }

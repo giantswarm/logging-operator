@@ -3,6 +3,7 @@ package loggingcredentials
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/pkg/errors"
@@ -41,6 +42,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	// update the secret's contents if needed
 	secretUpdated := UpdateLoggingCredentials(loggingCredentialsSecret)
+
+	// Check if metadata has been updated
+	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta(lc).Labels) {
+		logger.Info("loggingCredentials - metatada update required")
+		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta(lc)
+		secretUpdated = true
+	}
 
 	// commit our changes
 	if secretUpdated {

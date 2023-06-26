@@ -1,6 +1,7 @@
 package promtailtoggle
 
 import (
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -18,7 +19,7 @@ type app struct {
 
 // ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
 func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
-	return metav1.ObjectMeta{
+	metadata := metav1.ObjectMeta{
 		Name:      lc.AppConfigName(lc.GetObservabilityBundleConfigMap()),
 		Namespace: lc.GetAppsNamespace(),
 		Labels: map[string]string{
@@ -26,6 +27,9 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 			"app.kubernetes.io/name": lc.AppConfigName("observability-bundle"),
 		},
 	}
+
+	common.AddCommonLabels(metadata.Labels)
+	return metadata
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
