@@ -39,14 +39,14 @@ func genPassword() string {
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable promtail.
-func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) (v1.Secret, error) {
+func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secret {
 
 	secret := v1.Secret{
 		ObjectMeta: LoggingCredentialsSecretMeta(lc),
 		Data:       map[string][]byte{},
 	}
 
-	return secret, nil
+	return &secret
 }
 
 // Update a LoggingCredentials secret if needed

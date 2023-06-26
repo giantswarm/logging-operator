@@ -6,7 +6,6 @@ import (
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -27,31 +26,29 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	logger.Info(fmt.Sprintf("loggingcredentials checking secret %s/%s", LoggingCredentialsSecretMeta(lc).Namespace, LoggingCredentialsSecretMeta(lc).Name))
 
-	var loggingCredentialsSecret v1.Secret
+	// Start with some empty secret
+	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)
 
-	// Check if secrets exist / retrieve existing secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace}, &loggingCredentialsSecret)
+	// Retrieve existing secret if it exists
+	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace}, loggingCredentialsSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingcredentials secret not found, initializing one")
-			// Create basic secret
-			loggingCredentialsSecret, err = GenerateLoggingCredentialsBasicSecret(lc)
-		}
-		if err != nil {
+		} else {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	}
 
 	// update the secret's contents if needed
-	secretUpdated := UpdateLoggingCredentials(&loggingCredentialsSecret)
+	secretUpdated := UpdateLoggingCredentials(loggingCredentialsSecret)
 
 	// commit our changes
 	if secretUpdated {
 		logger.Info("loggingCredentials - Updating secret")
-		err = r.Client.Update(ctx, &loggingCredentialsSecret)
+		err = r.Client.Update(ctx, loggingCredentialsSecret)
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingCredentials - Secret does not exist, creating it")
-			err = r.Client.Create(ctx, &loggingCredentialsSecret)
+			err = r.Client.Create(ctx, loggingCredentialsSecret)
 		}
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
