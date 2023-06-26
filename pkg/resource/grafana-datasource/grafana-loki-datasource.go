@@ -1,0 +1,104 @@
+package grafanadatasource
+
+import (
+	"encoding/base64"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
+)
+
+type Values struct {
+	ApiVersion  int          `yaml:"apiversion" json:"apiversion"`
+	Datasources []datasource `yaml:"datasources" json:"datasources"`
+}
+
+type datasource struct {
+	Access         string         `yaml:"access" json:"access"`
+	Editable       bool           `yaml:"editable" json:"editable"`
+	BasicAuth      bool           `yaml:"basicAuth" json:"basicAuth"`
+	BasicAuthUser  string         `yaml:"basicAuthUser" json:"basicAuthUser"`
+	JsonData       jsonData       `yaml:"jsonData" json:"jsonData"`
+	Name           string         `yaml:"name" json:"name"`
+	Type           string         `yaml:"type" json:"type"`
+	Url            string         `yaml:"url" json:"url"`
+	SecureJsonData secureJsonData `yaml:"secureJsonData" json:"secureJsonData"`
+}
+
+type jsonData struct {
+	ManageAlerts bool `yaml:"manageAlerts" json:"manageAlerts"`
+}
+
+type secureJsonData struct {
+	BasicAuthPassword string `yaml:"basicAuthPassword" json:"basicAuthPassword"`
+}
+
+// ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
+func DatasourceConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+	metadata := metav1.ObjectMeta{
+		Name:      "loki-datasource",
+		Namespace: "monitoring",
+		Labels: map[string]string{
+			// This label is used to detect datasources
+			"app.giantswarm.io/kind": "datasource",
+		},
+	}
+
+	common.AddCommonLabels(metadata.Labels)
+	return metadata
+}
+
+// GenerateDatasourceSecret returns a secret for
+// the Loki datasource for Grafana
+func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (v1.Secret, error) {
+
+	user, err := loggingcredentials.GetLogin(lc, credentialsSecret, "read")
+	if err != nil {
+		return v1.Secret{}, errors.WithStack(err)
+	}
+
+	password, err := loggingcredentials.GetPass(lc, credentialsSecret, "read")
+	if err != nil {
+		return v1.Secret{}, errors.WithStack(err)
+	}
+	// password = base64.StdEncoding.EncodeToString([]byte(password))
+
+	values := Values{
+		ApiVersion: 1,
+		Datasources: []datasource{
+			{
+				Access:        "proxy",
+				Editable:      false,
+				BasicAuth:     true,
+				BasicAuthUser: user,
+				JsonData: jsonData{
+					ManageAlerts: false,
+				},
+				Name: "Lokitest",
+				Type: "loki",
+				Url:  "http://loki-gateway.loki.svc.cluster.local",
+				SecureJsonData: secureJsonData{
+					BasicAuthPassword: base64.StdEncoding.EncodeToString([]byte(password)),
+				},
+			},
+		},
+	}
+
+	v, err := yaml.Marshal(values)
+	if err != nil {
+		return v1.Secret{}, errors.WithStack(err)
+	}
+
+	secret := v1.Secret{
+		ObjectMeta: DatasourceConfigMapMeta(lc),
+		Data: map[string][]byte{
+			"datasource.yaml": []byte(v),
+		},
+	}
+
+	return secret, nil
+}
