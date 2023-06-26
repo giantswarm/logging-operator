@@ -2,7 +2,6 @@ package promtailtoggle
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -36,7 +35,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Check if configmap is already installed.
-	logger.Info(fmt.Sprintf("promtailtoggle checking %s/%s", desiredConfigMap.GetNamespace(), desiredConfigMap.GetName()))
+	logger.Info("promtailtoggle checking", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
 	var currentConfigMap v1.ConfigMap
 	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredConfigMap.GetName(), Namespace: desiredConfigMap.GetNamespace()}, &currentConfigMap)
 	if err != nil {
@@ -78,7 +77,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Delete configmap.
-	logger.Info(fmt.Sprintf("promtailtoggle deleting %s/%s", desiredConfigMap.GetNamespace(), desiredConfigMap.GetName()))
+	logger.Info("promtailtoggle deleting", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
 	err = r.Client.Delete(ctx, &desiredConfigMap)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
@@ -97,5 +96,5 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 // needUpdate return true if current.Data and desired.Data do not match.
 func needUpdate(current, desired v1.ConfigMap) bool {
-	return !reflect.DeepEqual(current.Data, desired.Data)
+	return !reflect.DeepEqual(current.Data, desired.Data) || !reflect.DeepEqual(current.ObjectMeta.Labels, desired.ObjectMeta.Labels)
 }

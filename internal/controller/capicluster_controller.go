@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/logging-operator/pkg/capicluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
@@ -63,7 +62,7 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info(fmt.Sprintf("Name %s", cluster.GetName()))
+	logger.Info("Reconciling CAPI Cluster", "name", cluster.GetName())
 
 	loggedCluster := capicluster.Object{
 		Object: cluster,
