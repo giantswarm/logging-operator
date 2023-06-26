@@ -110,7 +110,6 @@ func main() {
 
 	loggingSecrets := loggingcredentials.Reconciler{
 		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
 	}
 
 	loggingReconciler := loggingreconciler.LoggingReconciler{

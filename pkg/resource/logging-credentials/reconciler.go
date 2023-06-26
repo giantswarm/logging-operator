@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -20,7 +19,6 @@ import (
 // Logging Credentials: store and maintain logging credentials
 type Reconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
