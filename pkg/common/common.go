@@ -4,6 +4,11 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
+type LoggingConfig struct {
+	CredentialsSecretName      string ""
+	CredentialsSecretNamespace string ""
+}
+
 func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 
 	// Logging should be enabled when all conditions are met:

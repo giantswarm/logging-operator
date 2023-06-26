@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -20,27 +21,25 @@ import (
 // Logging Credentials: store and maintain logging credentials
 type Reconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme        *runtime.Scheme
+	LoggingConfig common.LoggingConfig
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	const secretNamespace = "monitoring"
-	const secretName = "logging-credentials"
-
-	logger.Info(fmt.Sprintf("loggingcredentials checking secret %s/%s", secretNamespace, secretName))
+	logger.Info(fmt.Sprintf("loggingcredentials checking secret %s/%s", r.LoggingConfig.CredentialsSecretNamespace, r.LoggingConfig.CredentialsSecretName))
 
 	var loggingCredentialsSecret v1.Secret
 
 	// Check if secrets exist / retrieve existing secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, &loggingCredentialsSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: r.LoggingConfig.CredentialsSecretName, Namespace: r.LoggingConfig.CredentialsSecretNamespace}, &loggingCredentialsSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-credentials not found, initializing one")
+			logger.Info("loggingcredentials secret not found, initializing one")
 			// Create basic secret
-			loggingCredentialsSecret, err = GenerateLoggingCredentialsBasicSecret(lc)
+			loggingCredentialsSecret, err = GenerateLoggingCredentialsBasicSecret(lc, r.LoggingConfig)
 		}
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)

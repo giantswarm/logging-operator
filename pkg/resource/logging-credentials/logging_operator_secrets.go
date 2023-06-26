@@ -5,16 +5,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
-func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func LoggingCredentialsSecretMeta(lc loggedcluster.Interface, config common.LoggingConfig) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
-		Name:      lc.AppConfigName("logging-credentials"),
-		Namespace: "monitoring",
+		Name:      lc.AppConfigName(config.CredentialsSecretName),
+		Namespace: config.CredentialsSecretNamespace,
 	}
 }
 
@@ -39,10 +40,10 @@ func genPassword() string {
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable promtail.
-func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) (v1.Secret, error) {
+func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface, config common.LoggingConfig) (v1.Secret, error) {
 
 	secret := v1.Secret{
-		ObjectMeta: LoggingCredentialsSecretMeta(lc),
+		ObjectMeta: LoggingCredentialsSecretMeta(lc, config),
 		Data:       map[string][]byte{},
 	}
 
