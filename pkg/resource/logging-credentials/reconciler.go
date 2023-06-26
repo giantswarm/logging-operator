@@ -49,22 +49,22 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		secretUpdated = true
 	}
 
-	// commit our changes
-	if secretUpdated {
-		logger.Info("loggingCredentials - Updating secret")
-		err = r.Client.Update(ctx, loggingCredentialsSecret)
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("loggingCredentials - Secret does not exist, creating it")
-			err = r.Client.Create(ctx, loggingCredentialsSecret)
-		}
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	} else {
+	if !secretUpdated {
+		// If there were no changes, we're done here.
 		logger.Info("loggingCredentials - up to date")
+		return ctrl.Result{}, nil
 	}
 
-	return ctrl.Result{}, nil
+	// commit our changes
+	logger.Info("loggingCredentials - Updating secret")
+	err = r.Client.Update(ctx, loggingCredentialsSecret)
+	if apimachineryerrors.IsNotFound(err) {
+		logger.Info("loggingCredentials - Secret does not exist, creating it")
+		err = r.Client.Create(ctx, loggingCredentialsSecret)
+	}
+
+	// Will return Secret's update error if any
+	return ctrl.Result{}, errors.WithStack(err)
 }
 
 // ReconcileDelete ensures a secret is removed for the current cluster
