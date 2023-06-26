@@ -51,7 +51,7 @@ func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface, config co
 }
 
 // Update a LoggingCredentials secret if needed
-func UpdateLoggingCredentials(loggingCredentials v1.Secret) bool {
+func UpdateLoggingCredentials(loggingCredentials *v1.Secret) bool {
 
 	var secretUpdated bool = false
 

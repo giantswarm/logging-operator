@@ -47,7 +47,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// update the secret's contents if needed
-	secretUpdated := UpdateLoggingCredentials(loggingCredentialsSecret)
+	secretUpdated := UpdateLoggingCredentials(&loggingCredentialsSecret)
 
 	// commit our changes
 	if secretUpdated {
