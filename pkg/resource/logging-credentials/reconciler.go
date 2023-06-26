@@ -2,7 +2,6 @@ package loggingcredentials
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -25,7 +24,7 @@ type Reconciler struct {
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	logger.Info(fmt.Sprintf("loggingcredentials checking secret %s/%s", LoggingCredentialsSecretMeta(lc).Namespace, LoggingCredentialsSecretMeta(lc).Name))
+	logger.Info("loggingcredentials checking secret", "namespace", LoggingCredentialsSecretMeta(lc).Namespace, "name", LoggingCredentialsSecretMeta(lc).Name)
 
 	// Start with some empty secret
 	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)

@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/vintagemc"
@@ -69,7 +68,7 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info(fmt.Sprintf("Reconciling Management cluster"))
+	logger.Info("Reconciling Management cluster")
 
 	// TODO(theo): Pass the IsLoggingEnabled function as a parameter into the LoggingReconciler
 	// So we can have different detection logic to enable logging for Vintage MC and CAPI cluster.

@@ -2,7 +2,6 @@ package loggingreconciler
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/key"
@@ -49,16 +48,16 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 	logger.Info("LOGGING enabled")
 
 	// Finalizer handling needs to come first.
-	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
+	logger.Info("checking finalizer", "finalizer", key.Finalizer)
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
-		logger.Info(fmt.Sprintf("adding finalizer %s", key.Finalizer))
+		logger.Info("adding finalizer", "finalizer", key.Finalizer)
 		controllerutil.AddFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		logger.Info(fmt.Sprintf("finalizer already added"))
+		logger.Info("finalizer already added")
 	}
 
 	// Call all reconcilers ReconcileCreate methods.
@@ -88,16 +87,16 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 	}
 
 	// Finalizer handling needs to come last.
-	logger.Info(fmt.Sprintf("checking finalizer %s", key.Finalizer))
+	logger.Info("checking finalizer", "finalizer", key.Finalizer)
 	if controllerutil.ContainsFinalizer(lc, key.Finalizer) {
-		logger.Info(fmt.Sprintf("removing finalizer %s", key.Finalizer))
+		logger.Info("removing finalizer", "finalizer", key.Finalizer)
 		controllerutil.RemoveFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		logger.Info(fmt.Sprintf("finalizer already removed"))
+		logger.Info("finalizer already removed")
 	}
 
 	return ctrl.Result{}, nil

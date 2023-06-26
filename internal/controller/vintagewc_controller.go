@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/vintagewc"
@@ -63,7 +62,7 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info(fmt.Sprintf("Name %s", cluster.GetName()))
+	logger.Info("Reconciling Vintage WV cluster", "name", cluster.GetName())
 
 	loggedCluster := vintagewc.Object{
 		Object: cluster,

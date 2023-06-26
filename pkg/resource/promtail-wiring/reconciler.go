@@ -2,7 +2,6 @@ package promtailwiring
 
 import (
 	"context"
-	"fmt"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -35,7 +34,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	appMeta := ObservabilityBundleAppMeta(lc)
 
 	// Retrieve the app.
-	logger.Info(fmt.Sprintf("promtailwiring checking app %s/%s", appMeta.GetNamespace(), appMeta.GetName()))
+	logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
