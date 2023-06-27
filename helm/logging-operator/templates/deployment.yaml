@@ -29,9 +29,7 @@ spec:
             path: config.yml
       serviceAccountName: {{ include "resource.default.name"  . }}
       securityContext:
-        runAsUser: {{ .Values.pod.user.id }}
-        runAsGroup: {{ .Values.pod.group.id }}
-        {{- with .Values.podSecurityContext }}
+        {{- with .Values.podSecurityContext.pod }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
       containers:
@@ -54,7 +52,7 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 1
         securityContext:
-          {{- with .Values.securityContext }}
+          {{- with .Values.securityContext.container }}
             {{- . | toYaml | nindent 10 }}
           {{- end }}
         resources:
