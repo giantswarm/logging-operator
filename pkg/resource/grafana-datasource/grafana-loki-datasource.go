@@ -12,6 +12,13 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	lokiURL                   = "http://loki-gateway.loki.svc.cluster.local"
+	datasourceName            = "Loki"
+	datasourceSecretName      = "loki-datasource"
+	datasourceSecretNamespace = "monitoring"
+)
+
 type Values struct {
 	ApiVersion  int          `yaml:"apiversion" json:"apiversion"`
 	Datasources []datasource `yaml:"datasources" json:"datasources"`
@@ -40,8 +47,8 @@ type secureJsonData struct {
 // ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
 func DatasourceConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      "loki-datasource",
-		Namespace: "monitoring",
+		Name:      datasourceSecretName,
+		Namespace: datasourceSecretNamespace,
 		Labels: map[string]string{
 			// This label is used to detect datasources
 			"app.giantswarm.io/kind": "datasource",
@@ -78,9 +85,9 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 				JsonData: jsonData{
 					ManageAlerts: false,
 				},
-				Name: "Lokitest",
+				Name: datasourceName,
 				Type: "loki",
-				Url:  "http://loki-gateway.loki.svc.cluster.local",
+				Url:  lokiURL,
 				SecureJsonData: secureJsonData{
 					BasicAuthPassword: base64.StdEncoding.EncodeToString([]byte(password)),
 				},
