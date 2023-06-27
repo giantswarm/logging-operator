@@ -1,0 +1,32 @@
+image:
+  name: "giantswarm/logging-operator"
+  tag: "[[ .Version ]]"
+
+registry:
+  domain: docker.io
+  pullSecret:
+    dockerConfigJSON: "Cg=="
+
+pod:
+  user:
+    id: 0
+  group:
+    id: 1000
+
+# Add seccomp to pod security context
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
+# Add seccomp to container security context
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 200Mi
+  limits:
+    cpu: 100m
+    memory: 200Mi
