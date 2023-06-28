@@ -19,8 +19,6 @@ package controller
 import (
 	"context"
 
-	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
-	"github.com/giantswarm/logging-operator/pkg/vintagemc"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,6 +26,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
+	"github.com/giantswarm/logging-operator/pkg/vintagemc"
 )
 
 // VintageMCReconciler reconciles a Service object

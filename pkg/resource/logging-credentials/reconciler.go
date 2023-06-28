@@ -4,10 +4,11 @@ import (
 	"context"
 	"reflect"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

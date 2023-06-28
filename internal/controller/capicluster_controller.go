@@ -19,8 +19,6 @@ package controller
 import (
 	"context"
 
-	"github.com/giantswarm/logging-operator/pkg/capicluster"
-	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -28,6 +26,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/capicluster"
+	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 )
 
 // CapiClusterReconciler reconciles a Cluster object

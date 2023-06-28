@@ -3,8 +3,9 @@ package reconciler
 import (
 	"context"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 // Interface provides a reconciler interface which is the controller core logic

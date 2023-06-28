@@ -3,16 +3,17 @@ package loggingreconciler
 import (
 	"context"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
-	"github.com/giantswarm/logging-operator/pkg/key"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/key"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/reconciler"
 )
 
 // LoggingReconciler reconciles logging for any supported object
