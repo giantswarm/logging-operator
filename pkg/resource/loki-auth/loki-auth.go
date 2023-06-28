@@ -1,18 +1,25 @@
 package lokiauth
 
 import (
+	"context"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	"github.com/pkg/errors"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 )
 
 const (
-	lokiauthSecretName      = "loki-multi-tenant-proxy-auth-config"
-	lokiauthSecretNamespace = "loki"
+	lokiauthSecretName          = "loki-multi-tenant-proxy-auth-config"
+	lokiauthSecretNamespace     = "loki"
+	lokiauthDeploymentName      = "loki-multi-tenant-proxy"
+	lokiauthDeploymentNamespace = "loki"
 )
 
 type Values struct {
@@ -91,4 +98,38 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	}
 
 	return secret, nil
+}
+
+func ReloadLokiProxy(lc loggedcluster.Interface, ctx context.Context, client client.Client) error {
+	const triggerredeployLabel = "app.giantswarm.io/triggerredeploy"
+
+	var lokiProxyDeployment appsv1.Deployment
+	err := client.Get(ctx, types.NamespacedName{Name: lokiauthDeploymentName, Namespace: lokiauthDeploymentNamespace}, &lokiProxyDeployment)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	labels := lokiProxyDeployment.Spec.Template.GetObjectMeta().GetLabels()
+
+	if val, ok := labels[triggerredeployLabel]; ok {
+
+		if val == "tick" {
+			labels[triggerredeployLabel] = "tock"
+		} else {
+			labels[triggerredeployLabel] = "tick"
+		}
+
+	} else {
+		labels[triggerredeployLabel] = "tick"
+	}
+
+	lokiProxyDeployment.Spec.Template.ObjectMeta.SetLabels(labels)
+
+	err = client.Update(ctx, &lokiProxyDeployment)
+	if err != nil {
+		return errors.WithStack(err)
+
+	}
+
+	return nil
 }

@@ -69,8 +69,14 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// trigger restart of loki-multi-tenant-auth-proxy
+	logger.Info("lokiauth - trigger loki-multi-tenant-auth-proxy restart")
 
+	err = ReloadLokiProxy(lc, ctx, r.Client)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	logger.Info("lokiauth - done")
 	return ctrl.Result{}, nil
 }
 
