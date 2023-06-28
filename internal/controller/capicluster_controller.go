@@ -68,7 +68,7 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	loggedCluster := capicluster.Object{
 		Object: cluster,
 	}
-	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
+	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

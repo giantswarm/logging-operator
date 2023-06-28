@@ -81,7 +81,7 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	loggedCluster := vintagemc.Object{
 		Object: service,
 	}
-	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
+	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

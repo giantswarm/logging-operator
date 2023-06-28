@@ -68,7 +68,7 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	loggedCluster := vintagewc.Object{
 		Object: cluster,
 	}
-	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
+	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
