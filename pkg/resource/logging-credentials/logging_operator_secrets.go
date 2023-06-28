@@ -15,11 +15,16 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
+const (
+	LoggingCredentialsName      = "logging-credentials"
+	LoggingCredentialsNamespace = "monitoring"
+)
+
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
 func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      "logging-credentials",
-		Namespace: "monitoring",
+		Name:      LoggingCredentialsName,
+		Namespace: LoggingCredentialsNamespace,
 		Labels:    map[string]string{},
 	}
 
