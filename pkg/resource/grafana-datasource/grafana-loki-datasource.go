@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	lokiURL                   = "http://loki-gateway.loki.svc.cluster.local"
+	lokiURL                   = "http://loki-gateway.loki.svc"
 	datasourceName            = "Loki"
 	datasourceSecretName      = "loki-datasource"
 	datasourceSecretNamespace = "monitoring"
