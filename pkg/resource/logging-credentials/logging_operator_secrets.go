@@ -36,7 +36,7 @@ func genPassword() (string, error) {
 	for i := 0; i < length; i++ {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
 		if err != nil {
-			return "", err
+			return "", errors.WithStack(err)
 		}
 		pass[i] = chars[num.Int64()]
 	}
