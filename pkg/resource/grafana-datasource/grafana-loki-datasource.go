@@ -3,13 +3,14 @@ package grafanadatasource
 import (
 	"encoding/base64"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
 const (

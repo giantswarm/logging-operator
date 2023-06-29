@@ -39,6 +39,7 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
@@ -118,6 +119,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	lokiAuth := lokiauth.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -126,6 +131,7 @@ func main() {
 			&promtailWiring,
 			&loggingSecrets,
 			&grafanaDatasource,
+			&lokiAuth,
 		},
 	}
 

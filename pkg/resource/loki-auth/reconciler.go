@@ -1,4 +1,4 @@
-package grafanadatasource
+package lokiauth
 
 import (
 	"context"
@@ -23,34 +23,34 @@ type Reconciler struct {
 	client.Client
 }
 
-// ReconcileCreate ensures Grafana Datasource for Loki is created with the right credentials
+// ReconcileCreate ensures Loki-multi-tenant auth map is created with the right credentials
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("grafanadatasource create")
+	logger.Info("lokiauth create")
 
 	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
+	var lokiAuthSecret v1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&loggingCredentialsSecret)
+		&lokiAuthSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired secret
-	desiredDatasourceSecret, err := GenerateDatasourceSecret(lc, &loggingCredentialsSecret)
+	desiredLokiAuthSecret, err := GenerateLokiAuthSecret(lc, &lokiAuthSecret)
 	if err != nil {
-		logger.Info("grafanadatasource - failed generating Datasource!", "error", err)
+		logger.Info("lokiauth - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if datasource already exists.
-	logger.Info("grafanadatasource - getting", "namespace", desiredDatasourceSecret.GetNamespace(), "name", desiredDatasourceSecret.GetName())
-	var currentDatasourceSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredDatasourceSecret.GetName(), Namespace: desiredDatasourceSecret.GetNamespace()}, &currentDatasourceSecret)
+	// Check if auth config already exists.
+	logger.Info("lokiauth - getting", "namespace", desiredLokiAuthSecret.GetNamespace(), "name", desiredLokiAuthSecret.GetName())
+	var currentLokiAuthSecret v1.Secret
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLokiAuthSecret.GetName(), Namespace: desiredLokiAuthSecret.GetNamespace()}, &currentLokiAuthSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafanadatasource not found, creating")
-			err = r.Client.Create(ctx, &desiredDatasourceSecret)
+			logger.Info("lokiauth not found, creating")
+			err = r.Client.Create(ctx, &desiredLokiAuthSecret)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -59,24 +59,32 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		}
 	}
 
-	if !needUpdate(currentDatasourceSecret, desiredDatasourceSecret) {
-		logger.Info("grafanadatasource up to date")
+	if !needUpdate(currentLokiAuthSecret, desiredLokiAuthSecret) {
+		logger.Info("lokiauth up to date")
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("grafanadatasource - updating")
-	err = r.Client.Update(ctx, &desiredDatasourceSecret)
+	logger.Info("lokiauth - updating")
+	err = r.Client.Update(ctx, &desiredLokiAuthSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	logger.Info("lokiauth - trigger loki-multi-tenant-auth-proxy restart")
+
+	err = ReloadLokiProxy(lc, ctx, r.Client)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	logger.Info("lokiauth - done")
 	return ctrl.Result{}, nil
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("grafanadatasource delete")
+	logger.Info("lokiauth delete")
 
 	return ctrl.Result{}, nil
 }
