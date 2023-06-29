@@ -3,8 +3,9 @@ package capicluster
 import (
 	"fmt"
 
-	"github.com/giantswarm/logging-operator/pkg/key"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/logging-operator/pkg/key"
 )
 
 type Object struct {

@@ -19,8 +19,6 @@ package controller
 import (
 	"context"
 
-	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
-	"github.com/giantswarm/logging-operator/pkg/vintagewc"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -28,6 +26,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
+	"github.com/giantswarm/logging-operator/pkg/vintagewc"
 )
 
 // VintageWCReconciler reconciles a Cluster object
@@ -67,7 +68,7 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	loggedCluster := vintagewc.Object{
 		Object: cluster,
 	}
-	result, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
+	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

@@ -1,9 +1,10 @@
 package promtailwiring
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ObservabilityBundleAppMeta returns metadata for the observability bundle app.

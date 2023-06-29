@@ -4,12 +4,13 @@ import (
 	"context"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

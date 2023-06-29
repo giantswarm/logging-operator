@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
+
 	"github.com/giantswarm/logging-operator/internal/controller"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"

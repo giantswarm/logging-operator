@@ -1,14 +1,14 @@
 package loggingcredentials
 
 import (
-	"math/rand"
-	"strings"
-	"time"
+	"crypto/rand"
+	"math/big"
+
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
@@ -24,22 +24,23 @@ func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta 
 }
 
 // Generate a random 20-characters password
-func genPassword() string {
+func genPassword() (string, error) {
 	const length = 20
 
-	rand.Seed(time.Now().UnixNano())
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
 		"0123456789" +
 		"~=+%^*/()[]{}/!@#$?|")
 
-	var b strings.Builder
+	pass := make([]rune, length)
 	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
-
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+		if err != nil {
+			return "", errors.WithStack(err)
+		}
+		pass[i] = chars[num.Int64()]
 	}
-	str := b.String() // E.g. "ExcbsVQs"
-	return str
+	return string(pass), nil
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
@@ -64,7 +65,11 @@ func UpdateLoggingCredentials(loggingCredentials *v1.Secret) bool {
 		secretUpdated = true
 	}
 	if _, ok := loggingCredentials.Data["readpassword"]; !ok {
-		loggingCredentials.Data["readpassword"] = []byte(genPassword())
+		password, err := genPassword()
+		if err != nil {
+			return false
+		}
+		loggingCredentials.Data["readpassword"] = []byte(password)
 		secretUpdated = true
 	}
 	if _, ok := loggingCredentials.Data["writeuser"]; !ok {
@@ -72,7 +77,11 @@ func UpdateLoggingCredentials(loggingCredentials *v1.Secret) bool {
 		secretUpdated = true
 	}
 	if _, ok := loggingCredentials.Data["writepassword"]; !ok {
-		loggingCredentials.Data["writepassword"] = []byte(genPassword())
+		password, err := genPassword()
+		if err != nil {
+			return false
+		}
+		loggingCredentials.Data["writepassword"] = []byte(password)
 		secretUpdated = true
 	}
 
