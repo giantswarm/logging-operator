@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	//#nosec G101
 	lokiauthSecretName          = "loki-multi-tenant-proxy-auth-config"
 	lokiauthSecretNamespace     = "loki"
 	lokiauthDeploymentName      = "loki-multi-tenant-proxy"
@@ -101,8 +102,11 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	return secret, nil
 }
 
+// This one is a hack until the proxy knows how to automatically reload its config
 func ReloadLokiProxy(lc loggedcluster.Interface, ctx context.Context, client client.Client) error {
 	const triggerredeployLabel = "app.giantswarm.io/triggerredeploy"
+	const tickValue = "tick"
+	const tockValue = "tock"
 
 	var lokiProxyDeployment appsv1.Deployment
 	err := client.Get(ctx, types.NamespacedName{Name: lokiauthDeploymentName, Namespace: lokiauthDeploymentNamespace}, &lokiProxyDeployment)
@@ -114,14 +118,14 @@ func ReloadLokiProxy(lc loggedcluster.Interface, ctx context.Context, client cli
 
 	if val, ok := labels[triggerredeployLabel]; ok {
 
-		if val == "tick" {
-			labels[triggerredeployLabel] = "tock"
+		if val == tickValue {
+			labels[triggerredeployLabel] = tockValue
 		} else {
-			labels[triggerredeployLabel] = "tick"
+			labels[triggerredeployLabel] = tickValue
 		}
 
 	} else {
-		labels[triggerredeployLabel] = "tick"
+		labels[triggerredeployLabel] = tickValue
 	}
 
 	lokiProxyDeployment.Spec.Template.ObjectMeta.SetLabels(labels)
