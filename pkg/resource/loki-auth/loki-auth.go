@@ -3,9 +3,6 @@ package lokiauth
 import (
 	"context"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -13,6 +10,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
 const (
