@@ -44,8 +44,8 @@ type secureJsonData struct {
 	BasicAuthPassword string `yaml:"basicAuthPassword" json:"basicAuthPassword"`
 }
 
-// ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
-func DatasourceConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+// DatasourceSecretMeta returns metadata for the observability bundle extra values configmap.
+func DatasourceSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      datasourceSecretName,
 		Namespace: datasourceSecretNamespace,
@@ -72,7 +72,6 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
-	// password = base64.StdEncoding.EncodeToString([]byte(password))
 
 	values := Values{
 		ApiVersion: 1,
@@ -101,7 +100,7 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 	}
 
 	secret := v1.Secret{
-		ObjectMeta: DatasourceConfigMapMeta(lc),
+		ObjectMeta: DatasourceSecretMeta(lc),
 		Data: map[string][]byte{
 			"datasource.yaml": []byte(v),
 		},
