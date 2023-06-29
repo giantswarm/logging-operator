@@ -37,6 +37,7 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
@@ -113,6 +114,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	grafanaDatasource := grafanadatasource.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -120,6 +125,7 @@ func main() {
 			&promtailReconciler,
 			&promtailWiring,
 			&loggingSecrets,
+			&grafanaDatasource,
 		},
 	}
 

@@ -4,6 +4,10 @@ import (
 	"crypto/rand"
 	"math/big"
 
+	"fmt"
+
+	"github.com/pkg/errors"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -53,6 +57,26 @@ func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secre
 	}
 
 	return &secret
+}
+
+func GetLogin(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user string) (string, error) {
+
+	login, ok := credentialsSecret.Data[fmt.Sprintf("%suser", user)]
+
+	if !ok {
+		return "", errors.New("Not found")
+	}
+	return string(login), nil
+}
+
+func GetPass(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user string) (string, error) {
+
+	pass, ok := credentialsSecret.Data[fmt.Sprintf("%spassword", user)]
+
+	if !ok {
+		return "", errors.New("Not found")
+	}
+	return string(pass), nil
 }
 
 // Update a LoggingCredentials secret if needed
