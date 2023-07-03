@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	//#nosec G101
 	LoggingCredentialsName      = "logging-credentials"
 	LoggingCredentialsNamespace = "monitoring"
 )
