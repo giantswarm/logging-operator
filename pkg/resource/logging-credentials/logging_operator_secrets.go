@@ -38,8 +38,7 @@ func genPassword() (string, error) {
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789" +
-		"~=+%^*/()[]{}/!@#$?|")
+		"0123456789")
 
 	pass := make([]rune, length)
 	for i := 0; i < length; i++ {
