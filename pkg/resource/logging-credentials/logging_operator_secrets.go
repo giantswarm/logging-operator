@@ -15,11 +15,17 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
+const (
+	//#nosec G101
+	LoggingCredentialsName      = "logging-credentials"
+	LoggingCredentialsNamespace = "monitoring"
+)
+
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
 func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      "logging-credentials",
-		Namespace: "monitoring",
+		Name:      LoggingCredentialsName,
+		Namespace: LoggingCredentialsNamespace,
 		Labels:    map[string]string{},
 	}
 
@@ -33,8 +39,7 @@ func genPassword() (string, error) {
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789" +
-		"~=+%^*/()[]{}/!@#$?|")
+		"0123456789")
 
 	pass := make([]rune, length)
 	for i := 0; i < length; i++ {

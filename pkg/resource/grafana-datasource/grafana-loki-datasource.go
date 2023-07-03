@@ -1,8 +1,6 @@
 package grafanadatasource
 
 import (
-	"encoding/base64"
-
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,10 +16,11 @@ const (
 	datasourceName            = "Loki"
 	datasourceSecretName      = "loki-datasource"
 	datasourceSecretNamespace = "monitoring"
+	datasourceFileName        = "loki-datasource.yaml"
 )
 
 type Values struct {
-	ApiVersion  int          `yaml:"apiversion" json:"apiversion"`
+	ApiVersion  int          `yaml:"apiVersion" json:"apiVersion"`
 	Datasources []datasource `yaml:"datasources" json:"datasources"`
 }
 
@@ -89,7 +88,7 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 				Type: "loki",
 				Url:  lokiURL,
 				SecureJsonData: secureJsonData{
-					BasicAuthPassword: base64.StdEncoding.EncodeToString([]byte(password)),
+					BasicAuthPassword: password,
 				},
 			},
 		},
@@ -103,7 +102,7 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 	secret := v1.Secret{
 		ObjectMeta: DatasourceSecretMeta(lc),
 		Data: map[string][]byte{
-			"datasource.yaml": []byte(v),
+			datasourceFileName: []byte(v),
 		},
 	}
 
