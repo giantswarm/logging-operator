@@ -1,8 +1,9 @@
 package vintagemc
 
 import (
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 type Object struct {
