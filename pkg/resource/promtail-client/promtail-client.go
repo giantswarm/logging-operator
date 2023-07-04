@@ -102,7 +102,7 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 						},
 						ExternalLabels: promtailConfigClientExternalLabels{
 							Installation: installationName,
-							ClusterID:    lc.GetName(),
+							ClusterID:    lc.GetClusterName(),
 						},
 					},
 				},
