@@ -84,7 +84,7 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 		return v1.Secret{}, errors.WithStack(err)
 	}
 
-	installName := "gauss"
+	installationName := lc.GetInstallationName()
 
 	values := values{
 		Promtail: promtail{
@@ -101,7 +101,7 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 							MaxPeriod: "10m",
 						},
 						ExternalLabels: promtailConfigClientExternalLabels{
-							Installation: installName,
+							Installation: installationName,
 							ClusterID:    lc.GetName(),
 						},
 					},

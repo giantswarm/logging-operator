@@ -4,10 +4,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 type Object struct {
 	client.Object
+	Options loggedcluster.Options
 }
 
 func (o Object) GetLoggingLabel() string {
@@ -28,6 +30,10 @@ func (o Object) AppConfigName(app string) string {
 
 func (o Object) GetClusterName() string {
 	return o.Object.GetName()
+}
+
+func (o Object) GetInstallationName() string {
+	return o.Options.InstallationName
 }
 
 func (o Object) GetObject() client.Object {

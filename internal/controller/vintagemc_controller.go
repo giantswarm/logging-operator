@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/vintagemc"
 )
@@ -79,7 +80,8 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// would check both the flag and the label.
 
 	loggedCluster := vintagemc.Object{
-		Object: service,
+		Object:  service,
+		Options: loggedcluster.O,
 	}
 	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {

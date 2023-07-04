@@ -35,6 +35,7 @@ import (
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
@@ -130,8 +131,8 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	var loggingReconcilerOptions = make(map[string]string)
-	loggingReconcilerOptions["installName"] = installationName
+	loggedcluster.O.LoggingEnabled = true
+	loggedcluster.O.InstallationName = installationName
 
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),

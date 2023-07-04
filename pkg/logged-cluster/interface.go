@@ -8,6 +8,7 @@ type Interface interface {
 	GetLoggingLabel() string
 	GetAppsNamespace() string
 	GetClusterName() string
+	GetInstallationName() string
 	AppConfigName(app string) string
 	GetObject() client.Object
 	GetObservabilityBundleConfigMap() string
