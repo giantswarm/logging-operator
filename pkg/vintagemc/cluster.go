@@ -20,6 +20,11 @@ func (o Object) AppConfigName(app string) string {
 	return app
 }
 
+func (o Object) GetClusterName() string {
+	// TODO - return installation name for vintage MC
+	return "gauss"
+}
+
 func (o Object) GetObject() client.Object {
 	return o.Object
 }
