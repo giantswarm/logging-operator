@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/capicluster"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 )
 
@@ -66,7 +67,8 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	logger.Info("Reconciling CAPI Cluster", "name", cluster.GetName())
 
 	loggedCluster := capicluster.Object{
-		Object: cluster,
+		Object:  cluster,
+		Options: loggedcluster.O,
 	}
 	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 	if err != nil {

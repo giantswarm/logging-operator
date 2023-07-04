@@ -35,11 +35,13 @@ import (
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
+	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
@@ -60,12 +62,14 @@ func init() {
 
 func main() {
 	var enableLeaderElection bool
+	var installationName string
 	var metricsAddr string
 	var probeAddr string
 	var vintageMode bool
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
@@ -123,6 +127,13 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	promtailClient := promtailclient.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
+	loggedcluster.O.LoggingEnabled = true
+	loggedcluster.O.InstallationName = installationName
+
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -132,6 +143,7 @@ func main() {
 			&loggingSecrets,
 			&grafanaDatasource,
 			&lokiAuth,
+			&promtailClient,
 		},
 	}
 
