@@ -36,6 +36,10 @@ func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
 }
 
+func (o Object) GetDisableLoggingFlag() bool {
+	return o.Options.DisableLoggingFlag
+}
+
 func (o Object) GetObject() client.Object {
 	return o.Object
 }
