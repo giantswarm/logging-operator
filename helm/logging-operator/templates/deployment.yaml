@@ -20,13 +20,6 @@ spec:
       labels:
         {{- include "labels.common" . | nindent 8 }}
     spec:
-      volumes:
-      - name: {{ include "name" . }}-configmap
-        configMap:
-          name: {{ include "resource.default.name"  . }}
-          items:
-          - key: config.yml
-            path: config.yml
       serviceAccountName: {{ include "resource.default.name"  . }}
       securityContext:
         {{- with .Values.securityContext.pod }}
@@ -36,15 +29,15 @@ spec:
       - name: {{ include "name" . }}
         image: "{{ .Values.registry.domain }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         args:
-        - daemon
-        - --config.dirs=/var/run/{{ include "name" . }}/configmap/,/var/run/{{ include "name" . }}/secret/
-        - --config.files=config,secret
-        ports:
-        - name: http
-          containerPort: 8000
-        volumeMounts:
-        - name: {{ include "name" . }}-configmap
-          mountPath: /var/run/{{ include "name" . }}/configmap/
+        {{ if .Values.loggingOperator.vintageMode -}}
+          - -vintage
+        {{- end }}
+        {{ if .Values.loggingOperator.loggingEnabled -}}
+          - -enable-logging=true
+        {{- else -}}
+          - -enable-logging=false
+        {{- end }}
+        - -installation-name={{ .Values.loggingOperator.installationName }}
         livenessProbe:
           httpGet:
             path: /healthz

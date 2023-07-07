@@ -1,6 +1,6 @@
 image:
   name: "giantswarm/logging-operator"
-  tag: "[[ .Version ]]"
+  tag: "1.0.0" # TODO: can ABS automate update of this according to current release, like in Chart.yaml?
 
 registry:
   domain: docker.io
@@ -32,3 +32,8 @@ resources:
 
 ciliumNetworkPolicy:
   enabled: true
+
+loggingOperator:
+  vintageMode: true
+  installationName: unknown
+  loggingEnabled: true
