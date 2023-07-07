@@ -62,7 +62,7 @@ func init() {
 
 func main() {
 	var enableLeaderElection bool
-	var disableLogging bool
+	var enableLogging bool
 	var installationName string
 	var metricsAddr string
 	var probeAddr string
@@ -70,7 +70,7 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.BoolVar(&disableLogging, "disable-logging", false, "disable logging for the whole installation")
+	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -133,7 +133,7 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	loggedcluster.O.DisableLoggingFlag = disableLogging
+	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
