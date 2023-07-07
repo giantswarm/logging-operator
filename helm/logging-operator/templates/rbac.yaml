@@ -27,13 +27,15 @@ rules:
       - ""
     resources:
       - secrets
+      - configmaps
     verbs:
       - create
-      - update 
+      - update
       - delete
       - deletecollection
       - get
       - list
+      - watch
   - apiGroups:
       - apiextensions.k8s.io
     resources:
@@ -67,6 +69,8 @@ rules:
       - delete
       - get
       - update
+      - list
+      - watch
   - apiGroups:
       - provider.giantswarm.io
     resources:
@@ -124,6 +128,8 @@ rules:
       - apps
     verbs:
       - get
+      - list
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
