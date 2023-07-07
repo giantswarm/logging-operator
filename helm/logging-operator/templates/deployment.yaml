@@ -29,7 +29,7 @@ spec:
             path: config.yml
       serviceAccountName: {{ include "resource.default.name"  . }}
       securityContext:
-        {{- with .Values.podSecurityContext.pod }}
+        {{- with .Values.securityContext.pod }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
       containers:
