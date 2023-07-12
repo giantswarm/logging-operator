@@ -7,6 +7,7 @@ type Interface interface {
 	client.Object
 	GetLoggingLabel() string
 	GetAppsNamespace() string
+	GetEnableLoggingFlag() bool
 	GetClusterName() string
 	GetInstallationName() string
 	AppConfigName(app string) string

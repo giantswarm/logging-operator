@@ -11,7 +11,7 @@ func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 	//   - cluster is not being deleted
 	//   - TODO(theo) global logging flag is enabled
 
-	return lc.GetLoggingLabel() == "true" && lc.GetDeletionTimestamp().IsZero()
+	return lc.GetLoggingLabel() == "true" && lc.GetDeletionTimestamp().IsZero() && lc.GetEnableLoggingFlag()
 }
 
 func AddCommonLabels(labels map[string]string) {
