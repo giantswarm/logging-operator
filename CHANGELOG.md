@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.1] - 2023-07-13
+
 ### Added
 
 - Add Helm chart
@@ -21,4 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/tree/master
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/giantswarm/logging-operator/releases/tag/v0.0.1
