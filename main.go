@@ -161,26 +161,29 @@ func main() {
 			setupLog.Error(err, "unable to create Vintage MC controller", "controller", "Service")
 			os.Exit(1)
 		}
-		if err = (&controller.VintageWCReconciler{
-			Client:            mgr.GetClient(),
-			Scheme:            mgr.GetScheme(),
-			LoggingReconciler: loggingReconciler,
-		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
-			os.Exit(1)
-		}
+
+		setupLog.Info("NOT creating Vintage WC reconciler - not supported yet!")
+		//		if err = (&controller.VintageWCReconciler{
+		//			Client:            mgr.GetClient(),
+		//			Scheme:            mgr.GetScheme(),
+		//			LoggingReconciler: loggingReconciler,
+		//		}).SetupWithManager(mgr); err != nil {
+		//			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
+		//			os.Exit(1)
+		//		}
 
 	} else {
 		setupLog.Info("CAPI mode selected")
 
-		if err = (&controller.CapiClusterReconciler{
-			Client:            mgr.GetClient(),
-			Scheme:            mgr.GetScheme(),
-			LoggingReconciler: loggingReconciler,
-		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
-			os.Exit(1)
-		}
+		setupLog.Info("NOT creating CAPI cluster reconciler - not supported yet!")
+		//		if err = (&controller.CapiClusterReconciler{
+		//			Client:            mgr.GetClient(),
+		//			Scheme:            mgr.GetScheme(),
+		//			LoggingReconciler: loggingReconciler,
+		//		}).SetupWithManager(mgr); err != nil {
+		//			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
+		//			os.Exit(1)
+		//		}
 	}
 	//+kubebuilder:scaffold:builder
 
