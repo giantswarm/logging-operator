@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Push app to aws-app-catalog
 - Commented reconcilers creation for Vintage WC and CAPI clusters - not supported yet.
 
 ## [0.0.1] - 2023-07-13
