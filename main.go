@@ -42,6 +42,7 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
+	promtailconfig "github.com/giantswarm/logging-operator/pkg/resource/promtail-config"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
@@ -133,6 +134,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	promtailConfig := promtailconfig.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
@@ -147,6 +152,7 @@ func main() {
 			&grafanaDatasource,
 			&lokiAuth,
 			&promtailClient,
+			&promtailConfig,
 		},
 	}
 
