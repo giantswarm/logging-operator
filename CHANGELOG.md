@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - PSP permissions to update app
+- fix CODEOWNERS
 
 ## [0.0.1] - 2023-07-13
 
