@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Add missing RBAC access to apps/deployment resources.
+
 ## [0.0.2] - 2023-07-26
 
 ### Added
