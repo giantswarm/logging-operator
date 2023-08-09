@@ -1,5 +1,4 @@
-[![CircleCI](https://circleci.com/gh/giantswarm/logging-operator.svg?&style=shield)](https://circleci.com/gh/giantswarm/logging-operator)
-[![Docker Repository on Quay](https://quay.io/repository/giantswarm/logging-operator/status "Docker Repository on Quay")](https://quay.io/repository/giantswarm/logging-operator)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/giantswarm/logging-operator/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/giantswarm/logging-operator/tree/main)
 
 # logging-operator
 
