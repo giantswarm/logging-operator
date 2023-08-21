@@ -18,6 +18,20 @@ make
 
 See `make help` for help.
 
+## Architecture
+
+The operator is built around a central reconciler, that calls multiple sub-reconcilers sequentially.
+![image](images/logging-operator-architecture.png)
+
+* Logging-Credentials are created if they don't exist. Then, their data (credentials) is used to create the next resources.
+* grafana datasource configures Grafana to read data from Loki
+* loki-multi-tenant-auth secures all Loki communication (per-tenant read/write access)
+* promtail client configures write access to Loki for Promtail
+* Promtail config setups some Promtail settings (like which logs to collect)
+* Promtail toggle enables/disables promtail deployment on WCs
+* Promtail wiring ensures promtail-app reads configs from previous steps
+
+
 ## Credits
 
 This operator was built using [`kubebuilder`](https://book.kubebuilder.io/quick-start.html).
