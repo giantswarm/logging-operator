@@ -72,7 +72,7 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 
 	// Scrape logs from kube-system and giantswarm namespaces only for WC clusters
 	extraRelabelConfigs := `[]`
-	if lc.GetObservabilityBundleConfigMap() == key.ObservabilityBundleConfigMapWC {
+	if lc.GetObservabilityBundleConfigMap() == key.WCObservabilityBundleConfigMap {
 		extraRelabelConfigs = `
 - source_labels: [__meta_kubernetes_namespace]
   action: keep

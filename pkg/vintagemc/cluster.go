@@ -43,5 +43,5 @@ func (o Object) GetObject() client.Object {
 
 // On vintage MC, there's no support for extraconfig so we should use standard user values
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return key.ObservabilityBundleConfigMapMC
+	return key.MCObservabilityBundleConfigMap
 }
