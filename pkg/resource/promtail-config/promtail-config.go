@@ -30,7 +30,8 @@ type promtail struct {
 }
 
 type promtailConfigSnippets struct {
-	ExtraScrapeConfigs string `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
+	ExtraRelabelConfigs string `yaml:"extraRelabelConfigs" json:"extraRelabelConfigs"`
+	ExtraScrapeConfigs  string `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
 }
 
 type promtailConfig struct {
@@ -75,6 +76,11 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 			},
 			Config: promtailConfig{
 				Snippets: promtailConfigSnippets{
+					ExtraRelabelConfigs: `# we only scrape logs from kube-system and giantswarm namespaces
+- source_labels: [__meta_kubernetes_namespace]
+  action: keep
+  regex: "kube-system|giantswarm"
+`,
 					ExtraScrapeConfigs: `# this one includes also system logs reported by systemd-journald
 - job_name: systemd_journal_run
   journal:
