@@ -1,8 +1,9 @@
 package key
 
 const (
-	Finalizer    = "giantswarm.io/logging-operator"
-	LoggingLabel = "giantswarm.io/logging"
-	ObservabilityBundleConfigMapMC = "observability-bundle-user-values"
-	ObservabilityBundleConfigMapWC = "observability-bundle-logging-values"
+	Finalizer                        = "giantswarm.io/logging-operator"
+	LoggingLabel                     = "giantswarm.io/logging"
+	ObservabilityBundleConfigMapMC   = "observability-bundle-user-values"
+	ObservabilityBundleConfigMapWC   = "observability-bundle-logging-values"
+	ObservabilityBundleConfigMapCAPI = "observability-bundle-logging-values"
 )

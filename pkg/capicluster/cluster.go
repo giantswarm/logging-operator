@@ -48,5 +48,5 @@ func (o Object) GetObject() client.Object {
 
 // On capi clusters, use an extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return "observability-bundle-logging-values"
+	return key.ObservabilityBundleConfigMapCAPI
 }

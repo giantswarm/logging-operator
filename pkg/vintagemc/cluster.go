@@ -3,6 +3,7 @@ package vintagemc
 import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
@@ -42,5 +43,5 @@ func (o Object) GetObject() client.Object {
 
 // On vintage MC, there's no support for extraconfig so we should use standard user values
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return "observability-bundle-user-values"
+	return key.ObservabilityBundleConfigMapMC
 }
