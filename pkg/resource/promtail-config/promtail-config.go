@@ -9,6 +9,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
@@ -69,6 +70,16 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // the promtail extra-config
 func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 
+	// Scrape logs from kube-system and giantswarm namespaces only for WC clusters
+	extraRelabelConfigs := `[]`
+	if lc.GetObservabilityBundleConfigMap() == key.ObservabilityBundleConfigMapWC {
+		extraRelabelConfigs = `
+- source_labels: [__meta_kubernetes_namespace]
+  action: keep
+  regex: "kube-system|giantswarm"
+`
+	}
+
 	values := values{
 		Promtail: promtail{
 			ExtraArgs: []string{
@@ -76,11 +87,7 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 			},
 			Config: promtailConfig{
 				Snippets: promtailConfigSnippets{
-					ExtraRelabelConfigs: `# we only scrape logs from kube-system and giantswarm namespaces
-- source_labels: [__meta_kubernetes_namespace]
-  action: keep
-  regex: "kube-system|giantswarm"
-`,
+					ExtraRelabelConfigs: extraRelabelConfigs,
 					ExtraScrapeConfigs: `# this one includes also system logs reported by systemd-journald
 - job_name: systemd_journal_run
   journal:
