@@ -17,3 +17,7 @@ func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 func AddCommonLabels(labels map[string]string) {
 	labels["giantswarm.io/managed-by"] = "logging-operator"
 }
+
+func IsWorkloadCluster(lc loggedcluster.Interface) bool {
+	return lc.GetInstallationName() != lc.GetClusterName()
+}

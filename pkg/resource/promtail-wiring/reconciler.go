@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 
@@ -28,8 +29,6 @@ type Reconciler struct {
 // ReconcileCreate ensure user value configmap is set in observability bundle
 // for the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
-	isWC := lc.GetClusterName() != lc.GetInstallationName()
-
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring create")
 
@@ -44,7 +43,9 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	if !isWC {
+	if common.IsWorkloadCluster(lc) {
+		logger.Info("cluster-operator is updating promtailwiring")
+	} else {
 		// Set user value configmap in the app.
 		if setUserConfig(&currentApp, lc) {
 			logger.Info("promtailwiring updating")
@@ -56,8 +57,6 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		} else {
 			logger.Info("promtailwiring up to date")
 		}
-	} else {
-		logger.Info("cluster-operator is updating promtailwiring")
 	}
 
 	return ctrl.Result{}, nil
