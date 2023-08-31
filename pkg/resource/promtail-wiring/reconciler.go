@@ -28,6 +28,8 @@ type Reconciler struct {
 // ReconcileCreate ensure user value configmap is set in observability bundle
 // for the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+	isWC := lc.GetClusterName() != lc.GetInstallationName()
+
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring create")
 
@@ -42,16 +44,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Set user value configmap in the app.
-	if setUserConfig(&currentApp, lc) {
-		logger.Info("promtailwiring updating")
-		// Update the app.
-		err := r.Client.Update(ctx, &currentApp)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+	if !isWC {
+		// Set user value configmap in the app.
+		if setUserConfig(&currentApp, lc) {
+			logger.Info("promtailwiring updating")
+			// Update the app.
+			err := r.Client.Update(ctx, &currentApp)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+		} else {
+			logger.Info("promtailwiring up to date")
 		}
 	} else {
-		logger.Info("promtailwiring up to date")
+		logger.Info("cluster-operator is updating promtailwiring")
 	}
 
 	return ctrl.Result{}, nil

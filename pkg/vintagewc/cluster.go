@@ -25,7 +25,11 @@ func (o Object) GetAppsNamespace() string {
 }
 
 func (o Object) AppConfigName(app string) string {
-	return app
+	if app == "observability-bundle" {
+		return o.GetObject().GetName() + "-" + app
+	} else {
+		return app
+	}
 }
 
 func (o Object) GetClusterName() string {
@@ -46,5 +50,5 @@ func (o Object) GetObject() client.Object {
 
 // on vintage WC, use extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return "observability-bundle-logging-values"
+	return "observability-bundle-logging-extraconfig"
 }
