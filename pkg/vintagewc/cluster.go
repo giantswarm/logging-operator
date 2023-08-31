@@ -46,5 +46,5 @@ func (o Object) GetObject() client.Object {
 
 // on vintage WC, use extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return key.WCObservabilityBundleConfigMap
+	return "observability-bundle-logging-values"
 }

@@ -9,7 +9,6 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
@@ -72,7 +71,7 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 
 	// Scrape logs from kube-system and giantswarm namespaces only for WC clusters
 	extraRelabelConfigs := `[]`
-	if lc.GetObservabilityBundleConfigMap() == key.WCObservabilityBundleConfigMap {
+	if common.IsWorkloadCluster(lc) {
 		extraRelabelConfigs = `
 - source_labels: [__meta_kubernetes_namespace]
   action: keep
