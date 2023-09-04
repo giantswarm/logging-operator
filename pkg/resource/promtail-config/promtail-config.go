@@ -96,27 +96,27 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 			Config: promtailConfig{
 				Snippets: promtailConfigSnippets{
 					ExtraScrapeConfigs: `# this one includes also system logs reported by systemd-journald
-	- job_name: systemd_journal_run
-	journal:
-	path: /run/log/journal
-	max_age: 12h
-	json: true
-	relabel_configs:
-	- source_labels: ['__journal__systemd_unit']
-	target_label: 'systemd_unit'
-	- source_labels: ['__journal__hostname']
-	target_label: 'hostname'
-	- job_name: systemd_journal_var
-	journal:
-	path: /var/log/journal
-	max_age: 12h
-	json: true
-	relabel_configs:
-	- source_labels: ['__journal__systemd_unit']
-	target_label: 'systemd_unit'
-	- source_labels: ['__journal__hostname']
-	target_label: 'hostname'
-	`,
+- job_name: systemd_journal_run
+  journal:
+    path: /run/log/journal
+    max_age: 12h
+    json: true
+  relabel_configs:
+  - source_labels: ['__journal__systemd_unit']
+    target_label: 'systemd_unit'
+  - source_labels: ['__journal__hostname']
+    target_label: 'hostname'
+- job_name: systemd_journal_var
+  journal:
+    path: /var/log/journal
+    max_age: 12h
+    json: true
+  relabel_configs:
+  - source_labels: ['__journal__systemd_unit']
+    target_label: 'systemd_unit'
+  - source_labels: ['__journal__hostname']
+    target_label: 'hostname'
+`,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 				},
 			},
