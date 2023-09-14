@@ -23,6 +23,10 @@ func (o Object) AppConfigName(app string) string {
 	return app
 }
 
+func ObservabilityBundleConfigLabelName(config string) string {
+	return config
+}
+
 func (o Object) GetClusterName() string {
 	// return installation name for vintage MC
 	return o.Options.InstallationName

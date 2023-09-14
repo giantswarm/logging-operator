@@ -25,7 +25,7 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 		Namespace: lc.GetAppsNamespace(),
 		Labels: map[string]string{
 			// This label is used by cluster-operator to find extraconfig. This only works on vintage WCs
-			"app.kubernetes.io/name": "observability-bundle",
+			"app.kubernetes.io/name": lc.ObservabilityBundleConfigLabelName("observability-bundle"),
 		},
 	}
 

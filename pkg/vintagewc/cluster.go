@@ -32,6 +32,10 @@ func (o Object) AppConfigName(app string) string {
 	}
 }
 
+func ObservabilityBundleConfigLabelName(config string) string {
+	return config
+}
+
 func (o Object) GetClusterName() string {
 	return o.Object.GetName()
 }
