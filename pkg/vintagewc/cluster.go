@@ -32,7 +32,7 @@ func (o Object) AppConfigName(app string) string {
 	}
 }
 
-func ObservabilityBundleConfigLabelName(config string) string {
+func (o Object) ObservabilityBundleConfigLabelName(config string) string {
 	return config
 }
 
