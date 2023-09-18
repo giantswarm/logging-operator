@@ -31,6 +31,12 @@ The operator is built around a central reconciler, that calls multiple sub-recon
 * Promtail toggle enables/disables promtail deployment on WCs
 * Promtail wiring ensures promtail-app reads configs from previous steps
 
+## Gathering logs from WCs
+
+When the need to gather logs from the WCs appears, the logging-operator will deploy promtail on those so that one may see the logs from the MC's grafana. In order to achieve that, one has to label the cluster(s) one wants to gather logs from thanks to the following command :
+```
+kubectl label cluster -n <wc_namespace> <wc_name> giantswarm.io/logging=true
+```
 
 ## Credits
 
