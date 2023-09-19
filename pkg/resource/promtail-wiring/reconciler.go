@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 
@@ -42,16 +43,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Set user value configmap in the app.
-	if setUserConfig(&currentApp, lc) {
-		logger.Info("promtailwiring updating")
-		// Update the app.
-		err := r.Client.Update(ctx, &currentApp)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+	if common.IsWorkloadCluster(lc) {
+		logger.Info("cluster-operator is updating promtailwiring")
 	} else {
-		logger.Info("promtailwiring up to date")
+		// Set user value configmap in the app.
+		if setUserConfig(&currentApp, lc) {
+			logger.Info("promtailwiring updating")
+			// Update the app.
+			err := r.Client.Update(ctx, &currentApp)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+		} else {
+			logger.Info("promtailwiring up to date")
+		}
 	}
 
 	return ctrl.Result{}, nil
