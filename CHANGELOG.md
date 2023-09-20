@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Added
+
+- Scrape logs from kube-system and giantswarm namespaces only for WC clusters.
+
 ## [0.0.4] - 2023-09-18
 
 ### Changed
