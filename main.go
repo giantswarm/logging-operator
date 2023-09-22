@@ -168,15 +168,14 @@ func main() {
 			os.Exit(1)
 		}
 
-		setupLog.Info("NOT creating Vintage WC reconciler - not supported yet!")
-		//		if err = (&controller.VintageWCReconciler{
-		//			Client:            mgr.GetClient(),
-		//			Scheme:            mgr.GetScheme(),
-		//			LoggingReconciler: loggingReconciler,
-		//		}).SetupWithManager(mgr); err != nil {
-		//			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
-		//			os.Exit(1)
-		//		}
+		if err = (&controller.VintageWCReconciler{
+			Client:            mgr.GetClient(),
+			Scheme:            mgr.GetScheme(),
+			LoggingReconciler: loggingReconciler,
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
+			os.Exit(1)
+		}
 
 	} else {
 		setupLog.Info("CAPI mode selected")

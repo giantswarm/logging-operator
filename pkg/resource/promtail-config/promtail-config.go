@@ -30,7 +30,8 @@ type promtail struct {
 }
 
 type promtailConfigSnippets struct {
-	ExtraScrapeConfigs string `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
+	ExtraScrapeConfigs  string               `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
+	ExtraRelabelConfigs []extraRelabelConfig `yaml:"extraRelabelConfigs" json:"extraRelabelConfigs"`
 }
 
 type promtailConfig struct {
@@ -52,6 +53,12 @@ type promtailExtraVolumeMount struct {
 	ReadOnly  bool   `yaml:"readOnly" json:"readOnly"`
 }
 
+type extraRelabelConfig struct {
+	SourceLabels []string `yaml:"source_labels" json:"source_labels"`
+	Action       string   `yaml:"action" json:"action"`
+	Regex        string   `yaml:"regex" json:"regex"`
+}
+
 // ConfigMeta returns metadata for the promtail-config
 func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
@@ -68,6 +75,19 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // the promtail extra-config
 func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 
+	// Scrape logs from kube-system and giantswarm namespaces only for WC clusters
+	var extraRelabelConfigs []extraRelabelConfig
+	if common.IsWorkloadCluster(lc) {
+		extraNamespaces := extraRelabelConfig{
+			SourceLabels: []string{
+				"__meta_kubernetes_namespace",
+			},
+			Action: "keep",
+			Regex:  "kube-system|giantswarm",
+		}
+		extraRelabelConfigs = append(extraRelabelConfigs, extraNamespaces)
+	}
+
 	values := values{
 		Promtail: promtail{
 			ExtraArgs: []string{
@@ -82,21 +102,22 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     max_age: 12h
     json: true
   relabel_configs:
-    - source_labels: ['__journal__systemd_unit']
-      target_label: 'systemd_unit'
-    - source_labels: ['__journal__hostname']
-      target_label: 'hostname'
+  - source_labels: ['__journal__systemd_unit']
+    target_label: 'systemd_unit'
+  - source_labels: ['__journal__hostname']
+    target_label: 'hostname'
 - job_name: systemd_journal_var
   journal:
     path: /var/log/journal
     max_age: 12h
     json: true
   relabel_configs:
-    - source_labels: ['__journal__systemd_unit']
-      target_label: 'systemd_unit'
-    - source_labels: ['__journal__hostname']
-      target_label: 'hostname'
+  - source_labels: ['__journal__systemd_unit']
+    target_label: 'systemd_unit'
+  - source_labels: ['__journal__hostname']
+    target_label: 'hostname'
 `,
+					ExtraRelabelConfigs: extraRelabelConfigs,
 				},
 			},
 			ExtraVolumes: []promtailExtraVolume{
