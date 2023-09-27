@@ -17,8 +17,7 @@ import (
 )
 
 var (
-	k8sClient  client.Client
-	baseDomain string
+	k8sClient client.Client
 
 	namespace    string
 	namespaceObj *corev1.Namespace

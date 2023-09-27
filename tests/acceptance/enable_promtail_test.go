@@ -2,7 +2,6 @@ package acceptance_test
 
 import (
 	"context"
-	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -13,6 +12,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	gscluster "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
@@ -73,21 +73,24 @@ var _ = Describe("Enable Promtail", func() {
 				"whatever": "doesn't matter",
 			},
 		}
-
-		k8sClient.Create(ctx, &observabilityCm)
+		Expect(k8sClient.Create(ctx, &observabilityCm)).To(Succeed())
 
 		// Reconciler creation
-		mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-			Scheme:                 scheme.Scheme,
-			MetricsBindAddress:     ":8080",
-			Port:                   9443,
-			HealthProbeBindAddress: ":8081",
-			LeaderElection:         false,
-			LeaderElectionID:       "5c8bbafe.x-k8s.io",
-		})
-		if err != nil {
-			os.Exit(1)
-		}
+		var mgr manager.Manager
+		Eventually(func() error {
+			var err error
+			mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+				Scheme:                 scheme.Scheme,
+				MetricsBindAddress:     ":8080",
+				Port:                   9443,
+				HealthProbeBindAddress: ":8081",
+				LeaderElection:         false,
+				LeaderElectionID:       "5c8bbafe.x-k8s.io",
+			})
+			return err
+		}).Should(Succeed())
+
+		Expect(mgr).ToNot(BeEmpty())
 
 		promtailReconciler := promtailtoggle.Reconciler{
 			Client: mgr.GetClient(),
