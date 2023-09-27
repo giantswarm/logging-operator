@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/giantswarm/logging-operator/tests"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -13,6 +12,8 @@ import (
 	gscluster "sigs.k8s.io/cluster-api/api/v1beta1"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/logging-operator/tests"
 )
 
 var (
@@ -23,11 +24,13 @@ var (
 	namespaceObj *corev1.Namespace
 )
 
+// Test suite definition
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Acceptance Suite")
 }
 
+// Set basic config before running the test suite
 var _ = BeforeSuite(func() {
 	tests.GetEnvOrSkip("KUBECONFIG")
 
@@ -41,6 +44,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 })
 
+// Set variables before each tests of the suite
 var _ = BeforeEach(func() {
 	namespace = uuid.New().String()
 	namespaceObj = &corev1.Namespace{}
@@ -48,6 +52,7 @@ var _ = BeforeEach(func() {
 	Expect(k8sClient.Create(context.Background(), namespaceObj)).To(Succeed())
 })
 
+// Cleanup after each tests of the suite
 var _ = AfterEach(func() {
 	Expect(k8sClient.Delete(context.Background(), namespaceObj)).To(Succeed())
 })
