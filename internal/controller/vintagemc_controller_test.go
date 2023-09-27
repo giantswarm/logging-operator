@@ -1,4 +1,4 @@
-package acceptance_test
+package controller_test
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 	"github.com/giantswarm/logging-operator/tests"
 )
 
-var _ = Describe("Enable Promtail", func() {
+var _ = Describe("Vintage MC Reconciler", func() {
 	var (
 		ctx context.Context
 

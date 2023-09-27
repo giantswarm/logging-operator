@@ -1,4 +1,4 @@
-package acceptance_test
+package controller_test
 
 import (
 	"context"
@@ -26,7 +26,7 @@ var (
 // Test suite definition
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Acceptance Suite")
+	RunSpecs(t, "Controller Suite")
 }
 
 // Set basic config before running the test suite
