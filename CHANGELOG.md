@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.5] - 2023-09-20
+### Fixed
 
+- Ensure we do not delete observability-bundle user configs for workload clusters.
+
+## [0.0.5] - 2023-09-20
 
 ### Added
 
