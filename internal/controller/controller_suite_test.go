@@ -48,7 +48,7 @@ var _ = BeforeSuite(func() {
 	logf.SetLogger(logger)
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
-	tests.GetEnvOrSkip("KUBECONFIG")
+	tests.GetEnvOrSkip("KUBEBUILDER_ASSETS")
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
