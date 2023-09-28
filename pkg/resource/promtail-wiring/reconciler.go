@@ -32,20 +32,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring create")
 
-	// Get observability bundle app metadata.
-	appMeta := ObservabilityBundleAppMeta(lc)
-
-	// Retrieve the app.
-	logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
-	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	if common.IsWorkloadCluster(lc) {
 		logger.Info("cluster-operator is updating promtailwiring")
 	} else {
+		// Get observability bundle app metadata.
+		appMeta := ObservabilityBundleAppMeta(lc)
+
+		// Retrieve the app.
+		logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
+		var currentApp appv1.App
+		err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+
 		// Set user value configmap in the app.
 		if setUserConfig(&currentApp, lc) {
 			logger.Info("promtailwiring updating")
@@ -68,32 +68,35 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring delete")
 
-	// Get observability bundle app metadata.
-	appMeta := ObservabilityBundleAppMeta(lc)
+	if common.IsWorkloadCluster(lc) {
+		logger.Info("cluster-operator is updating promtailwiring")
+	} else {
+		// Get observability bundle app metadata.
+		appMeta := ObservabilityBundleAppMeta(lc)
 
-	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("promtailwiring - app not found")
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// Unset user value configmap in the app.
-	if unsetUserConfig(&currentApp, lc) {
-		logger.Info("promtailwiring updating")
-		// Update the app.
-		err = r.Client.Update(ctx, &currentApp)
+		var currentApp appv1.App
+		err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 		if err != nil {
+			// Handle case where the app is not found.
+			if apimachineryerrors.IsNotFound(err) {
+				logger.Info("promtailwiring - app not found")
+				return ctrl.Result{}, nil
+			}
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-	} else {
-		logger.Info("promtailwiring up to date")
-	}
 
+		// Unset user value configmap in the app.
+		if unsetUserConfig(&currentApp, lc) {
+			logger.Info("promtailwiring updating")
+			// Update the app.
+			err = r.Client.Update(ctx, &currentApp)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+		} else {
+			logger.Info("promtailwiring up to date")
+		}
+	}
 	return ctrl.Result{}, nil
 }
 
