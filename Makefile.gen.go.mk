@@ -102,6 +102,11 @@ nancy: ## Runs nancy (requires v1.0.37 or newer).
 	@echo "====> $@"
 	CGO_ENABLED=0 go list -json -m all | nancy sleuth --skip-update-check --quiet --exclude-vulnerability-file ./.nancy-ignore --additional-exclude-vulnerability-files ./.nancy-ignore.generated
 
+ENVTEST = $(shell pwd)/bin/setup-envtest
+.PHONY: envtest
+envtest: ## Download envtest-setup locally if necessary.
+	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+
 .PHONY: test
 test: ## Runs go test with default values.
 	@echo "====> $@"
@@ -112,3 +117,17 @@ build-docker: build-linux ## Builds docker image to registry.
 	@echo "====> $@"
 	cp -a $(APPLICATION)-linux $(APPLICATION)
 	docker build -t ${APPLICATION}:${VERSION} .
+
+# go-get-tool will 'go get' any package $2 and install it to $1.
+PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+define go-get-tool
+@[ -f $(1) ] || { \
+set -e ;\
+TMP_DIR=$$(mktemp -d) ;\
+cd $$TMP_DIR ;\
+go mod init tmp ;\
+echo "Downloading $(2)" ;\
+GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
+rm -rf $$TMP_DIR ;\
+}
+endef
