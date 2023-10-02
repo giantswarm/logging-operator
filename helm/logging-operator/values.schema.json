@@ -10,6 +10,19 @@
                 }
             }
         },
+        "global": {
+            "type": "object",
+            "properties": {
+                "podSecurityStandards": {
+                    "type": "object",
+                    "properties": {
+                        "enforced": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "image": {
             "type": "object",
             "properties": {
@@ -18,6 +31,20 @@
                 },
                 "tag": {
                     "type": "string"
+                }
+            }
+        },
+        "loggingOperator": {
+            "type": "object",
+            "properties": {
+                "installationName": {
+                    "type": "string"
+                },
+                "loggingEnabled": {
+                    "type": "boolean"
+                },
+                "vintageMode": {
+                    "type": "boolean"
                 }
             }
         },
@@ -83,6 +110,9 @@
                                     }
                                 }
                             }
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean"
                         },
                         "seccompProfile": {
                             "type": "object",
