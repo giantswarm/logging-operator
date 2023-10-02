@@ -149,7 +149,6 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     labels:
       kind: audit-logs
       __path__: /var/log/apiserver/*.log
-      nodename: ${NODENAME}
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 				},
