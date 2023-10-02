@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Unit tests.
 
+## [0.0.6] - 2023-09-28
+
+### Fixed
+
+- Ensure we do not delete observability-bundle user configs for workload clusters.
+
 ## [0.0.5] - 2023-09-20
 
 ### Added
@@ -62,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/giantswarm/logging-operator/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/giantswarm/logging-operator/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/giantswarm/logging-operator/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/giantswarm/logging-operator/compare/v0.0.2...v0.0.3

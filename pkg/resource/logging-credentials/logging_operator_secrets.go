@@ -75,7 +75,6 @@ func GetLogin(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user str
 }
 
 func GetPass(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user string) (string, error) {
-
 	pass, ok := credentialsSecret.Data[fmt.Sprintf("%spassword", user)]
 
 	if !ok {
