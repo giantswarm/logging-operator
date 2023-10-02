@@ -24,9 +24,23 @@ type values struct {
 
 type promtail struct {
 	ExtraArgs         []string                   `yaml:"extraArgs" json:"extraArgs"`
+	ExtraEnv          []promtailExtraEnv         `yaml:"extraEnv" json:"extraEnv"`
 	Config            promtailConfig             `yaml:"config" json:"config"`
 	ExtraVolumes      []promtailExtraVolume      `yaml:"extraVolumes" json:"extraVolumes"`
 	ExtraVolumeMounts []promtailExtraVolumeMount `yaml:"extraVolumeMounts" json:"extraVolumeMounts"`
+}
+
+type promtailExtraEnvValuefrom struct {
+	FieldRef promtailExtraEnvFieldref `yaml:"fieldRef" json:"fieldRef"`
+}
+
+type promtailExtraEnvFieldref struct {
+	FieldPath string `yaml:"fieldPath" json:"fieldPath"`
+}
+
+type promtailExtraEnv struct {
+	Name      string                    `yaml:"name" json:"name"`
+	ValueFrom promtailExtraEnvValuefrom `yaml:"valueFrom" json:"valueFrom"`
 }
 
 type promtailConfigSnippets struct {
@@ -93,6 +107,16 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 			ExtraArgs: []string{
 				"-log-config-reverse-order",
 			},
+			ExtraEnv: []promtailExtraEnv{
+				{
+					Name: "HOSTNAME",
+					ValueFrom: promtailExtraEnvValuefrom{
+						FieldRef: promtailExtraEnvFieldref{
+							FieldPath: "spec.nodeName",
+						},
+					},
+				},
+			},
 			Config: promtailConfig{
 				Snippets: promtailConfigSnippets{
 					ExtraScrapeConfigs: `# this one includes also system logs reported by systemd-journald
@@ -116,6 +140,13 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
     target_label: 'hostname'
+- job_name: kubernetes-audit
+  static_configs:
+  - targets:
+	- localhost
+	labels:
+	  __path__: /var/log/apiserver/*.log
+	  hostname: $HOSTNAME
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 				},
