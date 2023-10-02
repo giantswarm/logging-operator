@@ -106,10 +106,12 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 		Promtail: promtail{
 			ExtraArgs: []string{
 				"-log-config-reverse-order",
+				"-client.external-labels=nodename=$(NODENAME)",
+				"-config.expand-env=true",
 			},
 			ExtraEnv: []promtailExtraEnv{
 				{
-					Name: "HOSTNAME",
+					Name: "NODENAME",
 					ValueFrom: promtailExtraEnvValuefrom{
 						FieldRef: promtailExtraEnvFieldref{
 							FieldPath: "spec.nodeName",
@@ -143,10 +145,11 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 - job_name: kubernetes-audit
   static_configs:
   - targets:
-	- localhost
-	labels:
-	  __path__: /var/log/apiserver/*.log
-	  hostname: $HOSTNAME
+    - localhost
+    labels:
+      kind: audit-logs
+      __path__: /var/log/apiserver/*.log
+      nodename: ${NODENAME}
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 				},
@@ -164,6 +167,12 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 						Path: "/var/log/journal/",
 					},
 				},
+				{
+					Name: "apiserver-logs",
+					HostPath: promtailExtraVolumeHostpath{
+						Path: "/var/log/apiserver/",
+					},
+				},
 			},
 			ExtraVolumeMounts: []promtailExtraVolumeMount{
 				{
@@ -174,6 +183,11 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 				{
 					Name:      "journal-var",
 					MountPath: "/var/log/journal/",
+					ReadOnly:  true,
+				},
+				{
+					Name:      "apiserver-logs",
+					MountPath: "/var/log/apiserver/",
 					ReadOnly:  true,
 				},
 			},
