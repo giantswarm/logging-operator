@@ -46,6 +46,7 @@ type promtailExtraEnv struct {
 type promtailConfigSnippets struct {
 	ExtraScrapeConfigs  string               `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
 	ExtraRelabelConfigs []extraRelabelConfig `yaml:"extraRelabelConfigs" json:"extraRelabelConfigs"`
+	AddScrapeJobLabel   bool                 `yaml:"addScrapeJobLabel" json:"addScrapeJobLabel"`
 }
 
 type promtailConfig struct {
@@ -126,31 +127,36 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     path: /run/log/journal
     max_age: 12h
     json: true
+    labels:
+      scrape_job: system-logs
   relabel_configs:
   - source_labels: ['__journal__systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
-    target_label: 'hostname'
+    target_label: 'node_name'
 - job_name: systemd_journal_var
   journal:
     path: /var/log/journal
     max_age: 12h
     json: true
+    labels:
+      scrape_job: system-logs
   relabel_configs:
   - source_labels: ['__journal__systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
-    target_label: 'hostname'
+    target_label: 'node_name'
 - job_name: kubernetes-audit
   static_configs:
   - targets:
     - localhost
     labels:
-      kind: audit-logs
+      scrape_job: audit-logs
       __path__: /var/log/apiserver/*.log
-      nodename: ${NODENAME:-unknown}
+      node_name: ${NODENAME:-unknown}
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
+					AddScrapeJobLabel:   true,
 				},
 			},
 			ExtraVolumes: []promtailExtraVolume{
