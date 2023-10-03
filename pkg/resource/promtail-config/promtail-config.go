@@ -106,7 +106,6 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 		Promtail: promtail{
 			ExtraArgs: []string{
 				"-log-config-reverse-order",
-				"-client.external-labels=nodename=$(NODENAME)",
 				"-config.expand-env=true",
 			},
 			ExtraEnv: []promtailExtraEnv{
@@ -149,6 +148,7 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     labels:
       kind: audit-logs
       __path__: /var/log/apiserver/*.log
+      nodename: ${NODENAME:-unknown}
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 				},
