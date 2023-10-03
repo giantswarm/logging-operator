@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Unit tests.
 
+### Changed
+
+- Only workload clusters release >= v19.1.0 can enable logging.
+
+## [0.0.7] - 2023-10-03
+
+### Added
+
+- Audit logs in promtail config.
+- Add condition for PSP installation in helm chart.
+
+### Changed
+
+- Logs labels updated to ease navigation.
+
 ## [0.0.6] - 2023-09-28
 
 ### Fixed
@@ -68,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.0.7...HEAD
+[0.0.7]: https://github.com/giantswarm/logging-operator/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/giantswarm/logging-operator/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/giantswarm/logging-operator/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/giantswarm/logging-operator/compare/v0.0.3...v0.0.4

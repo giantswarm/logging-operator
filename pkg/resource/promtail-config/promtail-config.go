@@ -24,14 +24,29 @@ type values struct {
 
 type promtail struct {
 	ExtraArgs         []string                   `yaml:"extraArgs" json:"extraArgs"`
+	ExtraEnv          []promtailExtraEnv         `yaml:"extraEnv" json:"extraEnv"`
 	Config            promtailConfig             `yaml:"config" json:"config"`
 	ExtraVolumes      []promtailExtraVolume      `yaml:"extraVolumes" json:"extraVolumes"`
 	ExtraVolumeMounts []promtailExtraVolumeMount `yaml:"extraVolumeMounts" json:"extraVolumeMounts"`
 }
 
+type promtailExtraEnvValuefrom struct {
+	FieldRef promtailExtraEnvFieldref `yaml:"fieldRef" json:"fieldRef"`
+}
+
+type promtailExtraEnvFieldref struct {
+	FieldPath string `yaml:"fieldPath" json:"fieldPath"`
+}
+
+type promtailExtraEnv struct {
+	Name      string                    `yaml:"name" json:"name"`
+	ValueFrom promtailExtraEnvValuefrom `yaml:"valueFrom" json:"valueFrom"`
+}
+
 type promtailConfigSnippets struct {
 	ExtraScrapeConfigs  string               `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
 	ExtraRelabelConfigs []extraRelabelConfig `yaml:"extraRelabelConfigs" json:"extraRelabelConfigs"`
+	AddScrapeJobLabel   bool                 `yaml:"addScrapeJobLabel" json:"addScrapeJobLabel"`
 }
 
 type promtailConfig struct {
@@ -92,6 +107,17 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 		Promtail: promtail{
 			ExtraArgs: []string{
 				"-log-config-reverse-order",
+				"-config.expand-env=true",
+			},
+			ExtraEnv: []promtailExtraEnv{
+				{
+					Name: "NODENAME",
+					ValueFrom: promtailExtraEnvValuefrom{
+						FieldRef: promtailExtraEnvFieldref{
+							FieldPath: "spec.nodeName",
+						},
+					},
+				},
 			},
 			Config: promtailConfig{
 				Snippets: promtailConfigSnippets{
@@ -101,23 +127,36 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     path: /run/log/journal
     max_age: 12h
     json: true
+    labels:
+      scrape_job: system-logs
   relabel_configs:
   - source_labels: ['__journal__systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
-    target_label: 'hostname'
+    target_label: 'node_name'
 - job_name: systemd_journal_var
   journal:
     path: /var/log/journal
     max_age: 12h
     json: true
+    labels:
+      scrape_job: system-logs
   relabel_configs:
   - source_labels: ['__journal__systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
-    target_label: 'hostname'
+    target_label: 'node_name'
+- job_name: kubernetes-audit
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      scrape_job: audit-logs
+      __path__: /var/log/apiserver/*.log
+      node_name: ${NODENAME:-unknown}
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
+					AddScrapeJobLabel:   true,
 				},
 			},
 			ExtraVolumes: []promtailExtraVolume{
@@ -133,6 +172,12 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 						Path: "/var/log/journal/",
 					},
 				},
+				{
+					Name: "apiserver-logs",
+					HostPath: promtailExtraVolumeHostpath{
+						Path: "/var/log/apiserver/",
+					},
+				},
 			},
 			ExtraVolumeMounts: []promtailExtraVolumeMount{
 				{
@@ -143,6 +188,11 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 				{
 					Name:      "journal-var",
 					MountPath: "/var/log/journal/",
+					ReadOnly:  true,
+				},
+				{
+					Name:      "apiserver-logs",
+					MountPath: "/var/log/apiserver/",
 					ReadOnly:  true,
 				},
 			},
