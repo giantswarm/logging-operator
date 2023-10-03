@@ -85,6 +85,8 @@ run: ## Runs go run main.go.
 clean: ## Cleans the binary.
 	@echo "====> $@"
 	rm -f $(APPLICATION)*
+	rm -rf ./bin/* && rm -R bin
+	rm -f ./*.out
 	go clean
 
 .PHONY: imports
@@ -102,15 +104,37 @@ nancy: ## Runs nancy (requires v1.0.37 or newer).
 	@echo "====> $@"
 	CGO_ENABLED=0 go list -json -m all | nancy sleuth --skip-update-check --quiet --exclude-vulnerability-file ./.nancy-ignore --additional-exclude-vulnerability-files ./.nancy-ignore.generated
 
+GINKGO = $(shell pwd)/bin/ginkgo
+.PHONY: ginkgo
+ginkgo: ## Download ginkgo locally if necessary.
+	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@latest)
+
+CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+.PHONY: controller-gen
+controller-gen: ## Download controller-gen locally if necessary.
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0)
+
+.PHONY: generate
+generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+	go generate ./...
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+.PHONY: fmt
+fmt: ## Run go fmt against code.
+	go fmt ./...
+
+.PHONY: vet
+vet: ## Run go vet against code.
+	go vet ./...
+
 ENVTEST = $(shell pwd)/bin/setup-envtest
 .PHONY: envtest
 envtest: ## Download envtest-setup locally if necessary.
 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
 
-.PHONY: test
-test: ## Runs go test with default values.
-	@echo "====> $@"
-	go test -ldflags "$(LDFLAGS)" -race ./...
+.PHONY: test-unit
+test-unit: ginkgo generate fmt vet envtest ## Run unit tests
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" $(GINKGO) -p --nodes 2 --skip-package=tests --cover --coverpkg=`go list ./... | grep -v fakes | tr '\n' ','` ./...
 
 .PHONY: build-docker
 build-docker: build-linux ## Builds docker image to registry.
