@@ -1,6 +1,9 @@
 package vintagewc
 
 import (
+	"fmt"
+
+	"golang.org/x/mod/semver"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
@@ -14,6 +17,14 @@ type Object struct {
 
 func (o Object) GetLoggingLabel() string {
 	labels := o.Object.GetLabels()
+
+	// Promtail only works starting with AWS version 19.1.0
+	clusterRelease := labels["release.giantswarm.io/version"]
+	// semver versions must be "vMAJOR[.MINOR[.PATCH[-PRERELEASE][+BUILD]]]"
+	clusterReleaseSemver := fmt.Sprintf("v%s", clusterRelease)
+	if semver.Compare(clusterReleaseSemver, "v19.1.0") == -1 {
+		return "false"
+	}
 
 	value := labels[key.LoggingLabel]
 
