@@ -83,11 +83,12 @@ func GetPass(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user stri
 	return string(pass), nil
 }
 
-// Update a LoggingCredentials secret if needed
-func UpdateLoggingCredentials(loggingCredentials *v1.Secret) bool {
+// AddLoggingCredentials - Add credentials to LoggingCredentials secret if needed
+func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) bool {
 
 	var secretUpdated bool = false
 
+	// Always check credentials for "readuser"
 	if _, ok := loggingCredentials.Data["readuser"]; !ok {
 		loggingCredentials.Data["readuser"] = []byte("read")
 		secretUpdated = true
@@ -100,18 +101,40 @@ func UpdateLoggingCredentials(loggingCredentials *v1.Secret) bool {
 		loggingCredentials.Data["readpassword"] = []byte(password)
 		secretUpdated = true
 	}
-	if _, ok := loggingCredentials.Data["writeuser"]; !ok {
-		loggingCredentials.Data["writeuser"] = []byte("write")
+
+	// Check credentials for [clustername]
+	clusterName := lc.GetClusterName()
+	if _, ok := loggingCredentials.Data[fmt.Sprintf("%suser", clusterName)]; !ok {
+		loggingCredentials.Data[fmt.Sprintf("%suser", clusterName)] = []byte(clusterName)
 		secretUpdated = true
 	}
-	if _, ok := loggingCredentials.Data["writepassword"]; !ok {
+	if _, ok := loggingCredentials.Data[fmt.Sprintf("%spassword", clusterName)]; !ok {
 		password, err := genPassword()
 		if err != nil {
 			return false
 		}
-		loggingCredentials.Data["writepassword"] = []byte(password)
+		loggingCredentials.Data[fmt.Sprintf("%spassword", clusterName)] = []byte(password)
 		secretUpdated = true
 	}
 
+	return secretUpdated
+}
+
+// RemoveLoggingCredentials - Remove credentials from LoggingCredentials secret
+func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) bool {
+	var secretUpdated bool = false
+
+	// Check credentials for [clustername]
+	clusterName := lc.GetClusterName()
+
+	if _, ok := loggingCredentials.Data[fmt.Sprintf("%suser", clusterName)]; ok {
+		delete(loggingCredentials.Data, fmt.Sprintf("%suser", clusterName))
+		secretUpdated = true
+	}
+
+	if _, ok := loggingCredentials.Data[fmt.Sprintf("%spassword", clusterName)]; ok {
+		delete(loggingCredentials.Data, fmt.Sprintf("%spassword", clusterName))
+		secretUpdated = true
+	}
 	return secretUpdated
 }
