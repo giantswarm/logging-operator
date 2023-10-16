@@ -126,14 +126,16 @@ func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1
 
 	// Check credentials for [clustername]
 	clusterName := lc.GetClusterName()
+	credsUsername := fmt.Sprintf("%suser", clusterName)
+	credsPassword := fmt.Sprintf("%spassword", clusterName)
 
-	if _, ok := loggingCredentials.Data[fmt.Sprintf("%suser", clusterName)]; ok {
-		delete(loggingCredentials.Data, fmt.Sprintf("%suser", clusterName))
+	if _, ok := loggingCredentials.Data[credsUsername]; ok {
+		delete(loggingCredentials.Data, credsUsername)
 		secretUpdated = true
 	}
 
-	if _, ok := loggingCredentials.Data[fmt.Sprintf("%spassword", clusterName)]; ok {
-		delete(loggingCredentials.Data, fmt.Sprintf("%spassword", clusterName))
+	if _, ok := loggingCredentials.Data[credsPassword]; ok {
+		delete(loggingCredentials.Data, credsPassword)
 		secretUpdated = true
 	}
 	return secretUpdated

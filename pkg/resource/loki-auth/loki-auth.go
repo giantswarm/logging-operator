@@ -24,6 +24,8 @@ const (
 	lokiauthSecretNamespace     = "loki"
 	lokiauthDeploymentName      = "loki-multi-tenant-proxy"
 	lokiauthDeploymentNamespace = "loki"
+	// DefaultReadOrgIDs - make sure to have at least 2 tenants, to prevent writing with this user
+	DefaultReadOrgIDs = "giantswarm|default"
 )
 
 type Values struct {
@@ -54,16 +56,10 @@ func listWriteUsers(credentialsSecret *v1.Secret) []string {
 	for myUser := range credentialsSecret.Data {
 
 		userTrimmed := strings.TrimSuffix(myUser, "user")
-		// bypass entries that are not a user
-		if userTrimmed == myUser {
-			continue
+		// bypass read user and entries that are not a user
+		if userTrimmed != myUser && userTrimmed != "read" {
+			usersList = append(usersList, userTrimmed)
 		}
-		// bypass read user
-		if userTrimmed == "read" {
-			continue
-		}
-
-		usersList = append(usersList, userTrimmed)
 	}
 
 	return usersList
@@ -78,8 +74,7 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 		Users: []user{},
 	}
 	// Prepare read user's orgid with default values
-	// make sure to have at least 2 tenants for read user, to prevent writing with this user
-	readOrgid := "giantswarm|default"
+	readOrgid := DefaultReadOrgIDs
 
 	// Loop on write users
 	for _, writeUser := range listWriteUsers(credentialsSecret) {
