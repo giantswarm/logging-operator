@@ -41,7 +41,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// update the secret's contents if needed
-	secretUpdated := UpdateLoggingCredentials(loggingCredentialsSecret)
+	secretUpdated := AddLoggingCredentials(lc, loggingCredentialsSecret)
 
 	// Check if metadata has been updated
 	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta(lc).Labels) {
@@ -71,9 +71,42 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 // ReconcileDelete ensures a secret is removed for the current cluster
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("loggingCredentials secret delete")
 
-	// Well, for the moment we don't have per-cluster creds, so we won't delete any.
+	logger.Info("loggingcredentials secret delete", "namespace", LoggingCredentialsSecretMeta(lc).Namespace, "name", LoggingCredentialsSecretMeta(lc).Name)
 
-	return ctrl.Result{}, nil
+	// Start with some empty secret
+	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)
+
+	// Retrieve existing secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace}, loggingCredentialsSecret)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// update the secret's contents if needed
+	secretUpdated := RemoveLoggingCredentials(lc, loggingCredentialsSecret)
+
+	// Check if metadata has been updated
+	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta(lc).Labels) {
+		logger.Info("loggingCredentials - metatada update required")
+		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta(lc)
+		secretUpdated = true
+	}
+
+	if !secretUpdated {
+		// If there were no changes, we're done here.
+		logger.Info("loggingCredentials - up to date")
+		return ctrl.Result{}, nil
+	}
+
+	// commit our changes
+	logger.Info("loggingCredentials - Updating secret")
+	err = r.Client.Update(ctx, loggingCredentialsSecret)
+	if apimachineryerrors.IsNotFound(err) {
+		logger.Info("loggingCredentials - Secret does not exist, creating it")
+		err = r.Client.Create(ctx, loggingCredentialsSecret)
+	}
+
+	// Will return Secret's update error if any
+	return ctrl.Result{}, errors.WithStack(err)
 }

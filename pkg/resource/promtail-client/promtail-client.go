@@ -74,12 +74,14 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // the Loki-multi-tenant-proxy auth config
 func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
 
-	writeUser, err := loggingcredentials.GetLogin(lc, credentialsSecret, "write")
+	clusterName := lc.GetClusterName()
+
+	writeUser, err := loggingcredentials.GetLogin(lc, credentialsSecret, clusterName)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
 
-	writePassword, err := loggingcredentials.GetPass(lc, credentialsSecret, "write")
+	writePassword, err := loggingcredentials.GetPass(lc, credentialsSecret, clusterName)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
@@ -92,7 +94,7 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 				Clients: []promtailConfigClient{
 					{
 						URL:      fmt.Sprintf("https://%s/loki/api/v1/push", lokiURL),
-						TenantID: "giantswarm",
+						TenantID: clusterName,
 						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,
 							Password: writePassword,
