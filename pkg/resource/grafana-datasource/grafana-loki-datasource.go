@@ -65,7 +65,7 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 
 	user := common.ReadUser
 
-	password, err := loggingcredentials.GetPass(lc, credentialsSecret, user)
+	password, err := loggingcredentials.GetPassword(lc, credentialsSecret, user)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}

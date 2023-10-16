@@ -22,7 +22,7 @@ const (
 	LoggingCredentialsNamespace = "monitoring"
 )
 
-type user struct {
+type userCredentials struct {
 	Password string `yaml:"password" json:"password"`
 }
 
@@ -69,8 +69,8 @@ func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secre
 	return &secret
 }
 
-func GetPass(lc loggedcluster.Interface, credentialsSecret *v1.Secret, username string) (string, error) {
-	var userYaml user
+func GetPassword(lc loggedcluster.Interface, credentialsSecret *v1.Secret, username string) (string, error) {
+	var userYaml userCredentials
 
 	userSecret, ok := credentialsSecret.Data[username]
 	if !ok {
@@ -94,7 +94,7 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 
 	// Always check credentials for "readuser"
 	if _, ok := loggingCredentials.Data[common.ReadUser]; !ok {
-		readUser := user{}
+		readUser := userCredentials{}
 
 		password, err := genPassword()
 		if err != nil {
@@ -115,7 +115,7 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 	// Check credentials for [clustername]
 	clusterName := lc.GetClusterName()
 	if _, ok := loggingCredentials.Data[clusterName]; !ok {
-		clusterUser := user{}
+		clusterUser := userCredentials{}
 
 		password, err := genPassword()
 		if err != nil {

@@ -79,7 +79,7 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	// Loop on write users
 	for _, writeUser := range listWriteUsers(credentialsSecret) {
 
-		writePassword, err := loggingcredentials.GetPass(lc, credentialsSecret, writeUser)
+		writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, writeUser)
 		if err != nil {
 			return v1.Secret{}, errors.WithStack(err)
 		}
@@ -99,7 +99,7 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	// Create read user
 	readUser := common.ReadUser
 
-	readPassword, err := loggingcredentials.GetPass(lc, credentialsSecret, readUser)
+	readPassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, readUser)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}

@@ -78,7 +78,7 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 
 	writeUser := clusterName
 
-	writePassword, err := loggingcredentials.GetPass(lc, credentialsSecret, clusterName)
+	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
