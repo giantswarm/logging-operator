@@ -63,12 +63,9 @@ func DatasourceSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // the Loki datasource for Grafana
 func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (v1.Secret, error) {
 
-	user, err := loggingcredentials.GetLogin(lc, credentialsSecret, "read")
-	if err != nil {
-		return v1.Secret{}, errors.WithStack(err)
-	}
+	user := common.ReadUser
 
-	password, err := loggingcredentials.GetPass(lc, credentialsSecret, "read")
+	password, err := loggingcredentials.GetPassword(lc, credentialsSecret, user)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}

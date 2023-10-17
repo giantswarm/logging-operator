@@ -41,7 +41,10 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// update the secret's contents if needed
-	secretUpdated := AddLoggingCredentials(lc, loggingCredentialsSecret)
+	secretUpdated, err := AddLoggingCredentials(lc, loggingCredentialsSecret)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
 
 	// Check if metadata has been updated
 	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta(lc).Labels) {

@@ -4,6 +4,9 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
+// ReadUser is the global user for reading logs
+const ReadUser = "read"
+
 func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 
 	// Logging should be enabled when all conditions are met:

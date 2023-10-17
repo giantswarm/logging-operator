@@ -54,11 +54,11 @@ func LokiAuthSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 func listWriteUsers(credentialsSecret *v1.Secret) []string {
 	var usersList []string
 	for myUser := range credentialsSecret.Data {
+		// bypass read user
+		// bypass old creds (xxxuser and xxxpassword)
 
-		userTrimmed := strings.TrimSuffix(myUser, "user")
-		// bypass read user and entries that are not a user
-		if userTrimmed != myUser && userTrimmed != "read" {
-			usersList = append(usersList, userTrimmed)
+		if !strings.HasSuffix(myUser, "user") && !strings.HasSuffix(myUser, "password") && myUser != common.ReadUser {
+			usersList = append(usersList, myUser)
 		}
 	}
 
@@ -79,7 +79,7 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	// Loop on write users
 	for _, writeUser := range listWriteUsers(credentialsSecret) {
 
-		writePassword, err := loggingcredentials.GetPass(lc, credentialsSecret, writeUser)
+		writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, writeUser)
 		if err != nil {
 			return v1.Secret{}, errors.WithStack(err)
 		}
@@ -97,12 +97,9 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	}
 
 	// Create read user
-	readUser, err := loggingcredentials.GetLogin(lc, credentialsSecret, "read")
-	if err != nil {
-		return v1.Secret{}, errors.WithStack(err)
-	}
+	readUser := common.ReadUser
 
-	readPassword, err := loggingcredentials.GetPass(lc, credentialsSecret, "read")
+	readPassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, readUser)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}

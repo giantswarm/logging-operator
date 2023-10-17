@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,6 +21,10 @@ const (
 	LoggingCredentialsName      = "logging-credentials"
 	LoggingCredentialsNamespace = "monitoring"
 )
+
+type userCredentials struct {
+	Password string `yaml:"password" json:"password"`
+}
 
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
 func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
@@ -64,60 +69,71 @@ func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secre
 	return &secret
 }
 
-func GetLogin(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user string) (string, error) {
+func GetPassword(lc loggedcluster.Interface, credentialsSecret *v1.Secret, username string) (string, error) {
+	var userYaml userCredentials
 
-	login, ok := credentialsSecret.Data[fmt.Sprintf("%suser", user)]
-
+	userSecret, ok := credentialsSecret.Data[username]
 	if !ok {
 		return "", errors.New("Not found")
 	}
-	return string(login), nil
-}
 
-func GetPass(lc loggedcluster.Interface, credentialsSecret *v1.Secret, user string) (string, error) {
-	pass, ok := credentialsSecret.Data[fmt.Sprintf("%spassword", user)]
-
-	if !ok {
-		return "", errors.New("Not found")
+	err := yaml.Unmarshal(userSecret, &userYaml)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("Invalid user %s", username))
 	}
-	return string(pass), nil
+
+	password := userYaml.Password
+
+	return string(password), nil
 }
 
 // AddLoggingCredentials - Add credentials to LoggingCredentials secret if needed
-func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) bool {
+func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) (bool, error) {
 
 	var secretUpdated bool = false
 
 	// Always check credentials for "readuser"
-	if _, ok := loggingCredentials.Data["readuser"]; !ok {
-		loggingCredentials.Data["readuser"] = []byte("read")
-		secretUpdated = true
-	}
-	if _, ok := loggingCredentials.Data["readpassword"]; !ok {
+	if _, ok := loggingCredentials.Data[common.ReadUser]; !ok {
+		readUser := userCredentials{}
+
 		password, err := genPassword()
 		if err != nil {
-			return false
+			return false, errors.New("Failed generating read password")
 		}
-		loggingCredentials.Data["readpassword"] = []byte(password)
+
+		readUser.Password = password
+
+		v, err := yaml.Marshal(readUser)
+		if err != nil {
+			return false, errors.New("Failed creating read user")
+		}
+
+		loggingCredentials.Data[common.ReadUser] = []byte(v)
 		secretUpdated = true
 	}
 
 	// Check credentials for [clustername]
 	clusterName := lc.GetClusterName()
-	if _, ok := loggingCredentials.Data[fmt.Sprintf("%suser", clusterName)]; !ok {
-		loggingCredentials.Data[fmt.Sprintf("%suser", clusterName)] = []byte(clusterName)
-		secretUpdated = true
-	}
-	if _, ok := loggingCredentials.Data[fmt.Sprintf("%spassword", clusterName)]; !ok {
+	if _, ok := loggingCredentials.Data[clusterName]; !ok {
+		clusterUser := userCredentials{}
+
 		password, err := genPassword()
 		if err != nil {
-			return false
+			return false, errors.New("Failed generating write password")
 		}
-		loggingCredentials.Data[fmt.Sprintf("%spassword", clusterName)] = []byte(password)
+
+		clusterUser.Password = password
+
+		v, err := yaml.Marshal(clusterUser)
+		if err != nil {
+			return false, errors.New("Failed creating write user")
+		}
+
+		loggingCredentials.Data[clusterName] = []byte(v)
 		secretUpdated = true
 	}
 
-	return secretUpdated
+	return secretUpdated, nil
 }
 
 // RemoveLoggingCredentials - Remove credentials from LoggingCredentials secret
@@ -126,17 +142,11 @@ func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1
 
 	// Check credentials for [clustername]
 	clusterName := lc.GetClusterName()
-	credsUsername := fmt.Sprintf("%suser", clusterName)
-	credsPassword := fmt.Sprintf("%spassword", clusterName)
 
-	if _, ok := loggingCredentials.Data[credsUsername]; ok {
-		delete(loggingCredentials.Data, credsUsername)
+	if _, ok := loggingCredentials.Data[clusterName]; ok {
+		delete(loggingCredentials.Data, clusterName)
 		secretUpdated = true
 	}
 
-	if _, ok := loggingCredentials.Data[credsPassword]; ok {
-		delete(loggingCredentials.Data, credsPassword)
-		secretUpdated = true
-	}
 	return secretUpdated
 }

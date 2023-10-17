@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only workload clusters release >= v19.1.0 can enable logging.
 - each cluster has a dedicated user
 - each cluster sends data as a different tenant
+- update logging-credentials secret format
 
 ## [0.0.7] - 2023-10-03
 
