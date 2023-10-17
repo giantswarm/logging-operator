@@ -38,7 +38,12 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 	values := Values{
 		Apps: map[string]app{
+			// Support observability-bundle < 1.0.0
 			"promtail-app": {
+				Enabled: true,
+			},
+			// Support observability-bundle >= 1.0.0
+			"promtail": {
 				Enabled: true,
 			},
 		},
