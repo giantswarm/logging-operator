@@ -11,7 +11,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,7 +35,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		logger.Info("cluster-operator is updating promtailwiring")
 	} else {
 		// Get observability bundle app metadata.
-		appMeta := ObservabilityBundleAppMeta(lc)
+		appMeta := common.ObservabilityBundleAppMeta(lc)
 
 		// Retrieve the app.
 		logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
@@ -72,7 +71,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 		logger.Info("cluster-operator is updating promtailwiring")
 	} else {
 		// Get observability bundle app metadata.
-		appMeta := ObservabilityBundleAppMeta(lc)
+		appMeta := common.ObservabilityBundleAppMeta(lc)
 
 		var currentApp appv1.App
 		err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
@@ -103,7 +102,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 // setUserConfig set the user value confimap in the app.
 // It returns true in case something was changed.
 func setUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
-	observabilityBundleConfigMapMeta := promtailtoggle.ObservabilityBundleConfigMapMeta(lc)
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(lc)
 	updated := app.Spec.UserConfig.ConfigMap.Name != observabilityBundleConfigMapMeta.GetName() || app.Spec.UserConfig.ConfigMap.Namespace != observabilityBundleConfigMapMeta.GetNamespace()
 
 	app.Spec.UserConfig.ConfigMap.Name = observabilityBundleConfigMapMeta.GetName()
@@ -115,7 +114,7 @@ func setUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
 // unsetUserConfig unset the user value confimap in the app.
 // It returns true in case something was changed.
 func unsetUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
-	observabilityBundleConfigMapMeta := promtailtoggle.ObservabilityBundleConfigMapMeta(lc)
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(lc)
 	updated := app.Spec.UserConfig.ConfigMap.Name == observabilityBundleConfigMapMeta.GetName() || app.Spec.UserConfig.ConfigMap.Namespace == observabilityBundleConfigMapMeta.GetNamespace()
 
 	app.Spec.UserConfig.ConfigMap.Name = ""

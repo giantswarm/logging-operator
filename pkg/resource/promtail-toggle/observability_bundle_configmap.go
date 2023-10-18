@@ -1,9 +1,9 @@
 package promtailtoggle
 
 import (
+	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -18,27 +18,17 @@ type app struct {
 	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
-// ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
-func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
-	metadata := metav1.ObjectMeta{
-		Name:      lc.AppConfigName(lc.GetObservabilityBundleConfigMap()),
-		Namespace: lc.GetAppsNamespace(),
-		Labels: map[string]string{
-			// This label is used by cluster-operator to find extraconfig. This only works on vintage WCs
-			"app.kubernetes.io/name": lc.ObservabilityBundleConfigLabelName("observability-bundle"),
-		},
-	}
-
-	common.AddCommonLabels(metadata.Labels)
-	return metadata
-}
-
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable promtail.
-func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface) (v1.ConfigMap, error) {
+func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
+	appName := "promtail"
+	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
+		appName = "promtail-app"
+	}
+
 	values := Values{
 		Apps: map[string]app{
-			"promtail-app": {
+			appName: {
 				Enabled: true,
 			},
 		},
@@ -50,7 +40,7 @@ func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface) (v1.Config
 	}
 
 	configmap := v1.ConfigMap{
-		ObjectMeta: ObservabilityBundleConfigMapMeta(lc),
+		ObjectMeta: common.ObservabilityBundleConfigMapMeta(lc),
 		Data: map[string]string{
 			"values": string(v),
 		},
