@@ -38,6 +38,6 @@ ciliumNetworkPolicy:
   enabled: true
 
 loggingOperator:
-  vintageMode: true
+  vintageMode: false
   installationName: unknown
   loggingEnabled: true
