@@ -4,12 +4,15 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/blang/semver"
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -24,13 +27,31 @@ type Reconciler struct {
 	Scheme *runtime.Scheme
 }
 
+func (r *Reconciler) GetObservabilityBundleVersion(ctx context.Context, lc loggedcluster.Interface) (semver.Version, error) {
+	// Get observability bundle app metadata.
+	appMeta := common.ObservabilityBundleAppMeta(lc)
+
+	// Retrieve the app.
+	var currentApp appv1.App
+	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		return semver.Version{}, errors.WithStack(err)
+	}
+	return semver.Parse(currentApp.Spec.Version)
+}
+
 // ReconcileCreate ensure Promtail is enabled in the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("promtailtoggle create")
 
+	observabilityBundleVersion, err := r.GetObservabilityBundleVersion(ctx, lc)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get desired configmap to enable promtail.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc, observabilityBundleVersion)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -71,8 +92,13 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("promtailtoggle delete")
 
+	observabilityBundleVersion, err := r.GetObservabilityBundleVersion(ctx, lc)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get expected configmap.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc, observabilityBundleVersion)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

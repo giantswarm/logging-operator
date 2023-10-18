@@ -43,6 +43,10 @@ func (o Object) AppConfigName(app string) string {
 	}
 }
 
+func (o Object) IsVintage() bool {
+	return true
+}
+
 func (o Object) ObservabilityBundleConfigLabelName(config string) string {
 	return config
 }

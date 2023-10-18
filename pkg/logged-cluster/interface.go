@@ -14,4 +14,5 @@ type Interface interface {
 	ObservabilityBundleConfigLabelName(config string) string
 	GetObject() client.Object
 	GetObservabilityBundleConfigMap() string
+	IsVintage() bool
 }

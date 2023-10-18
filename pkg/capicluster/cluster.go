@@ -38,6 +38,10 @@ func (o Object) GetClusterName() string {
 	return o.Object.GetName()
 }
 
+func (o Object) IsVintage() bool {
+	return false
+}
+
 func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
 }
@@ -52,5 +56,5 @@ func (o Object) GetObject() client.Object {
 
 // On capi clusters, use an extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return "observability-bundle-logging-values"
+	return fmt.Sprintf("%s-observability-bundle-logging-extraconfig", o.GetClusterName())
 }

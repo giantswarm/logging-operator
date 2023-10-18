@@ -15,6 +15,10 @@ func (o Object) GetLoggingLabel() string {
 	return "true"
 }
 
+func (o Object) IsVintage() bool {
+	return true
+}
+
 func (o Object) GetAppsNamespace() string {
 	return "giantswarm"
 }
