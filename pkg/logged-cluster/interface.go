@@ -8,7 +8,7 @@ import (
 // Interface contains the definition of functions that can differ between each type of cluster
 type Interface interface {
 	client.Object
-	GetLoggingLabel() string
+	IsLoggingEnabled() bool
 	GetAppsNamespace() string
 	GetEnableLoggingFlag() bool
 	GetClusterName() string

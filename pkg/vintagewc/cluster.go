@@ -2,6 +2,7 @@ package vintagewc
 
 import (
 	"fmt"
+	"strconv"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"golang.org/x/mod/semver"
@@ -16,20 +17,33 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) GetLoggingLabel() string {
+func (o Object) IsLoggingEnabled() bool {
 	labels := o.Object.GetLabels()
+
+	// If logging is disabled at the installation level, we return false
+	if !o.Options.EnableLoggingFlag {
+		return false
+	}
 
 	// Promtail only works starting with AWS version 19.1.0
 	clusterRelease := labels["release.giantswarm.io/version"]
 	// semver versions must be "vMAJOR[.MINOR[.PATCH[-PRERELEASE][+BUILD]]]"
 	clusterReleaseSemver := fmt.Sprintf("v%s", clusterRelease)
 	if semver.Compare(clusterReleaseSemver, "v19.1.0") == -1 {
-		return "false"
+		return false
 	}
 
-	value := labels[key.LoggingLabel]
+	loggingLabelValue, ok := labels[key.LoggingLabel]
+	if !ok {
+		// This is what we will have to change when we enable logging on all WCs >= 19.1.0
+		return false
+	}
 
-	return value
+	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
+	if err != nil {
+		return false
+	}
+	return loggingEnabled
 }
 
 func (o Object) GetAppsNamespace() string {

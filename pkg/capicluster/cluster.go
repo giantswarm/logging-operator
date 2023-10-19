@@ -3,6 +3,7 @@ package capicluster
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -17,12 +18,25 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) GetLoggingLabel() string {
+func (o Object) IsLoggingEnabled() bool {
 	labels := o.Object.GetLabels()
 
-	value := labels[key.LoggingLabel]
+	// If logging is disabled at the installation level, we return false
+	if !o.Options.EnableLoggingFlag {
+		return false
+	}
 
-	return value
+	loggingLabelValue, ok := labels[key.LoggingLabel]
+	if !ok {
+		// This is what we will have to change when we enable logging on all WCs
+		return false
+	}
+
+	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
+	if err != nil {
+		return false
+	}
+	return loggingEnabled
 }
 
 func (o Object) GetAppsNamespace() string {

@@ -13,8 +13,8 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) GetLoggingLabel() string {
-	return "true"
+func (o Object) IsLoggingEnabled() bool {
+	return o.Options.EnableLoggingFlag
 }
 
 func (o Object) GetAppsNamespace() string {
