@@ -3,6 +3,7 @@ package vintagewc
 import (
 	"fmt"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"golang.org/x/mod/semver"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -43,10 +44,6 @@ func (o Object) AppConfigName(app string) string {
 	}
 }
 
-func (o Object) IsVintage() bool {
-	return true
-}
-
 func (o Object) ObservabilityBundleConfigLabelName(config string) string {
 	return config
 }
@@ -70,4 +67,14 @@ func (o Object) GetObject() client.Object {
 // on vintage WC, use extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"
+}
+
+func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
+	// cluster-operator is taking care of the unwiring, nothing to do here
+	return currentApp.DeepCopy()
+}
+
+func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
+	// cluster-operator is taking care of the wiring, nothing to do here
+	return currentApp.DeepCopy()
 }

@@ -2,9 +2,12 @@ package capicluster
 
 import (
 	"fmt"
+	"reflect"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
@@ -38,10 +41,6 @@ func (o Object) GetClusterName() string {
 	return o.Object.GetName()
 }
 
-func (o Object) IsVintage() bool {
-	return false
-}
-
 func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
 }
@@ -57,4 +56,48 @@ func (o Object) GetObject() client.Object {
 // On capi clusters, use an extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"
+}
+
+func (o Object) getWiredExtraConfig() appv1.AppExtraConfig {
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)
+	return appv1.AppExtraConfig{
+		Kind:      "configMap",
+		Name:      observabilityBundleConfigMapMeta.GetName(),
+		Namespace: observabilityBundleConfigMapMeta.GetNamespace(),
+		Priority:  25,
+	}
+}
+
+// UnwirePromtail unsets the extraconfig confimap in a copy of the app
+func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
+	desiredApp := currentApp.DeepCopy()
+
+	wiredExtraConfig := o.getWiredExtraConfig()
+	for index, extraConfig := range currentApp.Spec.ExtraConfigs {
+		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
+			desiredApp.Spec.ExtraConfigs = append(currentApp.Spec.ExtraConfigs[:index], currentApp.Spec.ExtraConfigs[index+1:]...)
+		}
+	}
+
+	return desiredApp
+}
+
+// WirePromtail sets the extraconfig confimap in a copy of the app.
+func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
+	desiredApp := currentApp.DeepCopy()
+	wiredExtraConfig := o.getWiredExtraConfig()
+
+	// We check if the extra config already exists to know if we need to remove it.
+	var containsWiredExtraConfig bool = false
+	for _, extraConfig := range currentApp.Spec.ExtraConfigs {
+		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
+			containsWiredExtraConfig = true
+		}
+	}
+
+	if !containsWiredExtraConfig {
+		desiredApp.Spec.ExtraConfigs = append(desiredApp.Spec.ExtraConfigs, wiredExtraConfig)
+	}
+
+	return desiredApp
 }
