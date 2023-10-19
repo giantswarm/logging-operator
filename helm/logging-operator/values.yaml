@@ -38,6 +38,6 @@ networkPolicy:
   flavor: cilium
 
 loggingOperator:
-  vintageMode: false
+  vintageMode: true
   installationName: unknown
   loggingEnabled: true
