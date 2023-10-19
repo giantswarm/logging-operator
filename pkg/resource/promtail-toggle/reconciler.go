@@ -35,7 +35,7 @@ func (r *Reconciler) GetObservabilityBundleVersion(ctx context.Context, lc logge
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
-		return semver.Version{}, errors.WithStack(client.IgnoreNotFound(err))
+		return semver.Version{}, errors.WithStack(err)
 	}
 	return semver.Parse(currentApp.Spec.Version)
 }
@@ -94,7 +94,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	observabilityBundleVersion, err := r.GetObservabilityBundleVersion(ctx, lc)
 	if err != nil {
-		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get expected configmap.

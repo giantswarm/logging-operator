@@ -17,7 +17,7 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) IsLoggingEnabled() bool {
+func (o Object) HasLoggingEnabled() bool {
 	labels := o.Object.GetLabels()
 
 	// If logging is disabled at the installation level, we return false

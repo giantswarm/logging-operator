@@ -13,7 +13,7 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) IsLoggingEnabled() bool {
+func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
 }
 
