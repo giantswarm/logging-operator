@@ -34,8 +34,8 @@ resources:
     cpu: 100m
     memory: 500Mi
 
-ciliumNetworkPolicy:
-  enabled: true
+networkPolicy:
+  flavor: cilium
 
 loggingOperator:
   vintageMode: false

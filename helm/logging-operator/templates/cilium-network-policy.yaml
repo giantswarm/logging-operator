@@ -1,4 +1,4 @@
-{{ if .Values.ciliumNetworkPolicy.enabled }}
+{{ if eq .Values.networkPolicy.flavor "cilium" }}
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:
