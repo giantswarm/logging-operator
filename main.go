@@ -38,6 +38,7 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
@@ -138,6 +139,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	grafanaAgentConfig := grafanaagentconfig.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
@@ -153,6 +158,7 @@ func main() {
 			&lokiAuth,
 			&promtailClient,
 			&promtailConfig,
+			&grafanaAgentConfig,
 		},
 	}
 
