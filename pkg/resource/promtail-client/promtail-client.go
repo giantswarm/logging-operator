@@ -154,6 +154,8 @@ func GetPromtailCredentials(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	}
 
 	var credentials = make(map[string]string)
+	println(promtailYaml.Config.Clients)
+	println(promtailYaml.Config.Clients[0].URL)
 	credentials["url"] = promtailYaml.Config.Clients[0].URL
 	credentials["tenantID"] = promtailYaml.Config.Clients[0].TenantID
 	credentials["username"] = promtailYaml.Config.Clients[0].BasicAuth.Username
