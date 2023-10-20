@@ -21,9 +21,9 @@ type app struct {
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable grafana-agent.
 func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
-	appName := "grafana-agent"
+	appName := "grafanaAgent"
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
-		appName = "grafana-agent"
+		appName = "grafanaAgent"
 	}
 
 	values := Values{
