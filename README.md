@@ -4,10 +4,10 @@
 
 This operator is in charge of handling the setup and configuration of the logging stack at Giant Swarm.
 
-It reconciles `cluster.cluster.x-k8s.io` objects and makes sure each `Cluster` is provided with:
+It reconciles `cluster.cluster.x-k8s.io` objects and makes sure each `Cluster` is provided with logging agents:
 - [`promtail`](https://github.com/giantswarm/promtail-app) instance
 - [`grafana-agent`](https://github.com/giantswarm/grafana-agent-app) instance
-- and the necessary configuration to ship logs into [`loki`](https://github.com/giantswarm/loki-app).
+and the necessary configuration to ship logs into [`loki`](https://github.com/giantswarm/loki-app).
 
 ## Getting started
 
@@ -33,7 +33,7 @@ The operator is built around a central reconciler, that calls multiple sub-recon
 * Promtail config setups some Promtail settings (like which logs to collect)
 * Promtail wiring ensures promtail-app reads configs from previous steps
 * Grafana-Agent config setups some Grafana-Agent settings (like credentials to access loki write, configuration to scrape Kubernetes Events)
-* Apps toggle enables/disables promtail and grafana-agent deployment on WCs
+* Apps toggle enables/disables logging agents deployment on WCs
 
 ## Gathering logs from WCs
 

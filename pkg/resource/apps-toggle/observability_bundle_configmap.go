@@ -19,10 +19,9 @@ type app struct {
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
-// the observabilitybundle application to enable Promtail/GrafanaAgent.
+// the observabilitybundle application to enable logging agent apps.
 func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
 	promtailName := "promtail"
-	grafanaAgentName := "grafanaAgent"
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
 		promtailName = "promtail-app"
 	}
@@ -32,7 +31,7 @@ func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabil
 			promtailName: {
 				Enabled: true,
 			},
-			grafanaAgentName: {
+			"grafanaAgent": {
 				Enabled: true,
 			},
 		},

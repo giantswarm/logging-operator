@@ -21,7 +21,7 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// Promtail and GrafanaAgent toggle: enable or disable Promtail/GrafanaAgent in a given Cluster.
+// Logging agents toggle: enable or disable logging agents in a given Cluster.
 type Reconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -40,31 +40,31 @@ func (r *Reconciler) GetObservabilityBundleVersion(ctx context.Context, lc logge
 	return semver.Parse(currentApp.Spec.Version)
 }
 
-// ReconcileCreate ensure Promtail/GrafanaAgent is enabled in the given cluster.
+// ReconcileCreate ensure logging agents are enabled in the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Promtail and GrafanaAgent toggle create")
+	logger.Info("Logging agents toggle create")
 
 	observabilityBundleVersion, err := r.GetObservabilityBundleVersion(ctx, lc)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Get desired configmap to enable Promtail/GrafanaAgent.
+	// Get desired configmap to enable logging agents.
 	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc, observabilityBundleVersion)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Check if configmap is already installed.
-	logger.Info("Promtail and GrafanaAgent toggle checking", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
+	logger.Info("Logging agents toggle checking", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
 	var currentConfigMap v1.ConfigMap
 	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredConfigMap.GetName(), Namespace: desiredConfigMap.GetNamespace()}, &currentConfigMap)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Install configmap.
 			// Configmap was not found.
-			logger.Info("Promtail and GrafanaAgent toggle not found, creating")
+			logger.Info("Logging agents toggle not found, creating")
 			err = r.Client.Create(ctx, &desiredConfigMap)
 		}
 		if err != nil {
@@ -73,7 +73,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	if needUpdate(currentConfigMap, desiredConfigMap) {
-		logger.Info("Promtail and GrafanaAgent toggle updating")
+		logger.Info("Logging agents toggle updating")
 		// Update configmap
 		// Configmap is installed and need to be updated.
 		err := r.Client.Update(ctx, &desiredConfigMap)
@@ -81,16 +81,16 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		logger.Info("Promtail and GrafanaAgent toggle up to date")
+		logger.Info("Logging agents toggle up to date")
 	}
 
 	return ctrl.Result{}, nil
 }
 
-// ReconcileDelete ensure Promtail/GrafanaAgent is disabled for the given cluster.
+// ReconcileDelete ensure logging agents are disabled for the given cluster.
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Promtail and GrafanaAgent toggle delete")
+	logger.Info("Logging agents toggle delete")
 
 	observabilityBundleVersion, err := r.GetObservabilityBundleVersion(ctx, lc)
 	if err != nil {
@@ -104,18 +104,18 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Delete configmap.
-	logger.Info("Promtail and GrafanaAgent toggle deleting", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
+	logger.Info("Logging agents toggle deleting", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
 	err = r.Client.Delete(ctx, &desiredConfigMap)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means
 			// it was already deleted.
-			logger.Info("Promtail and GrafanaAgent toggle already deleted")
+			logger.Info("Logging agents toggle already deleted")
 		} else if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 	} else {
-		logger.Info("Promtail and GrafanaAgent toggle deleted")
+		logger.Info("Logging agents toggle deleted")
 	}
 
 	return ctrl.Result{}, nil
