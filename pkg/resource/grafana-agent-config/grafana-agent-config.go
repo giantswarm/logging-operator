@@ -69,51 +69,43 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 
 // GenerateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, promtailSecret *v1.Secret) (v1.ConfigMap, error) {
+func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, promtailCredentials map[string]string) (v1.ConfigMap, error) {
 
-	//var promtailYaml promtail
-	println(promtailSecret.Data["value"])
-	// 	err := yaml.Unmarshal(promtailSecret.Data["value"], &promtailYaml)
-	// 	if err != nil {
-	// 		return v1.ConfigMap{}, errors.New("Invalid promtail Secret content")
-	// 	}
+	values := values{
+		GrafanaAgent: grafanaAgent{
+			Agent: agent{
+				ConfigMap: configMap{
+					Content: `# grafana-agent river config
+logging {
+	level  = "info"
+	format = "logfmt"
+}
 
-	// 	values := values{
-	// 		GrafanaAgent: grafanaAgent{
-	// 			Agent: agent{
-	// 				ConfigMap: configMap{
-	// 					Content: `# grafana-agent river config
-	// logging {
-	//   level  = "info"
-	//   format = "logfmt"
-	// }
+loki.source.kubernetes_events "local" {
+	namespaces = ["kube-system", "giantswarm"]
+	forward_to = [loki.write.default.receiver]
+}
 
-	// loki.source.kubernetes_events "local" {
-	//   namespaces = ["kube-system", "giantswarm"]
-	//   forward_to = [loki.write.default.receiver]
-	// }
+loki.write "default" {
+	endpoint {
+	url = "` + promtailCredentials["url"] + `"
+	tenant_id = "` + promtailCredentials["tenantID"] + `"
+	basic_auth {
+		username = "` + promtailCredentials["username"] + `"
+		password = secret("` + promtailCredentials["password"] + `")
+	}
+	}
+	external_labels = {
+		installation = "` + promtailCredentials["installation"] + `",
+		cluster_id = "` + promtailCredentials["clusterID"] + `",
+	scrape_job = "kubernetes-events",
+	}
+}`,
+				},
+			},
+		},
+	}
 
-	// loki.write "default" {
-	//   endpoint {
-	//     url = "` + promtailYaml.Promtail.Config.Clients[0].URL + `"
-	//     tenant_id = "` + promtailYaml.Promtail.Config.Clients[0].TenantID + `"
-	//     basic_auth {
-	//       username = "` + promtailYaml.Promtail.Config.Clients[0].BasicAuth.Username + `"
-	//       password = secret("` + promtailYaml.Promtail.Config.Clients[0].BasicAuth.Password + `")
-	//     }
-	//   }
-	//   external_labels = {
-	//     cluster_id = "` + promtailYaml.Promtail.Config.Clients[0].ExternalLabels.ClusterID + `",
-	//     installation = "` + promtailYaml.Promtail.Config.Clients[0].ExternalLabels.Installation + `",
-	//     scrape_job = "kubernetes-events",
-	//   }
-	// }`,
-	// 				},
-	// 			},
-	// 		},
-	// 	}
-
-	values := values{}
 	v, err := yaml.Marshal(values)
 	if err != nil {
 		return v1.ConfigMap{}, errors.WithStack(err)

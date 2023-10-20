@@ -139,3 +139,26 @@ func readLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client 
 
 	return ingressURL, nil
 }
+
+func GetPromtailCredentials(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (map[string]string, error) {
+	var promtailYaml promtail
+
+	promtailSecret, ok := credentialsSecret.Data["values"]
+	if !ok {
+		return nil, errors.New("Promtail secret content not found")
+	}
+
+	err := yaml.Unmarshal(promtailSecret, &promtailYaml)
+	if err != nil {
+		return nil, errors.New("Invalid promtail secret content")
+	}
+
+	var credentials = make(map[string]string)
+	credentials["url"] = promtailYaml.Config.Clients[0].URL
+	credentials["tenantID"] = promtailYaml.Config.Clients[0].TenantID
+	credentials["username"] = promtailYaml.Config.Clients[0].BasicAuth.Username
+	credentials["installation"] = promtailYaml.Config.Clients[0].ExternalLabels.Installation
+	credentials["clusterID"] = promtailYaml.Config.Clients[0].ExternalLabels.ClusterID
+
+	return credentials, nil
+}

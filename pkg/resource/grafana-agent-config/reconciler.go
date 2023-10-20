@@ -29,15 +29,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("grafana-agent-config create")
 
 	// Retrieve promtail credentials
-	var promtailCredentials v1.Secret
+	var promtailSecret v1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: promtailclient.SecretMeta(lc).Name, Namespace: promtailclient.SecretMeta(lc).Namespace},
-		&promtailCredentials)
+		&promtailSecret)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	promtailCredentials, err := promtailclient.GetPromtailCredentials(lc, &promtailSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired config
-	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, &promtailCredentials)
+	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, promtailCredentials)
 	if err != nil {
 		logger.Info("grafana-agent-config - failed generating grafana-agent config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
