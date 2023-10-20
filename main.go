@@ -38,14 +38,13 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	appstoggle "github.com/giantswarm/logging-operator/pkg/resource/apps-toggle"
 	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
-	grafanaagenttoggle "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-toggle"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
 	promtailconfig "github.com/giantswarm/logging-operator/pkg/resource/promtail-config"
-	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
 )
@@ -110,7 +109,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	promtailReconciler := promtailtoggle.Reconciler{
+	appsToggle := appstoggle.Reconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
@@ -140,11 +139,6 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	grafanaAgentReconciler := grafanaagenttoggle.Reconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}
-
 	grafanaAgentConfig := grafanaagentconfig.Reconciler{
 		Client: mgr.GetClient(),
 	}
@@ -157,14 +151,13 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
-			&promtailReconciler,
+			&appsToggle,
 			&promtailWiring,
 			&loggingSecrets,
 			&grafanaDatasource,
 			&lokiAuth,
 			&promtailClient,
 			&promtailConfig,
-			&grafanaAgentReconciler,
 			&grafanaAgentConfig,
 		},
 	}
