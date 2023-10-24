@@ -17,35 +17,14 @@ const (
 	grafanaAgentConfigName = "grafana-agent-config"
 )
 
-// grafana-agent:
-//   image:
-//     # -- Grafana Agent image repository.
-//     repository: giantswarm/grafana-agent
-//   configReloader:
-//     image:
-//       repository: giantswarm/configmap-reload
-
-//   agent:
-//     # -- Mode to run Grafana Agent in. Can be "flow" or "static".
-//     mode: 'flow'
-//     configMap:
-//       # -- Create a new ConfigMap for the config file.
-//       create: true
-//       # -- Content to assign to the new ConfigMap.  This is passed into `tpl` allowing for templating from values.
-//       content: |
-//         logging {
-//           level  = "info"
-//           format = "logfmt"
-//         }
-
-///// Grafana-Agent values config structure
-
+// /// Grafana-Agent values config structure
 type values struct {
 	GrafanaAgent grafanaAgent `yaml:"grafana-agent" json:"grafana-agent"`
 }
 
 type grafanaAgent struct {
-	Agent agent `yaml:"agent" json:"agent"`
+	Agent      agent      `yaml:"agent" json:"agent"`
+	Controller controller `yaml:"controller" json:"controller"`
 }
 
 type agent struct {
@@ -54,6 +33,16 @@ type agent struct {
 
 type configMap struct {
 	Content string `yaml:"content" json:"content"`
+}
+
+type controller struct {
+	InitContainers []initContainers `yaml:"initContainers" json:"initContainers"`
+}
+
+type initContainers struct {
+	Name    string   `yaml:"name" json:"name"`
+	Image   string   `yaml:"image" json:"image"`
+	Command []string `yaml:"command" json:"command"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -105,7 +94,7 @@ loki.write "default" {
 	tenant_id = "` + clusterName + `"
 	basic_auth {
 		username = "` + writeUser + `"
-		password = "` + writePassword + `"
+		password_file = "/etc/agent/logging-write-secret"
 	}
 	}
 	external_labels = {
@@ -114,6 +103,19 @@ loki.write "default" {
 		scrape_job = "kubernetes-events",
 	}
 }`,
+				},
+			},
+			Controller: controller{
+				InitContainers: []initContainers{
+					{
+						Name:  "store-logging-write-password",
+						Image: "busybox:1.36",
+						Command: []string{
+							"- sh",
+							"- -c",
+							"- echo -n " + writePassword + " > /etc/agent/logging-write-secret",
+						},
+					},
 				},
 			},
 		},
