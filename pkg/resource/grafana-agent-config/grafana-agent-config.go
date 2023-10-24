@@ -79,7 +79,7 @@ func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, credentialsSecret *v
 		return v1.ConfigMap{}, errors.WithStack(err)
 	}
 
-	namespacesScraped := ""
+	namespacesScraped := "namespaces = []"
 	if common.IsWorkloadCluster(lc) {
 		namespacesScraped = "namespaces = [\"kube-system\", \"giantswarm\"]"
 	}
@@ -88,7 +88,7 @@ func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, credentialsSecret *v
 		GrafanaAgent: grafanaAgent{
 			Agent: agent{
 				ConfigMap: configMap{
-					Content: `# grafana-agent river config
+					Content: `
 logging {
 	level  = "info"
 	format = "logfmt"
@@ -101,11 +101,11 @@ loki.source.kubernetes_events "local" {
 
 loki.write "default" {
 	endpoint {
-	url = "` + lokiURL + `"
+	url = "` + fmt.Sprintf("https://%s/loki/api/v1/push", lokiURL) + `"
 	tenant_id = "` + clusterName + `"
 	basic_auth {
 		username = "` + writeUser + `"
-		password = secret("` + writePassword + `")
+		password = "` + writePassword + `"
 	}
 	}
 	external_labels = {
