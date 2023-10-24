@@ -1,15 +1,11 @@
 package promtailclient
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -122,45 +118,4 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 	}
 
 	return secret, nil
-}
-
-// Read Loki URL from ingress
-func readLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
-
-	var lokiIngress netv1.Ingress
-
-	err := client.Get(ctx, types.NamespacedName{Name: lokiIngressName, Namespace: lokiIngressNamespace}, &lokiIngress)
-	if err != nil {
-		return "", errors.WithStack(err)
-	}
-
-	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
-	ingressURL := lokiIngress.Spec.Rules[0].Host
-
-	return ingressURL, nil
-}
-
-func GetPromtailCredentials(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (map[string]string, error) {
-	var promtailYaml promtail
-
-	promtailSecret, ok := credentialsSecret.Data["values"]
-	if !ok {
-		return nil, errors.New("Promtail secret content not found")
-	}
-
-	err := yaml.Unmarshal(promtailSecret, &promtailYaml)
-	if err != nil {
-		return nil, errors.New("Invalid promtail secret content")
-	}
-
-	var credentials = make(map[string]string)
-	println(promtailYaml)
-
-	credentials["url"] = promtailYaml.Config.Clients[0].URL
-	credentials["tenantID"] = promtailYaml.Config.Clients[0].TenantID
-	credentials["username"] = promtailYaml.Config.Clients[0].BasicAuth.Username
-	credentials["installation"] = promtailYaml.Config.Clients[0].ExternalLabels.Installation
-	credentials["clusterID"] = promtailYaml.Config.Clients[0].ExternalLabels.ClusterID
-
-	return credentials, nil
 }

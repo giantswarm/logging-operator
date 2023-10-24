@@ -38,9 +38,9 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
-	appstoggle "github.com/giantswarm/logging-operator/pkg/resource/apps-toggle"
 	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
+	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
@@ -109,7 +109,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	appsToggle := appstoggle.Reconciler{
+	loggingAgentsToggle := loggingagentstoggle.Reconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
@@ -151,7 +151,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
-			&appsToggle,
+			&loggingAgentsToggle,
 			&promtailWiring,
 			&loggingSecrets,
 			&grafanaDatasource,

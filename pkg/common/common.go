@@ -1,11 +1,23 @@
 package common
 
 import (
+	"context"
+
+	"github.com/pkg/errors"
+	netv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
-// ReadUser is the global user for reading logs
-const ReadUser = "read"
+const (
+	// ReadUser is the global user for reading logs
+	ReadUser = "read"
+	// Loki Ingress
+	lokiIngressNamespace = "loki"
+	lokiIngressName      = "loki-gateway"
+)
 
 func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 
@@ -23,4 +35,20 @@ func AddCommonLabels(labels map[string]string) {
 
 func IsWorkloadCluster(lc loggedcluster.Interface) bool {
 	return lc.GetInstallationName() != lc.GetClusterName()
+}
+
+// Read Loki URL from ingress
+func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
+
+	var lokiIngress netv1.Ingress
+
+	err := client.Get(ctx, types.NamespacedName{Name: lokiIngressName, Namespace: lokiIngressNamespace}, &lokiIngress)
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
+	ingressURL := lokiIngress.Spec.Rules[0].Host
+
+	return ingressURL, nil
 }

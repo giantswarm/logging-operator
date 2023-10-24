@@ -9,6 +9,7 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 
@@ -37,7 +38,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Retrieve Loki ingress name
-	lokiURL, err := readLokiIngressURL(ctx, lc, r.Client)
+	lokiURL, err := common.ReadLokiIngressURL(ctx, lc, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

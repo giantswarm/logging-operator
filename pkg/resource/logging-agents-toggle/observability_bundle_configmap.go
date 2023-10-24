@@ -1,4 +1,4 @@
-package appstoggle
+package loggingagentstoggle
 
 import (
 	"github.com/blang/semver"

@@ -9,8 +9,9 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,21 +29,22 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-config create")
 
-	// Retrieve promtail credentials
-	var promtailSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: promtailclient.SecretMeta(lc).Name, Namespace: promtailclient.SecretMeta(lc).Namespace},
-		&promtailSecret)
+	// Retrieve secret containing credentials
+	var loggingCredentialsSecret v1.Secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
+		&loggingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	promtailCredentials, err := promtailclient.GetPromtailCredentials(lc, &promtailSecret)
+	// Retrieve Loki ingress name
+	lokiURL, err := common.ReadLokiIngressURL(ctx, lc, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired config
-	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, promtailCredentials)
+	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, &loggingCredentialsSecret, lokiURL)
 	if err != nil {
 		logger.Info("grafana-agent-config - failed generating grafana-agent config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

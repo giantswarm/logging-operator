@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
 const (
@@ -69,7 +70,19 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 
 // GenerateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, promtailCredentials map[string]string) (v1.ConfigMap, error) {
+func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.ConfigMap, error) {
+
+	clusterName := lc.GetClusterName()
+	writeUser := clusterName
+	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
+	if err != nil {
+		return v1.ConfigMap{}, errors.WithStack(err)
+	}
+
+	namespacesScraped := ""
+	if common.IsWorkloadCluster(lc) {
+		namespacesScraped = "namespaces = [\"kube-system\", \"giantswarm\"]"
+	}
 
 	values := values{
 		GrafanaAgent: grafanaAgent{
@@ -82,23 +95,23 @@ logging {
 }
 
 loki.source.kubernetes_events "local" {
-	namespaces = ["kube-system", "giantswarm"]
+	"` + namespacesScraped + `"
 	forward_to = [loki.write.default.receiver]
 }
 
 loki.write "default" {
 	endpoint {
-	url = "` + promtailCredentials["url"] + `"
-	tenant_id = "` + promtailCredentials["tenantID"] + `"
+	url = "` + lokiURL + `"
+	tenant_id = "` + clusterName + `"
 	basic_auth {
-		username = "` + promtailCredentials["username"] + `"
-		password = secret("` + promtailCredentials["password"] + `")
+		username = "` + writeUser + `"
+		password = secret("` + writePassword + `")
 	}
 	}
 	external_labels = {
-		installation = "` + promtailCredentials["installation"] + `",
-		cluster_id = "` + promtailCredentials["clusterID"] + `",
-	scrape_job = "kubernetes-events",
+		installation = "` + lc.GetInstallationName() + `",
+		cluster_id = "` + clusterName + `",
+		scrape_job = "kubernetes-events",
 	}
 }`,
 				},
