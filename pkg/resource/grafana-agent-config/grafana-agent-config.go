@@ -68,9 +68,9 @@ func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, credentialsSecret *v
 		return v1.ConfigMap{}, errors.WithStack(err)
 	}
 
-	namespacesScraped := "namespaces = []"
+	namespacesScraped := "[]"
 	if common.IsWorkloadCluster(lc) {
-		namespacesScraped = "namespaces = [\"kube-system\", \"giantswarm\"]"
+		namespacesScraped = "[\"kube-system\", \"giantswarm\"]"
 	}
 
 	values := values{
@@ -84,7 +84,7 @@ logging {
 }
 
 loki.source.kubernetes_events "local" {
-	"` + namespacesScraped + `"
+	namespaces = ` + namespacesScraped + `
 	forward_to = [loki.write.default.receiver]
 }
 
