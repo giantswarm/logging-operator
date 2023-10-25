@@ -14,7 +14,6 @@ import (
 
 const (
 	grafanaAgentConfigName = "grafana-agent-config"
-	grafanaAgentSecretName = "grafana-agent-secret"
 )
 
 // /// Grafana-Agent values config structure
@@ -98,7 +97,7 @@ loki.write "default" {
 				EnvFrom: []envFrom{
 					{
 						SecretRef: secretRef{
-							Name: fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentSecretName),
+							Name: fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()),
 						},
 					},
 				},

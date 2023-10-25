@@ -27,7 +27,7 @@ type values struct {
 // SecretMeta returns metadata for the grafana-agent-secret
 func SecretMeta(lc loggedcluster.Interface, secretNamespace string) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentSecretName),
+		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()),
 		Namespace: secretNamespace,
 		Labels:    map[string]string{},
 	}

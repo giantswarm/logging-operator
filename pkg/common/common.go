@@ -17,7 +17,13 @@ const (
 	// Loki Ingress
 	lokiIngressNamespace = "loki"
 	lokiIngressName      = "loki-gateway"
+	// grafana-agent secret name
+	grafanaAgentResourceName = "grafana-agent-secret"
 )
+
+func GetGrafanaAgentResourceName() string {
+	return grafanaAgentResourceName
+}
 
 func IsLoggingEnabled(lc loggedcluster.Interface) bool {
 
