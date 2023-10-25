@@ -80,11 +80,11 @@ loki.source.kubernetes_events "local" {
 
 loki.write "default" {
 	endpoint {
-	url = env("LOGGING_URL")
-	tenant_id = env("LOGGING_TENANT_ID")
+	url = env("logging-url")
+	tenant_id = env("logging-tenant-id")
 	basic_auth {
-		username = env("LOGGING_USERNAME")
-		password = env("LOGGING_PASSWORD")
+		username = env("logging-username")
+		password = env("logging-password")
 	}
 	}
 	external_labels = {
