@@ -44,7 +44,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	desiredGrafanaAgentSecret, err := GenerateGrafanaAgentSecret(lc, &loggingCredentialsSecret, lokiURL, "kube-system") // TODO
+	desiredGrafanaAgentSecret, err := GenerateGrafanaAgentSecret(lc, &loggingCredentialsSecret, lokiURL)
 	if err != nil {
 		logger.Info("grafana-agent-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
