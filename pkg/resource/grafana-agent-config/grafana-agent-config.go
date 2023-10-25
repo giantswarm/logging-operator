@@ -10,11 +10,11 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
 const (
 	grafanaAgentConfigName = "grafana-agent-config"
+	grafanaAgentSecretName = "grafana-agent-secret"
 )
 
 // /// Grafana-Agent values config structure
@@ -23,26 +23,24 @@ type values struct {
 }
 
 type grafanaAgent struct {
-	Agent      agent      `yaml:"agent" json:"agent"`
-	Controller controller `yaml:"controller" json:"controller"`
+	Agent agent `yaml:"agent" json:"agent"`
 }
 
 type agent struct {
 	ConfigMap configMap `yaml:"configMap" json:"configMap"`
+	EnvFrom   []envFrom `yaml:"envFrom" json:"envFrom"`
 }
 
 type configMap struct {
 	Content string `yaml:"content" json:"content"`
 }
 
-type controller struct {
-	InitContainers []initContainers `yaml:"initContainers" json:"initContainers"`
+type envFrom struct {
+	SecretRef secretRef `yaml:"secretRef" json:"secretRef"`
 }
 
-type initContainers struct {
-	Name    string   `yaml:"name" json:"name"`
-	Image   string   `yaml:"image" json:"image"`
-	Command []string `yaml:"command" json:"command"`
+type secretRef struct {
+	Name string `yaml:"name" json:"name"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -60,13 +58,6 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // GenerateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
 func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.ConfigMap, error) {
-
-	clusterName := lc.GetClusterName()
-	writeUser := clusterName
-	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
-	if err != nil {
-		return v1.ConfigMap{}, errors.WithStack(err)
-	}
 
 	namespacesScraped := "[]"
 	if common.IsWorkloadCluster(lc) {
@@ -90,30 +81,24 @@ loki.source.kubernetes_events "local" {
 
 loki.write "default" {
 	endpoint {
-	url = "` + fmt.Sprintf("https://%s/loki/api/v1/push", lokiURL) + `"
-	tenant_id = "` + clusterName + `"
+	url = env("LOGGING_URL")
+	tenant_id = env("LOGGING_TENANT_ID")
 	basic_auth {
-		username = "` + writeUser + `"
-		password_file = "/etc/agent/logging-write-secret"
+		username = env("LOGGING_USERNAME")
+		password = env("LOGGING_PASSWORD")
 	}
 	}
 	external_labels = {
 		installation = "` + lc.GetInstallationName() + `",
-		cluster_id = "` + clusterName + `",
+		cluster_id = "` + lc.GetClusterName() + `",
 		scrape_job = "kubernetes-events",
 	}
 }`,
 				},
-			},
-			Controller: controller{
-				InitContainers: []initContainers{
+				EnvFrom: []envFrom{
 					{
-						Name:  "store-logging-write-password",
-						Image: "busybox:1.36",
-						Command: []string{
-							"- sh",
-							"- -c",
-							"- echo -n " + writePassword + " > /etc/agent/logging-write-secret",
+						SecretRef: secretRef{
+							Name: fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentSecretName),
 						},
 					},
 				},

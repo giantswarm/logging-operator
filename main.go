@@ -39,6 +39,7 @@ import (
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
+	grafanaagentsecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
@@ -139,6 +140,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	grafanaAgentSecret := grafanaagentsecret.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	grafanaAgentConfig := grafanaagentconfig.Reconciler{
 		Client: mgr.GetClient(),
 	}
@@ -158,6 +163,7 @@ func main() {
 			&lokiAuth,
 			&promtailClient,
 			&promtailConfig,
+			&grafanaAgentSecret,
 			&grafanaAgentConfig,
 		},
 	}
