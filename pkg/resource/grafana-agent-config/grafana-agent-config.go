@@ -56,7 +56,7 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 
 // GenerateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.ConfigMap, error) {
+func GenerateGrafanaAgentConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 
 	namespacesScraped := "[]"
 	if common.IsWorkloadCluster(lc) {

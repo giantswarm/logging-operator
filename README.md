@@ -34,7 +34,7 @@ The operator is built around a central reconciler, that calls multiple sub-recon
 * Promtail wiring ensures promtail-app reads configs from previous steps
 * grafana-agent config setups some grafana-agent settings like the `river` configuration to scrape Kubernetes Events
 * grafana-agent secret setups logging write credentials to access loki into the `river` configuration
-* Apps toggle enables/disables logging agents deployment on WCs
+* Logging agents toggle enables/disables logging agents deployment on WCs
 
 ## Gathering logs from WCs
 

@@ -9,9 +9,7 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,22 +27,8 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-config create")
 
-	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&loggingCredentialsSecret)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// Retrieve Loki ingress name
-	lokiURL, err := common.ReadLokiIngressURL(ctx, lc, r.Client)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	// Get desired config
-	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, &loggingCredentialsSecret, lokiURL)
+	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc)
 	if err != nil {
 		logger.Info("grafana-agent-config - failed generating grafana-agent config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

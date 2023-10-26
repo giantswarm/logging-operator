@@ -19,7 +19,7 @@ type app struct {
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
-// the observabilitybundle application to enable logging agent apps.
+// the observabilitybundle application to enable logging agents.
 func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
 	promtailName := "promtail"
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {

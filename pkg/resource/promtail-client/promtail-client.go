@@ -15,8 +15,6 @@ import (
 
 const (
 	promtailClientSecretName = "logging-secret"
-	lokiIngressNamespace     = "loki"
-	lokiIngressName          = "loki-gateway"
 )
 
 type values struct {
