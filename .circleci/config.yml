@@ -81,3 +81,17 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
+
+      - architect/push-to-app-collection:
+          context: "architect"
+          name: capa-app-collection
+          app_name: "logging-operator"
+          app_namespace: "logging-operator"
+          app_collection_repo: "capa-app-collection"
+          requires:
+            - push-logging-operator-to-app-catalog
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
