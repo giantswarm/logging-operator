@@ -2,6 +2,11 @@ global:
   podSecurityStandards:
     enforced: false
 
+aws:
+  accessKeyID: accesskey
+  secretAccessKey: secretkey
+  region: eu-central-1
+
 image:
   name: "giantswarm/logging-operator"
   tag: ""
@@ -39,5 +44,10 @@ networkPolicy:
 
 loggingOperator:
   vintageMode: true
-  installationName: unknown
   loggingEnabled: true
+
+managementCluster:
+  name: unknown
+  baseDomain: "g8s.gigantic.io"
+  provider: 
+    kind: aws

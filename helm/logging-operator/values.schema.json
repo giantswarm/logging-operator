@@ -2,11 +2,17 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-        "ciliumNetworkPolicy": {
+        "aws": {
             "type": "object",
             "properties": {
-                "enabled": {
-                    "type": "boolean"
+                "accessKeyID": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "secretAccessKey": {
+                    "type": "string"
                 }
             }
         },
@@ -37,14 +43,38 @@
         "loggingOperator": {
             "type": "object",
             "properties": {
-                "installationName": {
-                    "type": "string"
-                },
                 "loggingEnabled": {
                     "type": "boolean"
                 },
                 "vintageMode": {
                     "type": "boolean"
+                }
+            }
+        },
+        "managementCluster": {
+            "type": "object",
+            "properties": {
+                "baseDomain": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "flavor": {
+                    "type": "string"
                 }
             }
         },

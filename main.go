@@ -24,6 +24,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -31,8 +32,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -41,6 +41,7 @@ import (
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
+	lokirole "github.com/giantswarm/logging-operator/pkg/resource/loki-role"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
 	promtailconfig "github.com/giantswarm/logging-operator/pkg/resource/promtail-config"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
@@ -65,6 +66,9 @@ func main() {
 	var enableLeaderElection bool
 	var enableLogging bool
 	var installationName string
+	var installationRegion string
+	var installationProvider string
+	var installationBaseDomain string
 	var metricsAddr string
 	var probeAddr string
 	var vintageMode bool
@@ -73,6 +77,9 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
+	flag.StringVar(&installationProvider, "installation-provider", "aws", "Provider of the installation (used to setup cloud accounts)")
+	flag.StringVar(&installationRegion, "installation-region", "eu-central-1", "Region where the management cluster is located")
+	flag.StringVar(&installationBaseDomain, "installation-base-domain", "gigantic.io", "Management cluster base domain")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
@@ -85,9 +92,10 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
+		Scheme: scheme,
+		Metrics: server.Options{
+			BindAddress: metricsAddr,
+		},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "5c8bbafe.x-k8s.io",
@@ -106,6 +114,13 @@ func main() {
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
+	}
+
+	var lokiRole reconciler.Interface = nil
+	if installationProvider == "capa" {
+		lokiRole = &lokirole.Reconciler{
+			Client: mgr.GetClient(),
+		}
 	}
 
 	promtailReconciler := promtailtoggle.Reconciler{
@@ -140,20 +155,30 @@ func main() {
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
+	loggedcluster.O.InstallationProvider = installationProvider
+	loggedcluster.O.InstallationRegion = installationRegion
+	loggedcluster.O.InstallationBaseDomain = installationBaseDomain
+
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
+	reconcilers := []reconciler.Interface{
+		&promtailReconciler,
+		&promtailWiring,
+		&loggingSecrets,
+		&grafanaDatasource,
+		&lokiAuth,
+		&promtailClient,
+		&promtailConfig,
+	}
+
+	if lokiRole != nil {
+		reconcilers = append(reconcilers, lokiRole)
+	}
+
 	loggingReconciler := loggingreconciler.LoggingReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Reconcilers: []reconciler.Interface{
-			&promtailReconciler,
-			&promtailWiring,
-			&loggingSecrets,
-			&grafanaDatasource,
-			&lokiAuth,
-			&promtailClient,
-			&promtailConfig,
-		},
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		Reconcilers: reconcilers,
 	}
 
 	if vintageMode {

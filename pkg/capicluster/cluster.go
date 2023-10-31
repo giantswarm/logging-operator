@@ -28,8 +28,7 @@ func (o Object) HasLoggingEnabled() bool {
 
 	loggingLabelValue, ok := labels[key.LoggingLabel]
 	if !ok {
-		// This is what we will have to change when we enable logging on all WCs
-		return false
+		return true
 	}
 
 	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
@@ -57,6 +56,14 @@ func (o Object) GetClusterName() string {
 
 func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
+}
+
+func (o Object) GetRegion() string {
+	return o.Options.InstallationRegion
+}
+
+func (o Object) GetCloudDomain() string {
+	return o.Options.InstallationBaseDomain
 }
 
 func (o Object) GetEnableLoggingFlag() bool {
