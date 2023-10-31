@@ -1,0 +1,18 @@
+{{- if .Capabilities.APIVersions.Has "objectstorage.giantswarm.io/v1alpha1" -}}
+apiVersion: objectstorage.giantswarm.io/v1alpha1
+kind: Bucket
+metadata:
+  labels:
+    {{- include "labels.common" . | nindent 4 }}
+  name: {{ include "resource.default.name" . }}-loki-storage
+  namespace: {{ include "resource.default.namespace" . }}
+spec:
+  name: {{ .Values.loggingOperator.installationName }}-g8s-loki
+  expirationPolicy:
+    days: 100
+  tags:
+  - key: installation
+    value: {{ .Values.loggingOperator.installationName }}
+  - key: app
+    value: logging-operator
+{{- end -}}
