@@ -52,7 +52,6 @@ workflows:
             tags:
               only: /^v.*/
 
-
       - architect/push-to-app-catalog:
           context: "architect"
           executor: "app-build-suite"
@@ -72,7 +71,7 @@ workflows:
           context: "architect"
           name: aws-app-collection
           app_name: "logging-operator"
-          app_namespace: "logging-operator"
+          app_namespace: "monitoring"
           app_collection_repo: "aws-app-collection"
           requires:
             - push-logging-operator-to-app-catalog
@@ -86,7 +85,7 @@ workflows:
           context: "architect"
           name: capa-app-collection
           app_name: "logging-operator"
-          app_namespace: "logging-operator"
+          app_namespace: "monitoring"
           app_collection_repo: "capa-app-collection"
           requires:
             - push-logging-operator-to-app-catalog
