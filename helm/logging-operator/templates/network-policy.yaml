@@ -1,4 +1,4 @@
-{{ if eq .Values.networkPolicy.flavor "kubernetes" }}
+{{- if eq .Values.networkPolicy.flavor "kubernetes" -}}
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
@@ -19,4 +19,4 @@ spec:
   policyTypes:
   - Egress
   - Ingress
-{{ end }}
+{{- end -}}

@@ -1,3 +1,4 @@
+{{- if .Values.loggingOperator.loggingEnabled -}}
 {{- if .Capabilities.APIVersions.Has "objectstorage.giantswarm.io/v1alpha1" -}}
 apiVersion: objectstorage.giantswarm.io/v1alpha1
 kind: Bucket
@@ -15,4 +16,5 @@ spec:
     value: {{ .Values.loggingOperator.installationName }}
   - key: app
     value: logging-operator
+{{- end -}}
 {{- end -}}
