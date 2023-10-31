@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Push to CAPA.
+- Push to CAPA app collection.
 
 ## [0.1.3] - 2023-10-18
 
