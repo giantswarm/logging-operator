@@ -2,9 +2,13 @@ package capicluster
 
 import (
 	"fmt"
+	"reflect"
+	"strconv"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
@@ -14,12 +18,24 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) GetLoggingLabel() string {
+func (o Object) HasLoggingEnabled() bool {
 	labels := o.Object.GetLabels()
 
-	value := labels[key.LoggingLabel]
+	// If logging is disabled at the installation level, we return false
+	if !o.Options.EnableLoggingFlag {
+		return false
+	}
 
-	return value
+	loggingLabelValue, ok := labels[key.LoggingLabel]
+	if !ok {
+		return true
+	}
+
+	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
+	if err != nil {
+		return false
+	}
+	return loggingEnabled
 }
 
 func (o Object) GetAppsNamespace() string {
@@ -52,5 +68,57 @@ func (o Object) GetObject() client.Object {
 
 // On capi clusters, use an extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
-	return fmt.Sprintf("%s-observability-bundle-logging-extraconfig", o.GetClusterName())
+	return "observability-bundle-logging-extraconfig"
+}
+
+func (o Object) getWiredExtraConfig() appv1.AppExtraConfig {
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)
+	return appv1.AppExtraConfig{
+		Kind:      "configMap",
+		Name:      observabilityBundleConfigMapMeta.GetName(),
+		Namespace: observabilityBundleConfigMapMeta.GetNamespace(),
+		Priority:  25,
+	}
+}
+
+// UnwirePromtail unsets the extraconfig confimap in a copy of the app
+func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
+	desiredApp := currentApp.DeepCopy()
+
+	wiredExtraConfig := o.getWiredExtraConfig()
+	for index, extraConfig := range currentApp.Spec.ExtraConfigs {
+		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
+			desiredApp.Spec.ExtraConfigs = append(currentApp.Spec.ExtraConfigs[:index], currentApp.Spec.ExtraConfigs[index+1:]...)
+		}
+	}
+
+	return desiredApp
+}
+
+// WirePromtail sets the extraconfig confimap in a copy of the app.
+func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
+	desiredApp := currentApp.DeepCopy()
+	wiredExtraConfig := o.getWiredExtraConfig()
+
+	// We check if the extra config already exists to know if we need to remove it.
+	var containsWiredExtraConfig bool = false
+	for _, extraConfig := range currentApp.Spec.ExtraConfigs {
+		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
+			containsWiredExtraConfig = true
+		}
+	}
+
+	if !containsWiredExtraConfig {
+		desiredApp.Spec.ExtraConfigs = append(desiredApp.Spec.ExtraConfigs, wiredExtraConfig)
+	}
+
+	return desiredApp
+}
+
+func (o Object) GetRegion() string {
+	return o.Options.InstallationRegion
+}
+
+func (o Object) GetCloudDomain() string {
+	return o.Options.InstallationBaseDomain
 }
