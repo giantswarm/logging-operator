@@ -24,7 +24,6 @@ type LoggingReconciler struct {
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
-
 	loggingEnabled := common.IsLoggingEnabled(lc)
 
 	if loggingEnabled {
