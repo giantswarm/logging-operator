@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improve network policy and minor go fixes.
+
 ## [0.1.4] - 2023-10-31
 
 ### Changed
