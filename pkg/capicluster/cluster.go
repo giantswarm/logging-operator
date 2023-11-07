@@ -33,7 +33,7 @@ func (o Object) HasLoggingEnabled() bool {
 
 	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
 	if err != nil {
-		return false
+		return true
 	}
 	return loggingEnabled
 }
