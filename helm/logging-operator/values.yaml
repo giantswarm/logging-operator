@@ -5,7 +5,6 @@ global:
 aws:
   accessKeyID: accesskey
   secretAccessKey: secretkey
-  region: eu-central-1
 
 image:
   name: "giantswarm/logging-operator"
@@ -51,3 +50,4 @@ managementCluster:
   baseDomain: "gaws.gigantic.io"
   provider: 
     kind: aws
+  region: eu-central-1
