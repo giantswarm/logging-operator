@@ -24,7 +24,6 @@ func (o Object) HasLoggingEnabled() bool {
 	if !o.Options.EnableLoggingFlag {
 		return false
 	}
-
 	// Promtail only works starting with AWS version 19.1.0
 	clusterRelease := labels["release.giantswarm.io/version"]
 	// semver versions must be "vMAJOR[.MINOR[.PATCH[-PRERELEASE][+BUILD]]]"
@@ -35,13 +34,12 @@ func (o Object) HasLoggingEnabled() bool {
 
 	loggingLabelValue, ok := labels[key.LoggingLabel]
 	if !ok {
-		// This is what we will have to change when we enable logging on all WCs >= 19.1.0
-		return false
+		return loggedcluster.LoggingEnabledDefault
 	}
 
 	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
 	if err != nil {
-		return false
+		return loggedcluster.LoggingEnabledDefault
 	}
 	return loggingEnabled
 }
@@ -73,6 +71,7 @@ func (o Object) GetInstallationName() string {
 func (o Object) GetRegion() string {
 	return o.Options.InstallationRegion
 }
+
 func (o Object) GetEnableLoggingFlag() bool {
 	return o.Options.EnableLoggingFlag
 }

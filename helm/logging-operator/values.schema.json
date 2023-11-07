@@ -8,9 +8,6 @@
                 "accessKeyID": {
                     "type": "string"
                 },
-                "region": {
-                    "type": "string"
-                },
                 "secretAccessKey": {
                     "type": "string"
                 }
@@ -67,6 +64,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "region": {
+                    "type": "string"
                 }
             }
         },

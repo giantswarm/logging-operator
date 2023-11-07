@@ -158,7 +158,6 @@ func main() {
 	loggedcluster.O.InstallationProvider = installationProvider
 	loggedcluster.O.InstallationRegion = installationRegion
 	loggedcluster.O.InstallationBaseDomain = installationBaseDomain
-
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
 	reconcilers := []reconciler.Interface{

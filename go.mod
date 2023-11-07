@@ -1,6 +1,6 @@
 module github.com/giantswarm/logging-operator
 
-go 1.18
+go 1.20
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.22.1

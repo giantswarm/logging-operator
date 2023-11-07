@@ -28,12 +28,12 @@ func (o Object) HasLoggingEnabled() bool {
 
 	loggingLabelValue, ok := labels[key.LoggingLabel]
 	if !ok {
-		return true
+		return loggedcluster.LoggingEnabledDefault
 	}
 
 	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
 	if err != nil {
-		return false
+		return loggedcluster.LoggingEnabledDefault
 	}
 	return loggingEnabled
 }
@@ -56,14 +56,6 @@ func (o Object) GetClusterName() string {
 
 func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
-}
-
-func (o Object) GetRegion() string {
-	return o.Options.InstallationRegion
-}
-
-func (o Object) GetCloudDomain() string {
-	return o.Options.InstallationBaseDomain
 }
 
 func (o Object) GetEnableLoggingFlag() bool {
@@ -121,4 +113,12 @@ func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
 	}
 
 	return desiredApp
+}
+
+func (o Object) GetRegion() string {
+	return o.Options.InstallationRegion
+}
+
+func (o Object) GetCloudDomain() string {
+	return o.Options.InstallationBaseDomain
 }

@@ -38,16 +38,8 @@ func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
 }
 
-func (o Object) GetRegion() string {
-	return o.Options.InstallationRegion
-}
-
 func (o Object) GetEnableLoggingFlag() bool {
 	return o.Options.EnableLoggingFlag
-}
-
-func (o Object) GetCloudDomain() string {
-	return o.Options.InstallationBaseDomain
 }
 
 func (o Object) GetObject() client.Object {
@@ -57,6 +49,14 @@ func (o Object) GetObject() client.Object {
 // On vintage MC, there's no support for extraconfig so we should use standard user values
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-user-values"
+}
+
+func (o Object) GetRegion() string {
+	return o.Options.InstallationRegion
+}
+
+func (o Object) GetCloudDomain() string {
+	return o.Options.InstallationBaseDomain
 }
 
 // UnwirePromtail unsets the user value confimap in a copy of the app

@@ -39,7 +39,7 @@ spec:
         {{- end }}
         - -installation-name={{ .Values.managementCluster.name }}
         - -installation-provider={{ .Values.managementCluster.provider.kind }}
-        - -installation-region={{ .Values.aws.region }}
+        - -installation-region={{ .Values.managementCluster.region }}
         - -installation-base-domain={{ .Values.managementCluster.baseDomain }}
         {{ if eq .Values.managementCluster.provider.kind "capa" -}}
         env:
