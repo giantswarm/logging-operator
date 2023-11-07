@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Prepare some stuff for CAPI.
+- Upgrade go dependencies.
+
 ### Changed
 
+- Change default logging behavior on WCs >= 19.1.0. Logging is now enabled by default.
 - Improve network policy and minor go fixes.
 
 ## [0.1.4] - 2023-10-31

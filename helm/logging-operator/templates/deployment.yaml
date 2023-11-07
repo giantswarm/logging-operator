@@ -37,7 +37,10 @@ spec:
         {{- else -}}
           - -enable-logging=false
         {{- end }}
-        - -installation-name={{ .Values.loggingOperator.installationName }}
+        - -installation-name={{ .Values.managementCluster.name }}
+        - -installation-provider={{ .Values.managementCluster.provider.kind }}
+        - -installation-region={{ .Values.managementCluster.region }}
+        - -installation-base-domain={{ .Values.managementCluster.baseDomain }}
         livenessProbe:
           httpGet:
             path: /healthz
