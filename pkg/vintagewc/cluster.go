@@ -34,12 +34,12 @@ func (o Object) HasLoggingEnabled() bool {
 
 	loggingLabelValue, ok := labels[key.LoggingLabel]
 	if !ok {
-		return true
+		return loggedcluster.LoggingEnabledDefault
 	}
 
 	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
 	if err != nil {
-		return true
+		return loggedcluster.LoggingEnabledDefault
 	}
 	return loggingEnabled
 }
