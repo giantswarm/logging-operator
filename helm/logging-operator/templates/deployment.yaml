@@ -38,14 +38,6 @@ spec:
           - -enable-logging=false
         {{- end }}
         - -installation-name={{ .Values.managementCluster.name }}
-        - -installation-provider={{ .Values.managementCluster.provider.kind }}
-        - -installation-region={{ .Values.managementCluster.region }}
-        - -installation-base-domain={{ .Values.managementCluster.baseDomain }}
-        {{ if eq .Values.managementCluster.provider.kind "capa" -}}
-        env:
-          - name: AWS_SHARED_CREDENTIALS_FILE
-            value: /home/.aws/credentials
-        {{- end }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -63,14 +55,3 @@ spec:
           limits:
             cpu: {{ .Values.resources.limits.cpu }}
             memory: {{ .Values.resources.limits.memory }}
-        {{ if eq .Values.managementCluster.provider.kind "capa" -}}
-        volumeMounts:
-          - mountPath: /home/.aws
-            name: credentials
-        {{- end }}
-      {{ if eq .Values.managementCluster.provider.kind "capa" -}}
-      volumes:
-      - name: credentials
-        secret:
-          secretName: {{ include "resource.default.name" . }}-aws-credentials
-      {{- end -}}

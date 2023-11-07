@@ -68,10 +68,6 @@ func (o Object) GetInstallationName() string {
 	return o.Options.InstallationName
 }
 
-func (o Object) GetRegion() string {
-	return o.Options.InstallationRegion
-}
-
 func (o Object) GetEnableLoggingFlag() bool {
 	return o.Options.EnableLoggingFlag
 }
@@ -83,10 +79,6 @@ func (o Object) GetObject() client.Object {
 // on vintage WC, use extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"
-}
-
-func (o Object) GetCloudDomain() string {
-	return o.Options.InstallationBaseDomain
 }
 
 func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {

@@ -41,7 +41,6 @@ import (
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
-	lokirole "github.com/giantswarm/logging-operator/pkg/resource/loki-role"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
 	promtailconfig "github.com/giantswarm/logging-operator/pkg/resource/promtail-config"
 	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
@@ -66,9 +65,6 @@ func main() {
 	var enableLeaderElection bool
 	var enableLogging bool
 	var installationName string
-	var installationRegion string
-	var installationProvider string
-	var installationBaseDomain string
 	var metricsAddr string
 	var probeAddr string
 	var vintageMode bool
@@ -77,9 +73,6 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
-	flag.StringVar(&installationProvider, "installation-provider", "aws", "Provider of the installation (used to setup cloud accounts)")
-	flag.StringVar(&installationRegion, "installation-region", "eu-central-1", "Region where the management cluster is located")
-	flag.StringVar(&installationBaseDomain, "installation-base-domain", "gigantic.io", "Management cluster base domain")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
@@ -116,13 +109,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	var lokiRole reconciler.Interface = nil
-	if installationProvider == "capa" {
-		lokiRole = &lokirole.Reconciler{
-			Client: mgr.GetClient(),
-		}
-	}
-
 	promtailReconciler := promtailtoggle.Reconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -155,9 +141,6 @@ func main() {
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
-	loggedcluster.O.InstallationProvider = installationProvider
-	loggedcluster.O.InstallationRegion = installationRegion
-	loggedcluster.O.InstallationBaseDomain = installationBaseDomain
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
 	reconcilers := []reconciler.Interface{
@@ -168,10 +151,6 @@ func main() {
 		&lokiAuth,
 		&promtailClient,
 		&promtailConfig,
-	}
-
-	if lokiRole != nil {
-		reconcilers = append(reconcilers, lokiRole)
 	}
 
 	loggingReconciler := loggingreconciler.LoggingReconciler{

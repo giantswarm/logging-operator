@@ -92,17 +92,6 @@ rules:
       - awsclusters
     verbs:
       - get
-  {{- if eq .Values.managementCluster.provider.kind "capa" }}
-  - apiGroups:
-      - infrastructure.cluster.x-k8s.io
-    resources:
-      - awsclusters
-      - awsclusterroleidentities
-    verbs:
-      - get
-      - list
-      - watch
-  {{ end }}
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
