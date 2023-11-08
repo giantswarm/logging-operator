@@ -21,20 +21,22 @@ type app struct {
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable logging agents.
 func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
+	appsToEnable := map[string]app{}
+
 	promtailAppName := "promtail"
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
 		promtailAppName = "promtail-app"
 	}
-
+	appsToEnable[promtailAppName] = app{
+		Enabled: true,
+	}
+	if observabilityBundleVersion.GE(semver.MustParse("0.10.0")) {
+		appsToEnable["grafanaAgent"] = app{
+			Enabled: true,
+		}
+	}
 	values := Values{
-		Apps: map[string]app{
-			promtailAppName: {
-				Enabled: true,
-			},
-			"grafanaAgent": {
-				Enabled: true,
-			},
-		},
+		Apps: appsToEnable,
 	}
 
 	v, err := yaml.Marshal(values)
@@ -44,9 +46,7 @@ func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabil
 
 	configmap := v1.ConfigMap{
 		ObjectMeta: common.ObservabilityBundleConfigMapMeta(lc),
-		Data: map[string]string{
-			"values": string(v),
-		},
+		Data:       map[string]string{"values": string(v)},
 	}
 
 	return configmap, nil

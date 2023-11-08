@@ -21,7 +21,7 @@ const (
 	grafanaAgentResourceName = "grafana-agent-secret"
 )
 
-func GetGrafanaAgentResourceName() string {
+func GrafanaAgentResourceName() string {
 	return grafanaAgentResourceName
 }
 
@@ -43,7 +43,6 @@ func IsWorkloadCluster(lc loggedcluster.Interface) bool {
 
 // Read Loki URL from ingress
 func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
-
 	var lokiIngress netv1.Ingress
 
 	err := client.Get(ctx, types.NamespacedName{Name: lokiIngressName, Namespace: lokiIngressNamespace}, &lokiIngress)

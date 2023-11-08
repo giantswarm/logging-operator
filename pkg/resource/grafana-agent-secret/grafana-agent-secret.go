@@ -25,7 +25,7 @@ type extraSecret struct {
 // SecretMeta returns metadata for the grafana-agent-secret
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()),
+		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentResourceName()),
 		Namespace: lc.GetAppsNamespace(),
 		Labels:    map[string]string{},
 	}
@@ -37,7 +37,6 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // GenerateGrafanaAgentSecret returns a secret for
 // the Loki-multi-tenant-proxy auth config
 func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
-
 	clusterName := lc.GetClusterName()
 	writeUser := clusterName
 	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
@@ -47,7 +46,7 @@ func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 
 	values := values{
 		ExtraSecret: extraSecret{
-			Name: fmt.Sprintf("%s-%s", clusterName, common.GetGrafanaAgentResourceName()),
+			Name: fmt.Sprintf("%s-%s", clusterName, common.GrafanaAgentResourceName()),
 			Data: map[string]string{
 				"logging-url":       fmt.Sprintf("https://%s/loki/api/v1/push", lokiURL),
 				"logging-tenant-id": clusterName,
