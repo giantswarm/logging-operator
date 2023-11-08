@@ -14,16 +14,12 @@ import (
 )
 
 type values struct {
-	LoggingSecret loggingSecret `yaml:"loggingSecret" json:"loggingSecret"`
+	ExtraSecret extraSecret `yaml:"extraSecret" json:"extraSecret"`
 }
 
-type loggingSecret struct {
-	Enabled    bool   `yaml:"enabled" json:"enabled"`
-	SecretName string `yaml:"secretName" json:"secretName"`
-	URL        string `yaml:"url" json:"url"`
-	TenantID   string `yaml:"tenantId" json:"tenantId"`
-	Username   string `yaml:"username" json:"username"`
-	Password   string `yaml:"password" json:"password"`
+type extraSecret struct {
+	Name string            `yaml:"name" json:"name"`
+	Data map[string]string `yaml:"data" json:"data"`
 }
 
 // SecretMeta returns metadata for the grafana-agent-secret
@@ -50,13 +46,14 @@ func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 	}
 
 	values := values{
-		LoggingSecret: loggingSecret{
-			Enabled:    true,
-			SecretName: fmt.Sprintf("%s-%s", clusterName, common.GetGrafanaAgentResourceName()),
-			URL:        fmt.Sprintf("https://%s/loki/api/v1/push", lokiURL),
-			TenantID:   clusterName,
-			Username:   writeUser,
-			Password:   writePassword,
+		ExtraSecret: extraSecret{
+			Name: fmt.Sprintf("%s-%s", clusterName, common.GetGrafanaAgentResourceName()),
+			Data: map[string]string{
+				"logging-url":       fmt.Sprintf("https://%s/loki/api/v1/push", lokiURL),
+				"logging-tenant-id": clusterName,
+				"logging-username":  writeUser,
+				"logging-password":  writePassword,
+			},
 		},
 	}
 

@@ -27,19 +27,10 @@ type grafanaAgent struct {
 
 type agent struct {
 	ConfigMap configMap `yaml:"configMap" json:"configMap"`
-	EnvFrom   []envFrom `yaml:"envFrom" json:"envFrom"`
 }
 
 type configMap struct {
 	Content string `yaml:"content" json:"content"`
-}
-
-type envFrom struct {
-	SecretRef secretRef `yaml:"secretRef" json:"secretRef"`
-}
-
-type secretRef struct {
-	Name string `yaml:"name" json:"name"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -78,13 +69,18 @@ loki.source.kubernetes_events "local" {
 	forward_to = [loki.write.default.receiver]
 }
 
+remote.kubernetes.secret "credentials" {
+	namespace = ` + lc.GetAppsNamespace() + `
+	name = ` + fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()) + `
+}
+
 loki.write "default" {
 	endpoint {
-	url = env("logging-url")
-	tenant_id = env("logging-tenant-id")
+	url = remote.kubernetes.secret.credentials.data["logging-url"]
+	tenant_id = remote.kubernetes.secret.credentials.data["logging-tenant-id"]
 	basic_auth {
-		username = env("logging-username")
-		password = env("logging-password")
+		username = remote.kubernetes.secret.credentials.data["logging-username"]
+		password = remote.kubernetes.secret.credentials.data["logging-password"]
 	}
 	}
 	external_labels = {
@@ -93,13 +89,6 @@ loki.write "default" {
 		scrape_job = "kubernetes-events",
 	}
 }`,
-				},
-				EnvFrom: []envFrom{
-					{
-						SecretRef: secretRef{
-							Name: fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()),
-						},
-					},
 				},
 			},
 		},
