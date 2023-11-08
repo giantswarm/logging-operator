@@ -18,11 +18,12 @@ const (
 	lokiIngressNamespace = "loki"
 	lokiIngressName      = "loki-gateway"
 	// grafana-agent secret name
-	grafanaAgentResourceName = "grafana-agent-secret"
+	//#nosec G101
+	grafanaAgentExtraSecretName = "grafana-agent-secret"
 )
 
-func GrafanaAgentResourceName() string {
-	return grafanaAgentResourceName
+func GrafanaAgentExtraSecretName() string {
+	return grafanaAgentExtraSecretName
 }
 
 func IsLoggingEnabled(lc loggedcluster.Interface) bool {
