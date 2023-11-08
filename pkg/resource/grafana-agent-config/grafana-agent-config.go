@@ -47,7 +47,7 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 
 // GenerateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func GenerateGrafanaAgentConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
+func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, appNamespace string) (v1.ConfigMap, error) {
 
 	namespacesScraped := "[]"
 	if common.IsWorkloadCluster(lc) {
@@ -70,7 +70,7 @@ loki.source.kubernetes_events "local" {
 }
 
 remote.kubernetes.secret "credentials" {
-	namespace = ` + lc.GetAppsNamespace() + `
+	namespace = ` + appNamespace + `
 	name = ` + fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()) + `
 }
 

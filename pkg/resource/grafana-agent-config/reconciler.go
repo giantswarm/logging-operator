@@ -4,11 +4,13 @@ import (
 	"context"
 	"reflect"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -27,8 +29,18 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-config create")
 
+	// Get observability bundle app metadata.
+	appMeta := common.ObservabilityBundleAppMeta(lc)
+
+	// Retrieve the app.
+	var currentApp appv1.App
+	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get desired config
-	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc)
+	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, currentApp.Spec.Namespace)
 	if err != nil {
 		logger.Info("grafana-agent-config - failed generating grafana-agent config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
