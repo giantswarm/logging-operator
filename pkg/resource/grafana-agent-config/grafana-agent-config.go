@@ -76,10 +76,10 @@ remote.kubernetes.secret "credentials" {
 
 loki.write "default" {
 	endpoint {
-	url = remote.kubernetes.secret.credentials.data["logging-url"]
-	tenant_id = remote.kubernetes.secret.credentials.data["logging-tenant-id"]
+	url = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
+	tenant_id = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
 	basic_auth {
-		username = remote.kubernetes.secret.credentials.data["logging-username"]
+		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
 		password = remote.kubernetes.secret.credentials.data["logging-password"]
 	}
 	}
