@@ -70,8 +70,8 @@ loki.source.kubernetes_events "local" {
 }
 
 remote.kubernetes.secret "credentials" {
-	namespace = ` + appNamespace + `
-	name = ` + fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()) + `
+	namespace = "` + appNamespace + `"
+	name = "` + fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GetGrafanaAgentResourceName()) + `"
 }
 
 loki.write "default" {
