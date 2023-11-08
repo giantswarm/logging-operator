@@ -49,9 +49,9 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // the grafana-agent extra-config
 func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, appNamespace string) (v1.ConfigMap, error) {
 
-	namespacesScraped := "[]"
+	scrapedNamespaces := "[]"
 	if common.IsWorkloadCluster(lc) {
-		namespacesScraped = "[\"kube-system\", \"giantswarm\"]"
+		scrapedNamespaces = "[\"kube-system\", \"giantswarm\"]"
 	}
 
 	values := values{
@@ -65,7 +65,7 @@ logging {
 }
 
 loki.source.kubernetes_events "local" {
-	namespaces = ` + namespacesScraped + `
+	namespaces = ` + scrapedNamespaces + `
 	forward_to = [loki.write.default.receiver]
 }
 
