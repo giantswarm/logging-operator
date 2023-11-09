@@ -15,8 +15,6 @@ type Interface interface {
 	GetEnableLoggingFlag() bool
 	GetClusterName() string
 	GetInstallationName() string
-	GetRegion() string
-	GetCloudDomain() string
 	AppConfigName(app string) string
 	ObservabilityBundleConfigLabelName(config string) string
 	GetObject() client.Object

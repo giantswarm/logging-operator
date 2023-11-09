@@ -2,25 +2,6 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-        "aws": {
-            "type": "object",
-            "properties": {
-                "accessKeyID": {
-                    "type": "string"
-                },
-                "secretAccessKey": {
-                    "type": "string"
-                }
-            }
-        },
-        "ciliumNetworkPolicy": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                }
-            }
-        },
         "global": {
             "type": "object",
             "properties": {
@@ -59,21 +40,15 @@
         "managementCluster": {
             "type": "object",
             "properties": {
-                "baseDomain": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
-                },
-                "provider": {
-                    "type": "object",
-                    "properties": {
-                        "kind": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "region": {
+                }
+            }
+        },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "flavor": {
                     "type": "string"
                 }
             }

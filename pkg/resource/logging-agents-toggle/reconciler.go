@@ -94,7 +94,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	observabilityBundleVersion, err := r.GetObservabilityBundleVersion(ctx, lc)
 	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
+		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
 	}
 
 	// Get expected configmap.

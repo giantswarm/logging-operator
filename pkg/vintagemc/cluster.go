@@ -51,14 +51,6 @@ func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-user-values"
 }
 
-func (o Object) GetRegion() string {
-	return o.Options.InstallationRegion
-}
-
-func (o Object) GetCloudDomain() string {
-	return o.Options.InstallationBaseDomain
-}
-
 // UnwirePromtail unsets the user value confimap in a copy of the app
 func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()

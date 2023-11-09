@@ -2,6 +2,7 @@ package promtailwiring
 
 import (
 	"context"
+	"reflect"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -31,32 +32,28 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring create")
 
-	if common.IsWorkloadCluster(lc) {
-		logger.Info("cluster-operator is updating promtailwiring")
-	} else {
-		// Get observability bundle app metadata.
-		appMeta := common.ObservabilityBundleAppMeta(lc)
+	// Get observability bundle app metadata.
+	appMeta := common.ObservabilityBundleAppMeta(lc)
 
-		// Retrieve the app.
-		logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
-		var currentApp appv1.App
-		err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	// Retrieve the app.
+	logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
+	var currentApp appv1.App
+	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	desiredApp := lc.WirePromtail(currentApp)
+	if !reflect.DeepEqual(currentApp, desiredApp) {
+		logger.Info("promtailwiring updating")
+		// Update the app.
+		err := r.Client.Update(ctx, desiredApp)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-
-		// Set user value configmap in the app.
-		if setUserConfig(&currentApp, lc) {
-			logger.Info("promtailwiring updating")
-			// Update the app.
-			err := r.Client.Update(ctx, &currentApp)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		} else {
-			logger.Info("promtailwiring up to date")
-		}
 	}
+
+	logger.Info("promtailwiring up to date")
 
 	return ctrl.Result{}, nil
 }
@@ -67,58 +64,31 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("promtailwiring delete")
 
-	if common.IsWorkloadCluster(lc) {
-		logger.Info("cluster-operator is updating promtailwiring")
-	} else {
-		// Get observability bundle app metadata.
-		appMeta := common.ObservabilityBundleAppMeta(lc)
+	// Get observability bundle app metadata.
+	appMeta := common.ObservabilityBundleAppMeta(lc)
 
-		var currentApp appv1.App
-		err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	var currentApp appv1.App
+	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		// Handle case where the app is not found.
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("promtailwiring - app not found")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	desiredApp := lc.UnwirePromtail(currentApp)
+	if !reflect.DeepEqual(currentApp, desiredApp) {
+		logger.Info("promtailwiring updating")
+		// Update the app.
+		err := r.Client.Update(ctx, desiredApp)
 		if err != nil {
-			// Handle case where the app is not found.
-			if apimachineryerrors.IsNotFound(err) {
-				logger.Info("promtailwiring - app not found")
-				return ctrl.Result{}, nil
-			}
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-
-		// Unset user value configmap in the app.
-		if unsetUserConfig(&currentApp, lc) {
-			logger.Info("promtailwiring updating")
-			// Update the app.
-			err = r.Client.Update(ctx, &currentApp)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		} else {
-			logger.Info("promtailwiring up to date")
-		}
 	}
+
+	logger.Info("promtailwiring up to date")
+
 	return ctrl.Result{}, nil
-}
-
-// setUserConfig set the user value confimap in the app.
-// It returns true in case something was changed.
-func setUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
-	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(lc)
-	updated := app.Spec.UserConfig.ConfigMap.Name != observabilityBundleConfigMapMeta.GetName() || app.Spec.UserConfig.ConfigMap.Namespace != observabilityBundleConfigMapMeta.GetNamespace()
-
-	app.Spec.UserConfig.ConfigMap.Name = observabilityBundleConfigMapMeta.GetName()
-	app.Spec.UserConfig.ConfigMap.Namespace = observabilityBundleConfigMapMeta.GetNamespace()
-
-	return updated
-}
-
-// unsetUserConfig unset the user value confimap in the app.
-// It returns true in case something was changed.
-func unsetUserConfig(app *appv1.App, lc loggedcluster.Interface) bool {
-	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(lc)
-	updated := app.Spec.UserConfig.ConfigMap.Name == observabilityBundleConfigMapMeta.GetName() || app.Spec.UserConfig.ConfigMap.Namespace == observabilityBundleConfigMapMeta.GetNamespace()
-
-	app.Spec.UserConfig.ConfigMap.Name = ""
-	app.Spec.UserConfig.ConfigMap.Namespace = ""
-
-	return updated
 }
