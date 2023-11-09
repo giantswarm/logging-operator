@@ -1,15 +1,11 @@
 package promtailclient
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -19,8 +15,6 @@ import (
 
 const (
 	promtailClientSecretName = "logging-secret"
-	lokiIngressNamespace     = "loki"
-	lokiIngressName          = "loki-gateway"
 )
 
 type values struct {
@@ -122,20 +116,4 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 	}
 
 	return secret, nil
-}
-
-// Read Loki URL from ingress
-func readLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
-
-	var lokiIngress netv1.Ingress
-
-	err := client.Get(ctx, types.NamespacedName{Name: lokiIngressName, Namespace: lokiIngressNamespace}, &lokiIngress)
-	if err != nil {
-		return "", errors.WithStack(err)
-	}
-
-	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
-	ingressURL := lokiIngress.Spec.Rules[0].Host
-
-	return ingressURL, nil
 }
