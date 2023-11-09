@@ -38,12 +38,14 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
+	grafanaagentsecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
+	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
 	promtailconfig "github.com/giantswarm/logging-operator/pkg/resource/promtail-config"
-	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
 )
@@ -109,7 +111,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	promtailReconciler := promtailtoggle.Reconciler{
+	loggingAgentsToggle := loggingagentstoggle.Reconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
@@ -139,24 +141,32 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	grafanaAgentSecret := grafanaagentsecret.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
+	grafanaAgentConfig := grafanaagentconfig.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
-	reconcilers := []reconciler.Interface{
-		&promtailReconciler,
-		&promtailWiring,
-		&loggingSecrets,
-		&grafanaDatasource,
-		&lokiAuth,
-		&promtailClient,
-		&promtailConfig,
-	}
-
 	loggingReconciler := loggingreconciler.LoggingReconciler{
-		Client:      mgr.GetClient(),
-		Scheme:      mgr.GetScheme(),
-		Reconcilers: reconcilers,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+		Reconcilers: []reconciler.Interface{
+			&loggingAgentsToggle,
+			&promtailWiring,
+			&loggingSecrets,
+			&grafanaDatasource,
+			&lokiAuth,
+			&promtailClient,
+			&promtailConfig,
+			&grafanaAgentSecret,
+			&grafanaAgentConfig,
+		},
 	}
 
 	if vintageMode {
