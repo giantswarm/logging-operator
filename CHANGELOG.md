@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2023-11-10
+
 ### Changed
 
 - default logging behavior on WCs reverted to disable.
@@ -126,7 +128,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/giantswarm/logging-operator/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/giantswarm/logging-operator/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/giantswarm/logging-operator/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/giantswarm/logging-operator/compare/v0.1.2...v0.1.3
