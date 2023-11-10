@@ -5,7 +5,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const LoggingEnabledDefault = true
+// LoggingEnabledDefault defines if WCs logs are collected by default
+const LoggingEnabledDefault = false
 
 // Interface contains the definition of functions that can differ between each type of cluster
 type Interface interface {

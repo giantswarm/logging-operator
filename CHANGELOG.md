@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- default logging behavior on WCs reverted to disable.
+
 ## [0.2.0] - 2023-11-09
 
 ### Added
