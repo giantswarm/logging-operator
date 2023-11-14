@@ -81,14 +81,6 @@ func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"
 }
 
-func (o Object) GetRegion() string {
-	return o.Options.InstallationRegion
-}
-
-func (o Object) GetCloudDomain() string {
-	return o.Options.InstallationBaseDomain
-}
-
 func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
 	// cluster-operator is taking care of the unwiring, nothing to do here
 	return currentApp.DeepCopy()

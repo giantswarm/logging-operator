@@ -114,11 +114,3 @@ func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
 
 	return desiredApp
 }
-
-func (o Object) GetRegion() string {
-	return o.Options.InstallationRegion
-}
-
-func (o Object) GetCloudDomain() string {
-	return o.Options.InstallationBaseDomain
-}

@@ -38,12 +38,14 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
+	grafanaagentsecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
+	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
 	promtailclient "github.com/giantswarm/logging-operator/pkg/resource/promtail-client"
 	promtailconfig "github.com/giantswarm/logging-operator/pkg/resource/promtail-config"
-	promtailtoggle "github.com/giantswarm/logging-operator/pkg/resource/promtail-toggle"
 	promtailwiring "github.com/giantswarm/logging-operator/pkg/resource/promtail-wiring"
 	//+kubebuilder:scaffold:imports
 )
@@ -65,9 +67,6 @@ func main() {
 	var enableLeaderElection bool
 	var enableLogging bool
 	var installationName string
-	var installationRegion string
-	var installationProvider string
-	var installationBaseDomain string
 	var metricsAddr string
 	var probeAddr string
 	var vintageMode bool
@@ -76,9 +75,6 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
-	flag.StringVar(&installationProvider, "installation-provider", "aws", "Provider of the installation (used to setup cloud accounts)")
-	flag.StringVar(&installationRegion, "installation-region", "eu-central-1", "Region where the management cluster is located")
-	flag.StringVar(&installationBaseDomain, "installation-base-domain", "gigantic.io", "Management cluster base domain")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
@@ -115,7 +111,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	promtailReconciler := promtailtoggle.Reconciler{
+	loggingAgentsToggle := loggingagentstoggle.Reconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
@@ -145,24 +141,31 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	grafanaAgentSecret := grafanaagentsecret.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
+	grafanaAgentConfig := grafanaagentconfig.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
-	loggedcluster.O.InstallationProvider = installationProvider
-	loggedcluster.O.InstallationRegion = installationRegion
-	loggedcluster.O.InstallationBaseDomain = installationBaseDomain
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
-			&promtailReconciler,
+			&loggingAgentsToggle,
 			&promtailWiring,
 			&loggingSecrets,
 			&grafanaDatasource,
 			&lokiAuth,
 			&promtailClient,
 			&promtailConfig,
+			&grafanaAgentSecret,
+			&grafanaAgentConfig,
 		},
 	}
 
@@ -190,15 +193,14 @@ func main() {
 	} else {
 		setupLog.Info("CAPI mode selected")
 
-		setupLog.Info("NOT creating CAPI cluster reconciler - not supported yet!")
-		//		if err = (&controller.CapiClusterReconciler{
-		//			Client:            mgr.GetClient(),
-		//			Scheme:            mgr.GetScheme(),
-		//			LoggingReconciler: loggingReconciler,
-		//		}).SetupWithManager(mgr); err != nil {
-		//			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
-		//			os.Exit(1)
-		//		}
+		if err = (&controller.CapiClusterReconciler{
+			Client:            mgr.GetClient(),
+			Scheme:            mgr.GetScheme(),
+			LoggingReconciler: loggingReconciler,
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 

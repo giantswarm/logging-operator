@@ -52,7 +52,6 @@ workflows:
             tags:
               only: /^v.*/
 
-
       - architect/push-to-app-catalog:
           context: "architect"
           executor: "app-build-suite"
