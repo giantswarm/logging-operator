@@ -43,3 +43,4 @@ loggingOperator:
 
 managementCluster:
   name: unknown
+  insecureCA: false
