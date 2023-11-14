@@ -38,6 +38,10 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
+func (o Object) IsInsecureCA() bool {
+	return o.Options.InsecureCA
+}
+
 func (o Object) GetAppsNamespace() string {
 	return o.Object.GetNamespace()
 }
