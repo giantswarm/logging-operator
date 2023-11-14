@@ -81,6 +81,9 @@ loki.write "default" {
 		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
 		password = remote.kubernetes.secret.credentials.data["logging-password"]
 	}
+	tls_config {
+		insecure_skip_verify = ` + fmt.Sprintf("%v", lc.IsInsecureCA()) + `
+	}
 	}
 	external_labels = {
 		installation = "` + lc.GetInstallationName() + `",

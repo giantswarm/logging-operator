@@ -67,6 +67,7 @@ func main() {
 	var enableLeaderElection bool
 	var enableLogging bool
 	var installationName string
+	var insecureCA bool
 	var metricsAddr string
 	var probeAddr string
 	var vintageMode bool
@@ -75,6 +76,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
+	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
@@ -151,6 +153,7 @@ func main() {
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.InstallationName = installationName
+	loggedcluster.O.InsecureCA = insecureCA
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
 	loggingReconciler := loggingreconciler.LoggingReconciler{

@@ -36,6 +36,11 @@ type promtailConfigClient struct {
 	BasicAuth      promtailConfigClientBasicAuth      `yaml:"basic_auth" json:"basic_auth"`
 	BackoffConfig  promtailConfigClientBackoffConfig  `yaml:"backoff_config" json:"backoff_config"`
 	ExternalLabels promtailConfigClientExternalLabels `yaml:"external_labels" json:"external_labels"`
+	TLSConfig      promtailConfigClientTLSConfig      `yaml:"tls_config" json:"tls_config"`
+}
+
+type promtailConfigClientTLSConfig struct {
+	InsecureSkipVerify bool `yaml:"insecure_skip_verify" json:"insecure_skip_verify"`
 }
 
 type promtailConfigClientExternalLabels struct {
@@ -96,6 +101,9 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 						ExternalLabels: promtailConfigClientExternalLabels{
 							Installation: installationName,
 							ClusterID:    lc.GetClusterName(),
+						},
+						TLSConfig: promtailConfigClientTLSConfig{
+							InsecureSkipVerify: lc.IsInsecureCA(),
 						},
 					},
 				},
