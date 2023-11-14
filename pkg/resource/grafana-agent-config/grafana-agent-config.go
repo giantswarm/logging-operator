@@ -82,7 +82,7 @@ loki.write "default" {
 		password = remote.kubernetes.secret.credentials.data["logging-password"]
 	}
 	tls_config {
-		insecure_skip_verify = ` + fmt.Sprintf("%v", lc.IsInsecureCA()) + `
+		insecure_skip_verify = ` + fmt.Sprintf("%t", lc.IsInsecureCA()) + `
 	}
 	}
 	external_labels = {
