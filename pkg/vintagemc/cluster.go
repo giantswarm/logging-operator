@@ -17,6 +17,10 @@ func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
 }
 
+func (o Object) IsInsecureCA() bool {
+	return o.Options.InsecureCA
+}
+
 func (o Object) GetAppsNamespace() string {
 	return "giantswarm"
 }

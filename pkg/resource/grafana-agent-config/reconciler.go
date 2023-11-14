@@ -34,7 +34,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	// Retrieve the app.
 	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: "grafana-agent", Namespace: appMeta.GetNamespace()}, &currentApp)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
