@@ -16,8 +16,7 @@ const (
 	promtailConfigName = "logging-config"
 )
 
-///// Promtail values config structure
-
+// /// Promtail values config structure
 type values struct {
 	Promtail promtail `yaml:"promtail" json:"promtail"`
 }
@@ -89,7 +88,6 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // GeneratePromtailConfig returns a configmap for
 // the promtail extra-config
 func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
-
 	// Scrape logs from kube-system and giantswarm namespaces only for WC clusters
 	var extraRelabelConfigs []extraRelabelConfig
 	if common.IsWorkloadCluster(lc) {
@@ -154,6 +152,26 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
       scrape_job: audit-logs
       __path__: /var/log/apiserver/*.log
       node_name: ${NODENAME:-unknown}
+  pipeline_stages:
+  - json:
+      expressions:
+        objectRef: objectRef
+        level:     level
+        stage:     stage
+        verb:      verb
+  - json:
+      expressions:
+        resource: resource
+        namespace: namespace
+        name: name
+      source: objectRef
+  - labels:
+      level:
+      stage:
+      verb:
+      resource:
+      namespace:
+      name:
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 					AddScrapeJobLabel:   true,
