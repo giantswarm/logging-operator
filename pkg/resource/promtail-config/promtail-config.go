@@ -156,22 +156,14 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
   - json:
       expressions:
         objectRef: objectRef
-        level:     level
-        stage:     stage
-        verb:      verb
   - json:
       expressions:
         resource: resource
         namespace: namespace
-        name: name
       source: objectRef
   - labels:
-      level:
-      stage:
-      verb:
       resource:
       namespace:
-      name:
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,
 					AddScrapeJobLabel:   true,
