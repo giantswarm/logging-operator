@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Drop system audit logs from Promtail's scrape target
 
+### Fixed
+
+- Replace systemd_unit label with syslog identifier for system logs without systemd_unit label
+
 ## [0.3.0] - 2023-11-21
 
 ### Changed
