@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Drop system audit logs from Promtail's scrape target
+
 ## [0.3.0] - 2023-11-21
 
 ### Changed
