@@ -6,7 +6,7 @@ import (
 )
 
 // LoggingEnabledDefault defines if WCs logs are collected by default
-const LoggingEnabledDefault = false
+const LoggingEnabledDefault = true
 
 // Interface contains the definition of functions that can differ between each type of cluster
 type Interface interface {
