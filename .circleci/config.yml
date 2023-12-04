@@ -62,3 +62,31 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
+
+      - architect/push-to-app-collection:
+          context: "architect"
+          name: capz-app-collection
+          app_name: "logging-operator"
+          app_namespace: "monitoring"
+          app_collection_repo: "capz-app-collection"
+          requires:
+            - push-logging-operator-to-app-catalog
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-app-collection:
+          context: "architect"
+          name: cloud-director-app-collection
+          app_name: "logging-operator"
+          app_namespace: "monitoring"
+          app_collection_repo: "cloud-director-app-collection"
+          requires:
+            - push-logging-operator-to-app-catalog
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
