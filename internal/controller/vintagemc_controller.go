@@ -28,8 +28,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/logged-cluster/vintagemc"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
-	"github.com/giantswarm/logging-operator/pkg/vintagemc"
 )
 
 // VintageMCReconciler reconciles a Service object

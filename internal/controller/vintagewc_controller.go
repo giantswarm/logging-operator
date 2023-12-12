@@ -28,8 +28,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/logged-cluster/vintagewc"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
-	"github.com/giantswarm/logging-operator/pkg/vintagewc"
 )
 
 // VintageWCReconciler reconciles a Cluster object

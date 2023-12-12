@@ -27,8 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/giantswarm/logging-operator/pkg/capicluster"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 )
 

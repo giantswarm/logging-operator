@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replace systemd_unit label with syslog identifier for system logs without systemd_unit label
 
+## [0.3.1] - 2023-12-04
+
+### Changed
+
+- enable logging on WCs by default.
+- push to CAPZ and CAPVCD collections
+
 ## [0.3.0] - 2023-11-21
 
 ### Changed
@@ -148,7 +155,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/giantswarm/logging-operator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/giantswarm/logging-operator/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/giantswarm/logging-operator/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/giantswarm/logging-operator/compare/v0.2.0...v0.2.1
