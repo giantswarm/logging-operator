@@ -45,6 +45,10 @@ spec:
           {{- with .Values.securityContext.container }}
             {{- . | toYaml | nindent 10 }}
           {{- end }}
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
         resources:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}

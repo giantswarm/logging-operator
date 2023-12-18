@@ -129,9 +129,25 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
       scrape_job: system-logs
   relabel_configs:
   - source_labels: ['__journal__systemd_unit']
+    target_label: '__tmp_systemd_unit'
+  - source_labels:
+    - __journal__systemd_unit
+    - __journal_syslog_identifier
+    separator: ;
+    regex: ';(.+)'
+    replacement: $1
+    target_label: '__tmp_systemd_unit'
+  - source_labels: ['__tmp_systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
     target_label: 'node_name'
+  pipeline_stages:
+  - json:
+      expressions:
+        SYSLOG_IDENTIFIER: SYSLOG_IDENTIFIER
+  - drop:
+      source: SYSLOG_IDENTIFIER
+      value: audit
 - job_name: systemd_journal_var
   journal:
     path: /var/log/journal
@@ -141,9 +157,25 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
       scrape_job: system-logs
   relabel_configs:
   - source_labels: ['__journal__systemd_unit']
+    target_label: '__tmp_systemd_unit'
+  - source_labels:
+    - __journal__systemd_unit
+    - __journal_syslog_identifier
+    separator: ;
+    regex: ';(.+)'
+    replacement: $1
+    target_label: '__tmp_systemd_unit'
+  - source_labels: ['__tmp_systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
     target_label: 'node_name'
+  pipeline_stages:
+  - json:
+      expressions:
+        SYSLOG_IDENTIFIER: SYSLOG_IDENTIFIER
+  - drop:
+      source: SYSLOG_IDENTIFIER
+      value: audit
 - job_name: kubernetes-audit
   static_configs:
   - targets:
