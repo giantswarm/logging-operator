@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Configure `gsoci.azurecr.io` as the default container image registry.
+- Drop system audit logs from Promtail's scrape target
+
+### Fixed
+
+- Replace systemd_unit label with syslog identifier for system logs without systemd_unit label
+- Fixed podmonitor
+
 ## [0.3.1] - 2023-12-04
 
 ### Changed
