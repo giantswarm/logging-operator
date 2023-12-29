@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add pprof library import in controllers to expose profiles.
+
 ### Changed
 
 - Configure `gsoci.azurecr.io` as the default container image registry.
