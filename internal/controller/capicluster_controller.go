@@ -19,8 +19,6 @@ package controller
 import (
 	"context"
 
-	_ "net/http/pprof" //nolint: all
-
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
