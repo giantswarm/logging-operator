@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add pprof library import in controllers to expose profiles.
+- Expose profiles in the controller.
+- Add conditional profiling annotations in the deployment.
 
 ### Changed
 

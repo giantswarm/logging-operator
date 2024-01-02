@@ -44,3 +44,7 @@ loggingOperator:
 managementCluster:
   name: unknown
   insecureCA: false
+
+profiling:
+  enabled: false
+  port: 8080

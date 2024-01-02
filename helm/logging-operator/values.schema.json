@@ -40,6 +40,9 @@
         "managementCluster": {
             "type": "object",
             "properties": {
+                "insecureCA": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 }
@@ -50,6 +53,17 @@
             "properties": {
                 "flavor": {
                     "type": "string"
+                }
+            }
+        },
+        "profiling": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "port": {
+                    "type": "integer"
                 }
             }
         },
