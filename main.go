@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"net/http"
+	"net/http/pprof"
 	_ "net/http/pprof" //nolint: all
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -89,8 +90,12 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
-	var mux *http.ServeMux
-	mux.Handle("/debug/pprof/", http.DefaultServeMux)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
@@ -98,6 +103,9 @@ func main() {
 		Scheme: scheme,
 		Metrics: server.Options{
 			BindAddress: metricsAddr,
+			ExtraHandlers: map[string]http.Handler{
+				"/debug/pprof/": mux,
+			},
 		},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
