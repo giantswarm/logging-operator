@@ -21,8 +21,7 @@ import (
 	"os"
 
 	"net/http"
-	"net/http/pprof"
-	_ "net/http/pprof" //nolint: all
+	"net/http/pprof" //nolint: all
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.

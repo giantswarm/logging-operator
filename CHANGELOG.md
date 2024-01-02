@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Expose profiles in the controller.
-- Add conditional profiling annotations in the deployment.
+- Expose profiles in the controller and add conditional profiling annotations in the deployment.
 
 ### Changed
 
