@@ -20,9 +20,6 @@ import (
 	"flag"
 	"os"
 
-	"net/http"
-	"net/http/pprof" //nolint: all
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -89,12 +86,12 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
-	mux := http.NewServeMux()
+	/* mux := http.NewServeMux()
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
 	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
 	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace) */
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
@@ -102,13 +99,14 @@ func main() {
 		Scheme: scheme,
 		Metrics: server.Options{
 			BindAddress: metricsAddr,
-			ExtraHandlers: map[string]http.Handler{
+			/* ExtraHandlers: map[string]http.Handler{
 				"/debug/pprof/": mux,
-			},
+			}, */
 		},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "5c8bbafe.x-k8s.io",
+		PprofBindAddress:       metricsAddr,
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
