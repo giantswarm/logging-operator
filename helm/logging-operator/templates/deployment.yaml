@@ -52,6 +52,9 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
+        - containerPort: 6060
+          name: profiles
+          protocol: TCP
         resources:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}

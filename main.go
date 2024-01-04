@@ -69,6 +69,7 @@ func main() {
 	var installationName string
 	var insecureCA bool
 	var metricsAddr string
+	var profilesAddr string
 	var probeAddr string
 	var vintageMode bool
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
@@ -78,6 +79,7 @@ func main() {
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&profilesAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
 	opts := zap.Options{
@@ -106,7 +108,7 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "5c8bbafe.x-k8s.io",
-		PprofBindAddress:       metricsAddr,
+		PprofBindAddress:       profilesAddr,
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
