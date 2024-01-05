@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
@@ -61,6 +62,9 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		//if r.Client.IsNotFound(err) {
 		//	return ctrl.Result{}, nil
 		//}
+		if apimachineryerrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
