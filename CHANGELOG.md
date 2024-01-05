@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix reconcile errors on grafana-agent-config.
+- Fix reconcile errors related to grafana-agent app not deployed.
 - Replace systemd_unit label with syslog identifier for system logs without systemd_unit label
 - Fixed podmonitor
 
