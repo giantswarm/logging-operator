@@ -44,7 +44,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	desiredApp := lc.WirePromtail(currentApp)
-	if !reflect.DeepEqual(currentApp, desiredApp) {
+	if !reflect.DeepEqual(currentApp, *desiredApp) {
 		logger.Info("promtailwiring updating")
 		// Update the app.
 		err := r.Client.Update(ctx, desiredApp)
@@ -79,7 +79,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	desiredApp := lc.UnwirePromtail(currentApp)
-	if !reflect.DeepEqual(currentApp, desiredApp) {
+	if !reflect.DeepEqual(currentApp, *desiredApp) {
 		logger.Info("promtailwiring updating")
 		// Update the app.
 		err := r.Client.Update(ctx, desiredApp)
