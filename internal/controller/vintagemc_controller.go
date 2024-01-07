@@ -63,11 +63,6 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	service := &corev1.Service{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, service)
 	if err != nil {
-		// TODO(theo): might need to ignore when objects are not found since we cannot do anything
-		//             see https://book.kubebuilder.io/reference/using-finalizers.html
-		//if r.Client.IsNotFound(err) {
-		//  return ctrl.Result{}, nil
-		//}
 		if apimachineryerrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
