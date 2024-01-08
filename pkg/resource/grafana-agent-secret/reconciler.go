@@ -27,6 +27,8 @@ type Reconciler struct {
 
 // ReconcileCreate ensures grafana-agent secret is created with the right credentials
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	logger.Info("grafana-agent-secret create")
 
 	// Check existence of grafana-agent app
 	var currentApp appv1.App
@@ -38,9 +40,6 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
-
-	logger := log.FromContext(ctx)
-	logger.Info("grafana-agent-secret create")
 
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret

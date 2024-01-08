@@ -63,7 +63,6 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Install configmap.
-			// Configmap was not found.
 			logger.Info("Logging agents toggle not found, creating")
 			err = r.Client.Create(ctx, &desiredConfigMap)
 		}
