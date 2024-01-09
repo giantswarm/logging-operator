@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -29,9 +30,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-secret create")
 
+	// Check existence of grafana-agent app
+	var currentApp appv1.App
+	appMeta := common.ObservabilityBundleAppMeta(lc)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
+	err = r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
 		&loggingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)

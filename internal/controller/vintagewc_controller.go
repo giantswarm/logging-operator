@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
@@ -56,11 +57,9 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	cluster := &capiv1beta1.Cluster{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, cluster)
 	if err != nil {
-		// TODO(theo): might need to ignore when objects are not found since we cannot do anything
-		//             see https://book.kubebuilder.io/reference/using-finalizers.html
-		//if r.Client.IsNotFound(err) {
-		//	return ctrl.Result{}, nil
-		//}
+		if apimachineryerrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
