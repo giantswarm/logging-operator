@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/giantswarm/logging-operator/internal/controller/predicates"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -88,7 +89,14 @@ func (r *VintageWCReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// This ensures we run the reconcile loop when the observability-bundle app resource version changes.
 		Watches(
 			&appv1alpha1.App{},
-			&handler.EnqueueRequestForObject{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      "kubernetes",
+						Namespace: "default",
+					}},
+				}
+			}),
 			builder.WithPredicates(predicates.ObservabilityBundleAppVersionChangedPredicate{}),
 		).
 		Complete(r)

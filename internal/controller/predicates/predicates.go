@@ -1,6 +1,11 @@
 package predicates
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/blang/semver"
+	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
@@ -19,11 +24,30 @@ func (ObservabilityBundleAppVersionChangedPredicate) Update(e event.UpdateEvent)
 		return false
 	}
 
-	if len(e.ObjectOld.GetLabels()) == 0 || len(e.ObjectNew.GetLabels()) == 0 ||
-		e.ObjectOld.GetLabels()["app.kubernetes.io/name"] != "observability-bundle" ||
-		e.ObjectNew.GetLabels()["app.kubernetes.io/name"] != "observability-bundle" {
+	if !strings.Contains(e.ObjectOld.GetName(), "observability-bundle") || !strings.Contains(e.ObjectNew.GetName(), "observability-bundle") {
+		return false
+	}
+	var oldApp, newApp *appv1alpha1.App
+	var ok bool
+	if oldApp, ok = e.ObjectOld.(*appv1alpha1.App); !ok {
+		return false
+	}
+	if newApp, ok = e.ObjectNew.(*appv1alpha1.App); !ok {
 		return false
 	}
 
-	return e.ObjectNew.GetResourceVersion() != e.ObjectOld.GetResourceVersion()
+	oldAppVersion, err := semver.New(oldApp.Spec.Version)
+	if err != nil {
+		return false
+	}
+	newAppVersion, err := semver.Parse(newApp.Spec.Version)
+	if err != nil {
+		return false
+	}
+	breakingVersion := semver.MustParse("1.0.0")
+
+	fmt.Printf("%v\n", oldApp)
+	fmt.Printf("%v\n", newApp)
+	fmt.Printf("%v\n", oldAppVersion.LT(breakingVersion) && newAppVersion.GTE(breakingVersion))
+	return oldAppVersion.LT(breakingVersion) && newAppVersion.GTE(breakingVersion)
 }
