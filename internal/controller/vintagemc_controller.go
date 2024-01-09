@@ -19,15 +19,19 @@ package controller
 import (
 	"context"
 
+	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/giantswarm/logging-operator/internal/controller/predicates"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/vintagemc"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
@@ -94,5 +98,11 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 func (r *VintageMCReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.Service{}).
+		// This ensures we run the reconcile loop when the observability-bundle app resource version changes.
+		Watches(
+			&appv1alpha1.App{},
+			&handler.EnqueueRequestForObject{},
+			builder.WithPredicates(predicates.ObservabilityBundleAppVersionChangedPredicate{}),
+		).
 		Complete(r)
 }
