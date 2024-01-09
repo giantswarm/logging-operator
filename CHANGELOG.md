@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2024-01-09
+
 ### Fixed
 
 - Fix reconcile errors (grafana-agent-config, promtail-wiring, cluster not found).
@@ -167,7 +169,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/giantswarm/logging-operator/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/giantswarm/logging-operator/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/giantswarm/logging-operator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/giantswarm/logging-operator/compare/v0.2.2...v0.3.0
