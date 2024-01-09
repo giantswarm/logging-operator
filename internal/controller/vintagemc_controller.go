@@ -21,6 +21,7 @@ import (
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -62,11 +63,9 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	service := &corev1.Service{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, service)
 	if err != nil {
-		// TODO(theo): might need to ignore when objects are not found since we cannot do anything
-		//             see https://book.kubebuilder.io/reference/using-finalizers.html
-		//if r.Client.IsNotFound(err) {
-		//  return ctrl.Result{}, nil
-		//}
+		if apimachineryerrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 

@@ -32,3 +32,16 @@ Selector labels
 app.kubernetes.io/name: {{ include "name" . | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end -}}
+
+
+{{/*
+Profiling annotations
+*/}}
+{{- define "annotations.profiling" -}}
+profiles.grafana.com/memory.scrape: "true"
+profiles.grafana.com/memory.port: {{ .Values.profiling.port | quote }}
+profiles.grafana.com/cpu.scrape: "true"
+profiles.grafana.com/cpu.port: {{ .Values.profiling.port | quote }}
+profiles.grafana.com/goroutine.scrape: "true"
+profiles.grafana.com/goroutine.port: {{ .Values.profiling.port | quote }}
+{{- end -}}
