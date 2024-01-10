@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -92,8 +93,8 @@ func (r *VintageWCReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
 				return []reconcile.Request{
 					{NamespacedName: types.NamespacedName{
-						Name:      "kubernetes",
-						Namespace: "default",
+						Name:      object.GetLabels()["giantswarm.io/cluster"],
+						Namespace: fmt.Sprintf("org-%s", object.GetLabels()["giantswarm.io/organization"]),
 					}},
 				}
 			}),

@@ -1,7 +1,6 @@
 package predicates
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/blang/semver"
@@ -27,6 +26,7 @@ func (ObservabilityBundleAppVersionChangedPredicate) Update(e event.UpdateEvent)
 	if !strings.Contains(e.ObjectOld.GetName(), "observability-bundle") || !strings.Contains(e.ObjectNew.GetName(), "observability-bundle") {
 		return false
 	}
+
 	var oldApp, newApp *appv1alpha1.App
 	var ok bool
 	if oldApp, ok = e.ObjectOld.(*appv1alpha1.App); !ok {
@@ -45,9 +45,5 @@ func (ObservabilityBundleAppVersionChangedPredicate) Update(e event.UpdateEvent)
 		return false
 	}
 	breakingVersion := semver.MustParse("1.0.0")
-
-	fmt.Printf("%v\n", oldApp)
-	fmt.Printf("%v\n", newApp)
-	fmt.Printf("%v\n", oldAppVersion.LT(breakingVersion) && newAppVersion.GTE(breakingVersion))
 	return oldAppVersion.LT(breakingVersion) && newAppVersion.GTE(breakingVersion)
 }
