@@ -40,7 +40,7 @@ func (ObservabilityBundleAppVersionChangedPredicate) Update(e event.UpdateEvent)
 	if err != nil {
 		return false
 	}
-	newAppVersion, err := semver.Parse(newApp.Spec.Version)
+	newAppVersion, err := semver.New(newApp.Spec.Version)
 	if err != nil {
 		return false
 	}
