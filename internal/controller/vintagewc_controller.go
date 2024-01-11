@@ -18,16 +18,22 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
+	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	capiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/giantswarm/logging-operator/internal/controller/predicates"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/vintagewc"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
@@ -81,5 +87,18 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 func (r *VintageWCReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&capiv1beta1.Cluster{}).
+		// This ensures we run the reconcile loop when the observability-bundle app resource version changes.
+		Watches(
+			&appv1alpha1.App{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      object.GetLabels()["giantswarm.io/cluster"],
+						Namespace: fmt.Sprintf("org-%s", object.GetLabels()["giantswarm.io/organization"]),
+					}},
+				}
+			}),
+			builder.WithPredicates(predicates.ObservabilityBundleAppVersionChangedPredicate{}),
+		).
 		Complete(r)
 }
