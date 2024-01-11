@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Watch observability-bundle apps to handle bundle migration to v1.0.0.
+
 ## [0.4.1] - 2024-01-09
 
 ### Fixed
