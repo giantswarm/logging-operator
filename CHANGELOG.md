@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ignore not found error for clusters that have logging disabled.
+
 ## [0.4.2] - 2024-01-11
 
 ### Fixed
