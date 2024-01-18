@@ -5,8 +5,8 @@ go 1.21
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/onsi/ginkgo/v2 v2.14.0
-	github.com/onsi/gomega v1.30.0
+	github.com/onsi/ginkgo/v2 v2.15.0
+	github.com/onsi/gomega v1.31.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/mod v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
