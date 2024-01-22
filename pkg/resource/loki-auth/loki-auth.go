@@ -68,7 +68,6 @@ func listWriteUsers(credentialsSecret *v1.Secret) []string {
 // GenerateLokiAuthSecret returns a secret for
 // the Loki-multi-tenant-proxy auth config
 func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (v1.Secret, error) {
-
 	// Init empty users structure
 	values := Values{
 		Users: []user{},

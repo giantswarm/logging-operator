@@ -72,7 +72,6 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // GeneratePromtailClientSecret returns a secret for
 // the Loki-multi-tenant-proxy auth config
 func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
-
 	clusterName := lc.GetClusterName()
 
 	writeUser := clusterName
