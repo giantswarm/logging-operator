@@ -1,16 +1,12 @@
 package lokiauth
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
-	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -20,10 +16,8 @@ import (
 
 const (
 	//#nosec G101
-	lokiauthSecretName          = "loki-multi-tenant-proxy-auth-config"
-	lokiauthSecretNamespace     = "loki"
-	lokiauthDeploymentName      = "loki-multi-tenant-proxy"
-	lokiauthDeploymentNamespace = "loki"
+	lokiauthSecretName      = "loki-multi-tenant-proxy-auth-config"
+	lokiauthSecretNamespace = "loki"
 	// DefaultReadOrgIDs - make sure to have at least 2 tenants, to prevent writing with this user
 	DefaultReadOrgIDs = "giantswarm|default"
 )
@@ -121,41 +115,4 @@ func GenerateLokiAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Se
 	}
 
 	return secret, nil
-}
-
-// This one is a hack until the proxy knows how to automatically reload its config
-func ReloadLokiProxy(lc loggedcluster.Interface, ctx context.Context, client client.Client) error {
-	const triggerredeployLabel = "app.giantswarm.io/triggerredeploy"
-	const tickValue = "tick"
-	const tockValue = "tock"
-
-	var lokiProxyDeployment appsv1.Deployment
-	err := client.Get(ctx, types.NamespacedName{Name: lokiauthDeploymentName, Namespace: lokiauthDeploymentNamespace}, &lokiProxyDeployment)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	labels := lokiProxyDeployment.Spec.Template.GetObjectMeta().GetLabels()
-
-	if val, ok := labels[triggerredeployLabel]; ok {
-
-		if val == tickValue {
-			labels[triggerredeployLabel] = tockValue
-		} else {
-			labels[triggerredeployLabel] = tickValue
-		}
-
-	} else {
-		labels[triggerredeployLabel] = tickValue
-	}
-
-	lokiProxyDeployment.Spec.Template.ObjectMeta.SetLabels(labels)
-
-	err = client.Update(ctx, &lokiProxyDeployment)
-	if err != nil {
-		return errors.WithStack(err)
-
-	}
-
-	return nil
 }
