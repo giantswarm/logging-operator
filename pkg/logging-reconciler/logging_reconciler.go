@@ -24,22 +24,13 @@ type LoggingReconciler struct {
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
-	loggingEnabled := common.IsLoggingEnabled(lc)
-
-	if loggingEnabled {
-		// TODO: handle returned ctrl.Result
-		_, err = l.reconcileCreate(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+	if common.IsLoggingEnabled(lc) {
+		result, err = l.reconcileCreate(ctx, lc)
 	} else {
-		_, err = l.reconcileDelete(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+		result, err = l.reconcileDelete(ctx, lc)
 	}
 
-	return ctrl.Result{}, nil
+	return result, errors.WithStack(err)
 }
 
 // reconcileCreate handles creation/update logic by calling ReconcileCreate method on all l.Reconcilers.
@@ -62,10 +53,9 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 
 	// Call all reconcilers ReconcileCreate methods.
 	for _, reconciler := range l.Reconcilers {
-		// TODO(theo): add handling for returned ctrl.Result value.
-		_, err := reconciler.ReconcileCreate(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+		result, err := reconciler.ReconcileCreate(ctx, lc)
+		if err != nil || !result.IsZero() {
+			return result, errors.WithStack(err)
 		}
 	}
 
@@ -79,10 +69,9 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 
 	// Call all reconcilers ReconcileDelete methods.
 	for _, reconciler := range l.Reconcilers {
-		// TODO(theo): add handling for returned ctrl.Result value.
-		_, err := reconciler.ReconcileDelete(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+		result, err := reconciler.ReconcileDelete(ctx, lc)
+		if err != nil || !result.IsZero() {
+			return result, errors.WithStack(err)
 		}
 	}
 

@@ -3,6 +3,7 @@ package grafanaagentconfig
 import (
 	"context"
 	"reflect"
+	"time"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -37,7 +38,8 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
+			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
