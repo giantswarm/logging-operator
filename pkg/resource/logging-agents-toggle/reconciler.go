@@ -41,7 +41,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-agents-toggle - observability bundle app not found")
+			logger.Info("logging-agents-toggle - observability bundle app not found, requeueing")
 			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
 			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
 		}
@@ -102,7 +102,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-agents-toggle - observability bundle app not found")
+			logger.Info("logging-agents-toggle - observability bundle app not found, skipping deletion")
 			// If the app is not found we ignore the error and return, as this means the app was already deleted.
 			return ctrl.Result{}, nil
 		}
