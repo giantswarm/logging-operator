@@ -9,6 +9,7 @@ import (
 
 	"github.com/blang/semver"
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
+
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
