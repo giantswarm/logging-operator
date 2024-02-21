@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- This feature fixes reconciliation by support requeing of failed request that do not necesseraly need to be an error (missing app due to slow cluster boostrapping).
+- This feature fixes reconciliation by support requeuing of failed request that do not necessarily need to be an error (missing app due to slow cluster boostrapping).
 
 ## [0.5.0] - 2024-02-19
 
