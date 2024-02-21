@@ -75,12 +75,8 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		Object:  cluster,
 		Options: loggedcluster.O,
 	}
-	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
 
-	return ctrl.Result{}, nil
+	return r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 }
 
 // SetupWithManager sets up the controller with the Manager.

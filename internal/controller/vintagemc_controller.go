@@ -50,10 +50,6 @@ type VintageMCReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Service object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
@@ -76,23 +72,11 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	logger.Info("Reconciling Management cluster")
 
-	// TODO(theo): Pass the IsLoggingEnabled function as a parameter into the LoggingReconciler
-	// So we can have different detection logic to enable logging for Vintage MC and CAPI cluster.
-	// On Vintage MC we determine if logging is enabled based on a global installation
-	// level setting which need to be passed as a flag to this operator.
-	// IsLoggingEnabled for this controller would only check the given flag, while the CAPI controller
-	// would check both the flag and the label.
-
 	loggedCluster := vintagemc.Object{
 		Object:  service,
 		Options: loggedcluster.O,
 	}
-	_, err = r.LoggingReconciler.Reconcile(ctx, loggedCluster)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	return ctrl.Result{}, nil
+	return r.LoggingReconciler.Reconcile(ctx, loggedCluster)
 }
 
 // SetupWithManager sets up the controller with the Manager.

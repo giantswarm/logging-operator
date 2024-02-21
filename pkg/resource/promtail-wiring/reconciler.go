@@ -3,6 +3,7 @@ package promtailwiring
 import (
 	"context"
 	"reflect"
+	"time"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -40,6 +41,11 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("promtailwiring - app not found, requeuing")
+			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
@@ -66,13 +72,12 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get observability bundle app metadata.
 	appMeta := common.ObservabilityBundleAppMeta(lc)
-
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("promtailwiring - app not found")
+			logger.Info("promtailwiring - app not found, skipping deletion")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
