@@ -33,11 +33,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("Logging agents toggle create")
 
-	// Get observability bundle app metadata.
-	appMeta := common.ObservabilityBundleAppMeta(lc)
-	// Retrieve the app.
-	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
@@ -45,11 +41,6 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
 			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
 		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	observabilityBundleVersion, err := semver.Parse(currentApp.Spec.Version)
-	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 

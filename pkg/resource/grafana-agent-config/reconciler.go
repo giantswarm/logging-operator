@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/blang/semver"
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -30,12 +31,27 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-config create")
 
+	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
+	if err != nil {
+		// Handle case where the app is not found.
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("grafana-agent-config - observability bundle app not found, requeueing")
+			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// The grafana agent was added only for bundle version 0.9.0 and above (cf. https://github.com/giantswarm/observability-bundle/compare/v0.8.9...v0.9.0)
+	if observabilityBundleVersion.LT(semver.MustParse("0.9.0")) {
+		return ctrl.Result{}, nil
+	}
+
 	// Get observability bundle app metadata.
 	appMeta := common.ObservabilityBundleAppMeta(lc)
-
 	// Retrieve the app.
 	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config - app not found, requeuing")

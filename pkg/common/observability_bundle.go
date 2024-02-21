@@ -1,8 +1,14 @@
 package common
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"context"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/blang/semver"
+	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
@@ -33,4 +39,16 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 
 	AddCommonLabels(metadata.Labels)
 	return metadata
+}
+
+func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.Client, ctx context.Context) (version semver.Version, err error) {
+	// Get observability bundle app metadata.
+	appMeta := ObservabilityBundleAppMeta(lc)
+	// Retrieve the app.
+	var currentApp appv1.App
+	err = client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	if err != nil {
+		return version, err
+	}
+	return semver.Parse(currentApp.Spec.Version)
 }
