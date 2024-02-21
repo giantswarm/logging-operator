@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2024-02-19
+
+### Removed
+
+- Remove multi-tenant proxy restart hack.
+
+## [0.4.4] - 2024-01-22
+
+### Changed
+
+- Push to CAPV.
+
+## [0.4.3] - 2024-01-17
+
+### Fixed
+
+- Ignore not found error for clusters that have logging disabled.
+
 ## [0.4.2] - 2024-01-11
 
 ### Fixed
@@ -175,7 +193,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/giantswarm/logging-operator/compare/v0.4.4...v0.5.0
+[0.4.4]: https://github.com/giantswarm/logging-operator/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/giantswarm/logging-operator/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/giantswarm/logging-operator/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/giantswarm/logging-operator/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/giantswarm/logging-operator/compare/v0.3.1...v0.4.0

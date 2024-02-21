@@ -83,7 +83,12 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	// Retrieve existing secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace}, loggingCredentialsSecret)
 	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("loggingcredentials secret not found, initializing one")
+			return ctrl.Result{}, nil
+		} else {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	// update the secret's contents if needed
