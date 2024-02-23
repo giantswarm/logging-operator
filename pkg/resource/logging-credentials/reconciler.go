@@ -62,9 +62,11 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	// commit our changes
 	logger.Info("loggingCredentials - Updating secret")
 	err = r.Client.Update(ctx, loggingCredentialsSecret)
-	if apimachineryerrors.IsNotFound(err) {
-		logger.Info("loggingCredentials - Secret does not exist, creating it")
-		err = r.Client.Create(ctx, loggingCredentialsSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("loggingCredentials - Secret does not exist, creating it")
+			err = r.Client.Create(ctx, loggingCredentialsSecret)
+		}
 	}
 
 	// Will return Secret's update error if any
@@ -110,9 +112,11 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	// commit our changes
 	logger.Info("loggingCredentials - Updating secret")
 	err = r.Client.Update(ctx, loggingCredentialsSecret)
-	if apimachineryerrors.IsNotFound(err) {
-		logger.Info("loggingCredentials - Secret does not exist, creating it")
-		err = r.Client.Create(ctx, loggingCredentialsSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("loggingCredentials - Secret does not exist, creating it")
+			err = r.Client.Create(ctx, loggingCredentialsSecret)
+		}
 	}
 
 	// Will return Secret's update error if any

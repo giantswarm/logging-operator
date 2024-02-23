@@ -24,22 +24,13 @@ type LoggingReconciler struct {
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
-	loggingEnabled := common.IsLoggingEnabled(lc)
-
-	if loggingEnabled {
-		// TODO: handle returned ctrl.Result
-		_, err = l.reconcileCreate(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+	if common.IsLoggingEnabled(lc) {
+		result, err = l.reconcileCreate(ctx, lc)
 	} else {
-		_, err = l.reconcileDelete(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+		result, err = l.reconcileDelete(ctx, lc)
 	}
 
-	return ctrl.Result{}, nil
+	return result, errors.WithStack(err)
 }
 
 // reconcileCreate handles creation/update logic by calling ReconcileCreate method on all l.Reconcilers.
@@ -47,25 +38,22 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING enabled")
 
-	// Finalizer handling needs to come first.
-	logger.Info("checking finalizer", "finalizer", key.Finalizer)
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
 		controllerutil.AddFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
+			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-	} else {
-		logger.Info("finalizer already added")
+		logger.Info("successfully added finalizer to logged cluster", "finalizer", key.Finalizer)
 	}
 
 	// Call all reconcilers ReconcileCreate methods.
 	for _, reconciler := range l.Reconcilers {
-		// TODO(theo): add handling for returned ctrl.Result value.
-		_, err := reconciler.ReconcileCreate(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+		result, err := reconciler.ReconcileCreate(ctx, lc)
+		if err != nil || !result.IsZero() {
+			return result, errors.WithStack(err)
 		}
 	}
 
@@ -77,26 +65,27 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 	logger := log.FromContext(ctx)
 	logger.Info("LOGGING disabled")
 
-	// Call all reconcilers ReconcileDelete methods.
-	for _, reconciler := range l.Reconcilers {
-		// TODO(theo): add handling for returned ctrl.Result value.
-		_, err := reconciler.ReconcileDelete(ctx, lc)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	// Finalizer handling needs to come last.
-	logger.Info("checking finalizer", "finalizer", key.Finalizer)
 	if controllerutil.ContainsFinalizer(lc, key.Finalizer) {
+		// Call all reconcilers ReconcileDelete methods.
+		for _, reconciler := range l.Reconcilers {
+			result, err := reconciler.ReconcileDelete(ctx, lc)
+			if err != nil || !result.IsZero() {
+				return result, errors.WithStack(err)
+			}
+		}
+
+		// We get the latest state of the object to avoid race conditions.
+		// Finalizer handling needs to come last.
 		logger.Info("removing finalizer", "finalizer", key.Finalizer)
 		controllerutil.RemoveFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+			// We need to requeue if we fail to remove the finalizer because of race conditions between multiple operators.
+			// This will be eventually consistent.
+			logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
+			return ctrl.Result{Requeue: true}, nil
 		}
-	} else {
-		logger.Info("finalizer already removed")
+		logger.Info("successfully removed finalizer from logged cluster", "finalizer", key.Finalizer)
 	}
 
 	return ctrl.Result{}, nil
