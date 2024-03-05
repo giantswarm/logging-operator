@@ -8,7 +8,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.16.0
 	github.com/onsi/gomega v1.31.1
 	github.com/pkg/errors v0.9.1
-	golang.org/x/mod v0.15.0
+	golang.org/x/mod v0.16.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
