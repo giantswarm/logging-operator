@@ -182,7 +182,7 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
     - localhost
     labels:
       scrape_job: audit-logs
-      __path__: /var/log/apiserver/*.log
+      __path__: /var/log/apiserver/audit.log
       node_name: ${NODENAME:-unknown}
   pipeline_stages:
   - json:
