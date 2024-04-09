@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Reduce audit log cardinality by removing filename label and ignoring rotated audit log files.
+- Reduce audit log cardinality by removing filename label and ignoring rotated audit log files to avoid duplicate audit logs.
 
 ## [0.5.2] - 2024-03-06
 
