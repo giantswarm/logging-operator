@@ -55,8 +55,8 @@ func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-user-values"
 }
 
-// UnwirePromtail unsets the user value confimap in a copy of the app
-func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
+// UnwireLogging unsets the user value confimap in a copy of the app
+func (o Object) UnwireLogging(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()
 
 	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)
@@ -69,8 +69,8 @@ func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
 	return desiredApp
 }
 
-// WirePromtail sets the user value confimap in a copy of the app.
-func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
+// WireLogging sets the user value confimap in a copy of the app.
+func (o Object) WireLogging(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()
 
 	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)

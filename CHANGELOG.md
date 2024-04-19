@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replace promtail occurrences by logging to be more generic.
+
+### Fixed
+
+- Delete leftover configmaps and secrets while cluster deleting.
+
 ## [0.5.3] - 2024-04-09
 
 ### Changed

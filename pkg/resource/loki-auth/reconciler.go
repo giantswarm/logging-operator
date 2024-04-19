@@ -18,7 +18,7 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// Promtail toggle: enable or disable Promtail in a given Cluster.
+// Loki auth: a secret for the Loki-multi-tenant-proxy auth config
 type Reconciler struct {
 	client.Client
 }

@@ -1,4 +1,4 @@
-package promtailclient
+package loggingsecret
 
 import (
 	"context"
@@ -19,15 +19,15 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// Promtail client: extra promtail config about where and how to send logs
+// Logging secret: extra logging secret about where and how to send logs
 type Reconciler struct {
 	client.Client
 }
 
-// ReconcileCreate ensures promtail secret is created with the right credentials
+// ReconcileCreate ensures logging-secret is created with the right credentials
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("promtailclient create")
+	logger.Info("logging-secret create")
 
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret
@@ -44,20 +44,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	desiredPromtailClientSecret, err := GeneratePromtailClientSecret(lc, &loggingCredentialsSecret, lokiURL)
+	desiredLoggingSecret, err := GenerateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
 	if err != nil {
-		logger.Info("promtailclient - failed generating auth config!", "error", err)
+		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Check if secret already exists.
-	logger.Info("promtailclient - getting", "namespace", desiredPromtailClientSecret.GetNamespace(), "name", desiredPromtailClientSecret.GetName())
-	var currentPromtailClientSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredPromtailClientSecret.GetName(), Namespace: desiredPromtailClientSecret.GetNamespace()}, &currentPromtailClientSecret)
+	logger.Info("logging-secret - getting", "namespace", desiredLoggingSecret.GetNamespace(), "name", desiredLoggingSecret.GetName())
+	var currentLoggingSecret v1.Secret
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLoggingSecret.GetName(), Namespace: desiredLoggingSecret.GetNamespace()}, &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("promtailclient not found, creating")
-			err = r.Client.Create(ctx, &desiredPromtailClientSecret)
+			logger.Info("logging-secret not found, creating")
+			err = r.Client.Create(ctx, &desiredLoggingSecret)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -66,25 +66,50 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		}
 	}
 
-	if !needUpdate(currentPromtailClientSecret, desiredPromtailClientSecret) {
-		logger.Info("promtailclient up to date")
+	if !needUpdate(currentLoggingSecret, desiredLoggingSecret) {
+		logger.Info("logging-secret up to date")
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("promtailclient - updating")
-	err = r.Client.Update(ctx, &desiredPromtailClientSecret)
+	logger.Info("logging-secret - updating")
+	err = r.Client.Update(ctx, &desiredLoggingSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info("promtailclient - done")
+	logger.Info("logging-secret - done")
 	return ctrl.Result{}, nil
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("promtailclient delete")
+	logger.Info("logging-secret delete")
+
+	// Get expected secret.
+	var currentLoggingSecret v1.Secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("logging-secret not found, stop here")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Delete secret.
+	logger.Info("logging-secret deleting", "namespace", currentLoggingSecret.GetNamespace(), "name", currentLoggingSecret.GetName())
+	err = r.Client.Delete(ctx, &currentLoggingSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			// Do no throw error in case it was not found, as this means
+			// it was already deleted.
+			logger.Info("logging-secret already deleted")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	logger.Info("logging-secret deleted")
 
 	return ctrl.Result{}, nil
 }

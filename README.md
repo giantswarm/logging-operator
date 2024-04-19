@@ -29,9 +29,9 @@ The operator is built around a central reconciler, that calls multiple sub-recon
 * Logging-Credentials are created if they don't exist. Then, their data (credentials) is used to create the next resources.
 * grafana datasource configures Grafana to read data from Loki
 * loki-multi-tenant-auth secures all Loki communication (per-tenant read/write access)
-* promtail client configures write access to Loki for Promtail
-* Promtail config setups some Promtail settings (like which logs to collect)
-* Promtail wiring ensures promtail-app reads configs from previous steps
+* logging-secret configures write access to Loki for Promtail
+* logging-config setups some Promtail settings (like which logs to collect)
+* logging-wiring ensures promtail-app reads configs from previous steps
 * grafana-agent config setups some grafana-agent settings like the `river` configuration to scrape Kubernetes Events
 * grafana-agent secret setups logging write credentials to access loki into the `river` configuration
 * Logging agents toggle enables/disables logging agents deployment on WCs

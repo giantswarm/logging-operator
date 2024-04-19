@@ -58,7 +58,7 @@ func genPassword() (string, error) {
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
-// the observabilitybundle application to enable promtail.
+// the observabilitybundle application to enable logging.
 func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secret {
 	secret := v1.Secret{
 		ObjectMeta: LoggingCredentialsSecretMeta(lc),

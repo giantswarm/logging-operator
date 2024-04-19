@@ -18,7 +18,7 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// Promtail toggle: enable or disable Promtail in a given Cluster.
+// Grafana datasource secret: secret which stores Loki datasource information for Grafana
 type Reconciler struct {
 	client.Client
 }

@@ -1,4 +1,4 @@
-package promtailconfig
+package loggingconfig
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	promtailConfigName = "logging-config"
+	loggingConfigName = "logging-config"
 )
 
 // /// Promtail values config structure
@@ -73,10 +73,10 @@ type extraRelabelConfig struct {
 	Regex        string   `yaml:"regex" json:"regex"`
 }
 
-// ConfigMeta returns metadata for the promtail-config
+// ConfigMeta returns metadata for the logging-config
 func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), promtailConfigName),
+		Name:      getLoggingConfigName(lc),
 		Namespace: lc.GetAppsNamespace(),
 		Labels:    map[string]string{},
 	}
@@ -85,9 +85,9 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-// GeneratePromtailConfig returns a configmap for
-// the promtail extra-config
-func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
+// GenerateLoggingConfig returns a configmap for
+// the logging extra-config
+func GenerateLoggingConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 	// Scrape logs from kube-system and giantswarm namespaces only for WC clusters
 	var extraRelabelConfigs []extraRelabelConfig
 	if common.IsWorkloadCluster(lc) {
@@ -254,4 +254,8 @@ func GeneratePromtailConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 	}
 
 	return configmap, nil
+}
+
+func getLoggingConfigName(lc loggedcluster.Interface) string {
+	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingConfigName)
 }
