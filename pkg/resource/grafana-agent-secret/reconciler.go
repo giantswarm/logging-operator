@@ -113,10 +113,35 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	return ctrl.Result{}, nil
 }
 
-// ReconcileDelete - Not much to do here when a cluster is deleted
+// ReconcileDelete ensure grafana-agent-secret is deleted for the given cluster.
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-secret delete")
+
+	// Get expected secret.
+	var currentGrafanaAgentSecret v1.Secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentGrafanaAgentSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("grafana-agent-secret not found, stop here")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Delete secret.
+	logger.Info("grafana-agent-secret deleting", "namespace", currentGrafanaAgentSecret.GetNamespace(), "name", currentGrafanaAgentSecret.GetName())
+	err = r.Client.Delete(ctx, &currentGrafanaAgentSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			// Do no throw error in case it was not found, as this means
+			// it was already deleted.
+			logger.Info("grafana-agent-secret already deleted")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	logger.Info("grafana-agent-secret deleted")
 
 	return ctrl.Result{}, nil
 }

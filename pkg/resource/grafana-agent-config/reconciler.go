@@ -99,12 +99,35 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	return ctrl.Result{}, nil
 }
 
-// ReconcileDelete - Not much to do here when a cluster is deleted
+// ReconcileDelete ensure grafana-agent-config is deleted for the given cluster.
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-config delete")
 
-	// Don't do anything, we let observability-bundle do the cleanup when logging.enable=false
+	// Get expected configmap.
+	var currentGrafanaAgentConfig v1.ConfigMap
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentGrafanaAgentConfig)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("grafana-agent-config not found, stop here")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Delete configmap.
+	logger.Info("grafana-agent-config deleting", "namespace", currentGrafanaAgentConfig.GetNamespace(), "name", currentGrafanaAgentConfig.GetName())
+	err = r.Client.Delete(ctx, &currentGrafanaAgentConfig)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			// Do no throw error in case it was not found, as this means
+			// it was already deleted.
+			logger.Info("grafana-agent-config already deleted")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	logger.Info("grafana-agent-config deleted")
 
 	return ctrl.Result{}, nil
 }

@@ -36,7 +36,7 @@ type configMap struct {
 // ConfigMeta returns metadata for the grafana-agent-config
 func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentConfigName),
+		Name:      getGrafanaAgentConfigName(lc),
 		Namespace: lc.GetAppsNamespace(),
 		Labels:    map[string]string{},
 	}
@@ -109,4 +109,8 @@ loki.write "default" {
 	}
 
 	return configmap, nil
+}
+
+func getGrafanaAgentConfigName(lc loggedcluster.Interface) string {
+	return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentConfigName)
 }

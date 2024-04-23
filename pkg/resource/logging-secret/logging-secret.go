@@ -1,4 +1,4 @@
-package promtailclient
+package loggingsecret
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	promtailClientSecretName = "logging-secret"
+	loggingClientSecretName = "logging-secret"
 )
 
 type values struct {
@@ -57,10 +57,10 @@ type promtailConfigClientBasicAuth struct {
 	Password string `yaml:"password" json:"password"`
 }
 
-// SecretMeta returns metadata for the promtail-user-secrets
+// SecretMeta returns metadata for the logging-secret
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), promtailClientSecretName),
+		Name:      getLoggingSecretName(lc),
 		Namespace: lc.GetAppsNamespace(),
 		Labels:    map[string]string{},
 	}
@@ -69,9 +69,9 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-// GeneratePromtailClientSecret returns a secret for
+// GenerateLoggingSecret returns a secret for
 // the Loki-multi-tenant-proxy auth config
-func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func GenerateLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
 	clusterName := lc.GetClusterName()
 
 	writeUser := clusterName
@@ -123,4 +123,8 @@ func GeneratePromtailClientSecret(lc loggedcluster.Interface, credentialsSecret 
 	}
 
 	return secret, nil
+}
+
+func getLoggingSecretName(lc loggedcluster.Interface) string {
+	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingClientSecretName)
 }

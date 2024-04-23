@@ -85,12 +85,12 @@ func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"
 }
 
-func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
+func (o Object) UnwireLogging(currentApp appv1.App) *appv1.App {
 	// cluster-operator is taking care of the unwiring, nothing to do here
 	return currentApp.DeepCopy()
 }
 
-func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
+func (o Object) WireLogging(currentApp appv1.App) *appv1.App {
 	// cluster-operator is taking care of the wiring, nothing to do here
 	return currentApp.DeepCopy()
 }

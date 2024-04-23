@@ -1,4 +1,4 @@
-package promtailwiring
+package loggingwiring
 
 import (
 	"context"
@@ -20,8 +20,8 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// Promtail wiring: set or unset the user value configmap created by
-// promtail-toggle in the observability bundle.
+// Logging wiring: set or unset the user value configmap created by
+// logging-agents-toggle in the observability bundle.
 type Reconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -31,27 +31,27 @@ type Reconciler struct {
 // for the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("promtailwiring create")
+	logger.Info("logging wiring create")
 
 	// Get observability bundle app metadata.
 	appMeta := common.ObservabilityBundleAppMeta(lc)
 
 	// Retrieve the app.
-	logger.Info("promtailwiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
+	logger.Info("logging wiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
 	var currentApp appv1.App
 	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("promtailwiring - app not found, requeuing")
+			logger.Info("logging wiring - app not found, requeuing")
 			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
 			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	desiredApp := lc.WirePromtail(currentApp)
+	desiredApp := lc.WireLogging(currentApp)
 	if !reflect.DeepEqual(currentApp, *desiredApp) {
-		logger.Info("promtailwiring updating")
+		logger.Info("logging wiring updating")
 		// Update the app.
 		err := r.Client.Update(ctx, desiredApp)
 		if err != nil {
@@ -59,7 +59,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		}
 	}
 
-	logger.Info("promtailwiring up to date")
+	logger.Info("logging wiring up to date")
 
 	return ctrl.Result{}, nil
 }
@@ -68,7 +68,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 // for the given cluster.
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("promtailwiring delete")
+	logger.Info("logging wiring delete")
 
 	// Get observability bundle app metadata.
 	appMeta := common.ObservabilityBundleAppMeta(lc)
@@ -77,15 +77,15 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("promtailwiring - app not found, skipping deletion")
+			logger.Info("logging wiring - app not found, skipping deletion")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	desiredApp := lc.UnwirePromtail(currentApp)
+	desiredApp := lc.UnwireLogging(currentApp)
 	if !reflect.DeepEqual(currentApp, *desiredApp) {
-		logger.Info("promtailwiring updating")
+		logger.Info("logging wiring updating")
 		// Update the app.
 		err := r.Client.Update(ctx, desiredApp)
 		if err != nil {
@@ -93,7 +93,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 		}
 	}
 
-	logger.Info("promtailwiring up to date")
+	logger.Info("logging wiring up to date")
 
 	return ctrl.Result{}, nil
 }

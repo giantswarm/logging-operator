@@ -21,6 +21,6 @@ type Interface interface {
 	ObservabilityBundleConfigLabelName(config string) string
 	GetObject() client.Object
 	GetObservabilityBundleConfigMap() string
-	UnwirePromtail(currentApp appv1.App) *appv1.App
-	WirePromtail(currentApp appv1.App) *appv1.App
+	UnwireLogging(currentApp appv1.App) *appv1.App
+	WireLogging(currentApp appv1.App) *appv1.App
 }

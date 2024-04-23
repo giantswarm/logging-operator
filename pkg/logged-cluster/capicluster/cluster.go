@@ -85,8 +85,8 @@ func (o Object) getWiredExtraConfig() appv1.AppExtraConfig {
 	}
 }
 
-// UnwirePromtail unsets the extraconfig confimap in a copy of the app
-func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
+// UnwireLogging unsets the extraconfig confimap in a copy of the app
+func (o Object) UnwireLogging(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()
 
 	wiredExtraConfig := o.getWiredExtraConfig()
@@ -99,8 +99,8 @@ func (o Object) UnwirePromtail(currentApp appv1.App) *appv1.App {
 	return desiredApp
 }
 
-// WirePromtail sets the extraconfig confimap in a copy of the app.
-func (o Object) WirePromtail(currentApp appv1.App) *appv1.App {
+// WireLogging sets the extraconfig confimap in a copy of the app.
+func (o Object) WireLogging(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()
 	wiredExtraConfig := o.getWiredExtraConfig()
 

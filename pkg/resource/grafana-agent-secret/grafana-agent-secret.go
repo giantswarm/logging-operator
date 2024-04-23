@@ -25,7 +25,7 @@ type extraSecret struct {
 // SecretMeta returns metadata for the grafana-agent-secret
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentExtraSecretName()),
+		Name:      getGrafanaAgentSecretName(lc),
 		Namespace: lc.GetAppsNamespace(),
 		Labels:    map[string]string{},
 	}
@@ -69,4 +69,8 @@ func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 	}
 
 	return secret, nil
+}
+
+func getGrafanaAgentSecretName(lc loggedcluster.Interface) string {
+	return fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentExtraSecretName())
 }

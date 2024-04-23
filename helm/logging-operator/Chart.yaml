@@ -1,6 +1,6 @@
 apiVersion: v2
 name: logging-operator
-description: The logging-operator manages loki and promtail related config.
+description: The logging-operator manages loki and logging related config.
 home: https://github.com/giantswarm/logging-operator
 version: 0.5.3
 appVersion: 0.0.1
