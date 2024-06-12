@@ -2,8 +2,10 @@ package loggingreconciler
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,9 +44,14 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
 		controllerutil.AddFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
-		if err != nil {
-			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
-			return ctrl.Result{}, errors.WithStack(err)
+		// We check if the error is a conflict error, which means that the object has been updated since we last fetched it.
+		if apimachineryerrors.IsConflict(err) {
+			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+		} else {
+			if err != nil {
+				logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
+				return ctrl.Result{}, errors.WithStack(err)
+			}
 		}
 		logger.Info("successfully added finalizer to logged cluster", "finalizer", key.Finalizer)
 	}

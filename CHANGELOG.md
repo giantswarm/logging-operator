@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix reconciliation errors when adding or removing the finalizer on the Cluster CR.
+
 ## [0.5.4] - 2024-04-23
 
 ### Changed
