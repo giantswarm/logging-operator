@@ -111,7 +111,7 @@ func (r *CapiClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func ControllerRateLimiter() wq.RateLimiter {
 	return wq.NewMaxOfRateLimiter(
 		wq.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 1000*time.Second),
-		// 1 query per 2 sec, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
-		&wq.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.5), 100)},
+		// 1 query per 4 sec, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+		&wq.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.25), 100)},
 	)
 }
