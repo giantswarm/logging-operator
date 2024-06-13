@@ -18,16 +18,20 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
+	"golang.org/x/time/rate"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	wq "k8s.io/client-go/util/workqueue"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -82,6 +86,9 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 func (r *CapiClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&capi.Cluster{}).
+		WithOptions(controller.Options{
+			RateLimiter: ControllerRateLimiter(),
+		}).
 		// This ensures we run the reconcile loop when the observability-bundle app resource version changes.
 		Watches(
 			&appv1alpha1.App{},
@@ -96,4 +103,15 @@ func (r *CapiClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			builder.WithPredicates(predicates.ObservabilityBundleAppVersionChangedPredicate{}),
 		).
 		Complete(r)
+}
+
+// ControllerRateLimiter returns a rate limiter to control the rate of reconciliation.
+// Taken from https://github.com/kubernetes/client-go/blob/20732a1bc198ab57de644af498fa75e73fa44c08/util/workqueue/default_rate_limiters.go#L39-L45
+// We set a rate limiter starting at 1 request per second.
+func ControllerRateLimiter() wq.RateLimiter {
+	return wq.NewMaxOfRateLimiter(
+		wq.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 1000*time.Second),
+		// 1 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+		&wq.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(1), 100)},
+	)
 }

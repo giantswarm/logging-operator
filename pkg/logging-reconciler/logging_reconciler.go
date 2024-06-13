@@ -2,10 +2,8 @@ package loggingreconciler
 
 import (
 	"context"
-	"time"
 
 	"github.com/pkg/errors"
-	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,13 +43,8 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 		controllerutil.AddFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
-			// We check if the error is a conflict error, which means that the object has been updated since we last fetched it.
-			if apimachineryerrors.IsConflict(err) {
-				return ctrl.Result{RequeueAfter: time.Duration(1 * time.Minute)}, nil
-			} else {
-				logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
-				return ctrl.Result{}, errors.WithStack(err)
-			}
+			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
+			return ctrl.Result{}, errors.WithStack(err)
 		}
 		logger.Info("successfully added finalizer to logged cluster", "finalizer", key.Finalizer)
 	}
@@ -87,15 +80,10 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 		controllerutil.RemoveFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
-			// We check if the error is a conflict error, which means that the object has been updated since we last fetched it.
-			if apimachineryerrors.IsConflict(err) {
-				return ctrl.Result{RequeueAfter: time.Duration(1 * time.Minute)}, nil
-			} else {
-				// We need to requeue if we fail to remove the finalizer because of race conditions between multiple operators.
-				// This will be eventually consistent.
-				logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
-				return ctrl.Result{Requeue: true}, nil
-			}
+			// We need to requeue if we fail to remove the finalizer because of race conditions between multiple operators.
+			// This will be eventually consistent.
+			logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
+			return ctrl.Result{Requeue: true}, nil
 		}
 		logger.Info("successfully removed finalizer from logged cluster", "finalizer", key.Finalizer)
 	}
