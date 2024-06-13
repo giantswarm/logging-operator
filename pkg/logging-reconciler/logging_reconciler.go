@@ -44,11 +44,11 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
 		controllerutil.AddFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
-		// We check if the error is a conflict error, which means that the object has been updated since we last fetched it.
-		if apimachineryerrors.IsConflict(err) {
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		} else {
-			if err != nil {
+		if err != nil {
+			// We check if the error is a conflict error, which means that the object has been updated since we last fetched it.
+			if apimachineryerrors.IsConflict(err) {
+				return ctrl.Result{RequeueAfter: time.Duration(1 * time.Minute)}, nil
+			} else {
 				logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -87,10 +87,15 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 		controllerutil.RemoveFinalizer(lc, key.Finalizer)
 		err := l.Client.Update(ctx, lc.GetObject())
 		if err != nil {
-			// We need to requeue if we fail to remove the finalizer because of race conditions between multiple operators.
-			// This will be eventually consistent.
-			logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
-			return ctrl.Result{Requeue: true}, nil
+			// We check if the error is a conflict error, which means that the object has been updated since we last fetched it.
+			if apimachineryerrors.IsConflict(err) {
+				return ctrl.Result{RequeueAfter: time.Duration(1 * time.Minute)}, nil
+			} else {
+				// We need to requeue if we fail to remove the finalizer because of race conditions between multiple operators.
+				// This will be eventually consistent.
+				logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
+				return ctrl.Result{Requeue: true}, nil
+			}
 		}
 		logger.Info("successfully removed finalizer from logged cluster", "finalizer", key.Finalizer)
 	}
