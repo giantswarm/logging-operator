@@ -18,10 +18,10 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
-	"golang.org/x/time/rate"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -108,6 +108,5 @@ func (r *CapiClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // Taken from https://github.com/kubernetes/client-go/blob/20732a1bc198ab57de644af498fa75e73fa44c08/util/workqueue/default_rate_limiters.go#L39-L45
 // We set a rate limiter starting at 1 requests per 2 seconds.
 func ControllerRateLimiter() wq.RateLimiter {
-	// 1 query per sec.  This is only for retry speed and its only the overall factor (not per item)
-	return &wq.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(1), 1)}
+	return wq.NewItemExponentialFailureRateLimiter(2*time.Second, 1000*time.Second)
 }
