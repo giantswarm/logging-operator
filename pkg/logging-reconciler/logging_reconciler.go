@@ -41,6 +41,9 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
+
+		// We use a patch rather than an update to avoid conflicts when multiple controllers are adding their finalizer to the ClusterCR
+		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
 		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
@@ -81,6 +84,9 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 		// We get the latest state of the object to avoid race conditions.
 		// Finalizer handling needs to come last.
 		logger.Info("removing finalizer", "finalizer", key.Finalizer)
+
+		// We use a patch rather than an update to avoid conflicts when multiple controllers are removing their finalizer from the ClusterCR
+		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
 		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
