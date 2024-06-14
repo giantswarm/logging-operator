@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -41,11 +42,14 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
 
-		currentObject := lc
-		// We choose to make a Patch instead of an Update to avoid error when the object is updated by another operator.
-		patch := client.MergeFrom(lc)
-		err := l.Client.Patch(ctx, currentObject, patch)
+		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
 		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+
+		controllerutil.AddFinalizer(lc, key.Finalizer)
+
+		if err := patchHelper.Patch(ctx, lc.GetObject()); err != nil {
 			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
 			return ctrl.Result{}, errors.WithStack(err)
 		}
