@@ -41,10 +41,10 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
 
-		controllerutil.AddFinalizer(lc, key.Finalizer)
+		currentObject := lc
 		// We choose to make a Patch instead of an Update to avoid error when the object is updated by another operator.
 		patch := client.MergeFrom(lc)
-		err := l.Client.Patch(ctx, lc, patch)
+		err := l.Client.Patch(ctx, currentObject, patch)
 		if err != nil {
 			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
 			return ctrl.Result{}, errors.WithStack(err)
