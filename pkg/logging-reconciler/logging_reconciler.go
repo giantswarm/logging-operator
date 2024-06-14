@@ -41,19 +41,15 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 
 	if !controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		logger.Info("adding finalizer", "finalizer", key.Finalizer)
-
 		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-
 		controllerutil.AddFinalizer(lc, key.Finalizer)
-
 		if err := patchHelper.Patch(ctx, lc.GetObject()); err != nil {
 			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
 			return ctrl.Result{}, errors.WithStack(err)
 		}
-
 		logger.Info("successfully added finalizer to logged cluster", "finalizer", key.Finalizer)
 	}
 
@@ -85,13 +81,14 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 		// We get the latest state of the object to avoid race conditions.
 		// Finalizer handling needs to come last.
 		logger.Info("removing finalizer", "finalizer", key.Finalizer)
-		controllerutil.RemoveFinalizer(lc, key.Finalizer)
-		err := l.Client.Update(ctx, lc.GetObject())
+		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
 		if err != nil {
-			// We need to requeue if we fail to remove the finalizer because of race conditions between multiple operators.
-			// This will be eventually consistent.
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+		controllerutil.RemoveFinalizer(lc, key.Finalizer)
+		if err := patchHelper.Patch(ctx, lc.GetObject()); err != nil {
 			logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{}, errors.WithStack(err)
 		}
 		logger.Info("successfully removed finalizer from logged cluster", "finalizer", key.Finalizer)
 	}
