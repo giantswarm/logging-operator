@@ -12,8 +12,14 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
+type ControllerType string
+
 const (
 	grafanaAgentConfigName = "grafana-agent-config"
+
+	deployment  ControllerType = "deployment"
+	daemonset   ControllerType = "daemonset"
+	statefulset ControllerType = "statefulset"
 )
 
 // /// Grafana-Agent values config structure
@@ -22,7 +28,8 @@ type values struct {
 }
 
 type grafanaAgent struct {
-	Agent agent `yaml:"agent" json:"agent"`
+	Agent      agent      `yaml:"agent" json:"agent"`
+	Controller controller `yaml:"controller" json:"controller"`
 }
 
 type agent struct {
@@ -31,6 +38,10 @@ type agent struct {
 
 type configMap struct {
 	Content string `yaml:"content" json:"content"`
+}
+
+type controller struct {
+	Type ControllerType `yaml:"type" json:"type"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -92,6 +103,9 @@ loki.write "default" {
 	}
 }`,
 				},
+			},
+			Controller: controller{
+				Type: deployment,
 			},
 		},
 	}
