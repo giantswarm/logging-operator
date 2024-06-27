@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use a deployment for the grafana-agent instance used to collect kubernetes events to avoid using too much resources on clusters as long as we use promtail.
 
+## [0.5.5] - 2024-06-14
+
+
 ### Fixed
 
 - Fix reconciliation errors when adding or removing the finalizer on the Cluster CR.
@@ -229,7 +232,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.5.4...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.5.5...HEAD
+[0.5.5]: https://github.com/giantswarm/logging-operator/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/giantswarm/logging-operator/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/giantswarm/logging-operator/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/giantswarm/logging-operator/compare/v0.5.1...v0.5.2
