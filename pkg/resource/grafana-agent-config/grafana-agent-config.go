@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
@@ -12,8 +13,14 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
+type ControllerType string
+
 const (
 	grafanaAgentConfigName = "grafana-agent-config"
+
+	deployment  ControllerType = "deployment"
+	daemonset   ControllerType = "daemonset"
+	statefulset ControllerType = "statefulset"
 )
 
 // /// Grafana-Agent values config structure
@@ -22,7 +29,8 @@ type values struct {
 }
 
 type grafanaAgent struct {
-	Agent agent `yaml:"agent" json:"agent"`
+	Agent      agent      `yaml:"agent" json:"agent"`
+	Controller controller `yaml:"controller" json:"controller"`
 }
 
 type agent struct {
@@ -31,6 +39,12 @@ type agent struct {
 
 type configMap struct {
 	Content string `yaml:"content" json:"content"`
+}
+
+type controller struct {
+	Replicas             int                                `yaml:"replicas" json:"replicas"`
+	Type                 ControllerType                     `yaml:"type" json:"type"`
+	VolumeClaimTemplates []v1.PersistentVolumeClaimTemplate `yaml:"volumeClaimTemplates" json:"volumeClaimTemplates"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -91,6 +105,27 @@ loki.write "default" {
 		scrape_job = "kubernetes-events",
 	}
 }`,
+				},
+			},
+			Controller: controller{
+				Replicas: 1,
+				Type:     statefulset,
+				VolumeClaimTemplates: []v1.PersistentVolumeClaimTemplate{
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: "grafana-agent-storage",
+						},
+						Spec: v1.PersistentVolumeClaimSpec{
+							AccessModes: []v1.PersistentVolumeAccessMode{
+								v1.ReadWriteOnce,
+							},
+							Resources: v1.VolumeResourceRequirements{
+								Requests: v1.ResourceList{
+									v1.ResourceStorage: resource.MustParse("1Gi"),
+								},
+							},
+						},
+					},
 				},
 			},
 		},
