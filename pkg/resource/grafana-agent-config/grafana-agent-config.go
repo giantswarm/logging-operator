@@ -41,7 +41,8 @@ type configMap struct {
 }
 
 type controller struct {
-	Type ControllerType `yaml:"type" json:"type"`
+	Replicas int            `yaml:"replicas" json:"replicas"`
+	Type     ControllerType `yaml:"type" json:"type"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -105,7 +106,8 @@ loki.write "default" {
 				},
 			},
 			Controller: controller{
-				Type: deployment,
+				Replicas: 1,
+				Type:     deployment,
 			},
 		},
 	}
