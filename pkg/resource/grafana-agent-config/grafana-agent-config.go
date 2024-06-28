@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
@@ -41,7 +42,9 @@ type configMap struct {
 }
 
 type controller struct {
-	Type ControllerType `yaml:"type" json:"type"`
+	Replicas             int                                `yaml:"replicas" json:"replicas"`
+	Type                 ControllerType                     `yaml:"type" json:"type"`
+	VolumeClaimTemplates []v1.PersistentVolumeClaimTemplate `yaml:"volumeClaimTemplates" json:"volumeClaimTemplates"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -105,7 +108,25 @@ loki.write "default" {
 				},
 			},
 			Controller: controller{
-				Type: deployment,
+				Replicas: 1,
+				Type:     statefulset,
+				VolumeClaimTemplates: []v1.PersistentVolumeClaimTemplate{
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: "grafana-agent-storage",
+						},
+						Spec: v1.PersistentVolumeClaimSpec{
+							AccessModes: []v1.PersistentVolumeAccessMode{
+								v1.ReadWriteOnce,
+							},
+							Resources: v1.VolumeResourceRequirements{
+								Requests: v1.ResourceList{
+									v1.ResourceStorage: resource.MustParse("1Gi"),
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
