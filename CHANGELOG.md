@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use a deployment for the grafana-agent instance used to collect kubernetes events to avoid using too much resources on clusters as long as we use promtail.
+
 ## [0.5.5] - 2024-06-14
+
 
 ### Fixed
 
