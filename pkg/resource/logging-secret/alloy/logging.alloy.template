@@ -206,7 +206,7 @@ local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apiserver/audit.log",
-		node_name   = coalesce(env("NODENAME") "unknown"),
+		node_name   = coalesce(env("NODENAME"), "unknown"),
 		scrape_job  = "audit-logs",
 	}]
 }
