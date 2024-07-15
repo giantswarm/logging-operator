@@ -33,11 +33,11 @@ func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabil
 		appsToEnable[promtailAppName] = app{
 			Enabled: true,
 		}
-		appsToEnable["alloy"] = app{
+		appsToEnable["alloy-logs"] = app{
 			Enabled: false,
 		}
 	case "alloy":
-		appsToEnable["alloy"] = app{
+		appsToEnable["alloy-logs"] = app{
 			Enabled: true,
 		}
 		appsToEnable[promtailAppName] = app{
