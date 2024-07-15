@@ -12,6 +12,7 @@ const LoggingEnabledDefault = true
 type Interface interface {
 	client.Object
 	HasLoggingEnabled() bool
+	GetLoggingAgent() string
 	IsInsecureCA() bool
 	GetAppsNamespace() string
 	GetEnableLoggingFlag() bool

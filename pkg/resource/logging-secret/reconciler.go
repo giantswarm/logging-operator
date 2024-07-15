@@ -44,7 +44,17 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	desiredLoggingSecret, err := GenerateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
+	// Get desired config
+	var desiredLoggingSecret v1.Secret
+	switch lc.GetLoggingAgent() {
+	case "promtail":
+		desiredLoggingSecret, err = GeneratePromtailLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
+	case "alloy":
+		desiredLoggingSecret, err = GenerateAlloyLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
+	default:
+		return ctrl.Result{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
+	}
+
 	if err != nil {
 		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

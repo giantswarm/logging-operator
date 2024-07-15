@@ -27,9 +27,26 @@ func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabil
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
 		promtailAppName = "promtail-app"
 	}
-	appsToEnable[promtailAppName] = app{
-		Enabled: true,
+
+	switch lc.GetLoggingAgent() {
+	case "promtail":
+		appsToEnable[promtailAppName] = app{
+			Enabled: true,
+		}
+		appsToEnable["alloy"] = app{
+			Enabled: false,
+		}
+	case "alloy":
+		appsToEnable["alloy"] = app{
+			Enabled: true,
+		}
+		appsToEnable[promtailAppName] = app{
+			Enabled: false,
+		}
+	default:
+		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
 	}
+
 	if observabilityBundleVersion.GE(semver.MustParse("0.10.0")) {
 		appsToEnable["grafanaAgent"] = app{
 			Enabled: true,

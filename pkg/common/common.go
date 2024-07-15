@@ -20,6 +20,9 @@ const (
 	// grafana-agent secret name
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
+
+	MaxBackoffPeriod = "10m"
+	LokiURLFormat    = "https://%s/loki/api/v1/push"
 )
 
 func GrafanaAgentExtraSecretName() string {

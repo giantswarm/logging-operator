@@ -44,6 +44,10 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
+func (o Object) GetLoggingAgent() string {
+	return o.Options.LoggingAgent
+}
+
 func (o Object) IsInsecureCA() bool {
 	return o.Options.InsecureCA
 }
