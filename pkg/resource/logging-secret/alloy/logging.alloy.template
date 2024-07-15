@@ -254,8 +254,8 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}"
-		installation = "{{ .Installation }}"
+		cluster_id   = "{{ .ClusterID }}",
+		installation = "{{ .Installation }}",
 	}
 }
 
