@@ -40,6 +40,7 @@ networkPolicy:
 loggingOperator:
   vintageMode: true
   loggingEnabled: true
+  loggingAgent: promtail
 
 managementCluster:
   name: unknown
