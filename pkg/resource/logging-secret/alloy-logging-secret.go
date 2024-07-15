@@ -79,7 +79,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secre
 
 	data := struct {
 		LokiURL           string
-		ClusterName       string
+		ClusterID         string
 		Installation      string
 		TenantID          string
 		BasicAuthUsername string
@@ -88,7 +88,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secre
 		IsWorkloadCluster bool
 	}{
 		LokiURL:           fmt.Sprintf(common.LokiURLFormat, lokiURL),
-		ClusterName:       clusterName,
+		ClusterID:         clusterName,
 		Installation:      lc.GetInstallationName(),
 		TenantID:          clusterName,
 		BasicAuthUsername: clusterName,
