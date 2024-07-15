@@ -44,7 +44,6 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	// Get desired config
 	var desiredLoggingSecret v1.Secret
 	switch lc.GetLoggingAgent() {
 	case "promtail":
