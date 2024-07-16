@@ -21,26 +21,17 @@ var alloyLogging string
 //go:embed alloy/logging-secret.yaml.template
 var alloyLoggingSecret string
 
-func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
-	secret, err := generateAlloyLoggingConfig(lc, credentialsSecret, lokiURL)
-	if err != nil {
-		return v1.Secret{}, err
-	}
-
-	return secret, nil
-}
-
-func generateAlloyLoggingConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) ([]byte, error) {
 	var values bytes.Buffer
 
 	t, err := template.New("logging-config.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingSecret)
 	if err != nil {
-		return v1.Secret{}, err
+		return nil, err
 	}
 
 	alloyConfig, err := generateAlloyConfig(lc, credentialsSecret, lokiURL)
 	if err != nil {
-		return v1.Secret{}, err
+		return nil, err
 	}
 
 	data := struct{ AlloyConfig string }{
@@ -49,17 +40,10 @@ func generateAlloyLoggingConfig(lc loggedcluster.Interface, credentialsSecret *v
 
 	err = t.Execute(&values, data)
 	if err != nil {
-		return v1.Secret{}, err
+		return nil, err
 	}
 
-	secret := v1.Secret{
-		ObjectMeta: SecretMeta(lc),
-		Data: map[string][]byte{
-			"values": values.Bytes(),
-		},
-	}
-
-	return secret, nil
+	return values.Bytes(), nil
 }
 
 func generateAlloyConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (string, error) {
