@@ -17,19 +17,21 @@ import (
 
 var (
 	//go:embed alloy/logging.alloy.template
-	alloyLogging string
+	alloyLogging         string
+	alloyLoggingTemplate *template.Template
 
 	//go:embed alloy/logging-secret.yaml.template
-	alloyLoggingSecret string
+	alloyLoggingSecret         string
+	alloyLoggingSecretTemplate *template.Template
 )
+
+func init() {
+	alloyLoggingTemplate = template.Must(template.New("logging.alloy").Funcs(sprig.FuncMap()).Parse(alloyLogging))
+	alloyLoggingSecretTemplate = template.Must(template.New("logging-config.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingSecret))
+}
 
 func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) ([]byte, error) {
 	var values bytes.Buffer
-
-	t, err := template.New("logging-config.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingSecret)
-	if err != nil {
-		return nil, err
-	}
 
 	alloyConfig, err := generateAlloyConfig(lc, credentialsSecret, lokiURL)
 	if err != nil {
@@ -40,7 +42,7 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 		AlloyConfig: alloyConfig,
 	}
 
-	err = t.Execute(&values, data)
+	err = alloyLoggingSecretTemplate.Execute(&values, data)
 	if err != nil {
 		return nil, err
 	}
@@ -54,11 +56,6 @@ func generateAlloyConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secre
 	clusterName := lc.GetClusterName()
 
 	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
-	if err != nil {
-		return "", err
-	}
-
-	t, err := template.New("logging.alloy").Funcs(sprig.FuncMap()).Parse(alloyLogging)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +80,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secre
 		IsWorkloadCluster: common.IsWorkloadCluster(lc),
 	}
 
-	err = t.Execute(&values, data)
+	err = alloyLoggingTemplate.Execute(&values, data)
 	if err != nil {
 		return "", err
 	}
