@@ -4,6 +4,7 @@ import (
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -26,6 +27,13 @@ func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabil
 	promtailAppName := "promtail"
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
 		promtailAppName = "promtail-app"
+	}
+
+	// Enforce promtail as logging agent when observability-bundle version <= 1.4.0
+	if observabilityBundleVersion.LE(semver.MustParse("1.4.0")) && lc.GetLoggingAgent() == "alloy" {
+		logger := log.FromContext(ctx)
+		logger.Info("Logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
+		lc.SetLoggingAgent("promtail")
 	}
 
 	switch lc.GetLoggingAgent() {

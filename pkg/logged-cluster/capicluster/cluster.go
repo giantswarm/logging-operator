@@ -42,6 +42,10 @@ func (o Object) GetLoggingAgent() string {
 	return o.Options.LoggingAgent
 }
 
+func (o *Object) SetLoggingAgent(logginAgent string) {
+	o.Options.LoggingAgent = loggingAgent
+}
+
 func (o Object) IsInsecureCA() bool {
 	return o.Options.InsecureCA
 }
