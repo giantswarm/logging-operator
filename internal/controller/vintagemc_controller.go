@@ -72,7 +72,7 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	logger.Info("Reconciling Management cluster")
 
-	loggedCluster := vintagemc.Object{
+	loggedCluster := &vintagemc.Object{
 		Object:  service,
 		Options: loggedcluster.O,
 	}

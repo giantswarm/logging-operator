@@ -48,7 +48,7 @@ func (o Object) GetLoggingAgent() string {
 	return o.Options.LoggingAgent
 }
 
-func (o *Object) SetLoggingAgent(logginAgent string) {
+func (o *Object) SetLoggingAgent(loggingAgent string) {
 	o.Options.LoggingAgent = loggingAgent
 }
 

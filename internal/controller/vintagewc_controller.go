@@ -71,7 +71,7 @@ func (r *VintageWCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	logger.Info("Reconciling Vintage WC cluster", "name", cluster.GetName())
 
-	loggedCluster := vintagewc.Object{
+	loggedCluster := &vintagewc.Object{
 		Object:  cluster,
 		Options: loggedcluster.O,
 	}

@@ -42,7 +42,7 @@ func (o Object) GetLoggingAgent() string {
 	return o.Options.LoggingAgent
 }
 
-func (o *Object) SetLoggingAgent(logginAgent string) {
+func (o *Object) SetLoggingAgent(loggingAgent string) {
 	o.Options.LoggingAgent = loggingAgent
 }
 
@@ -84,7 +84,7 @@ func (o Object) GetObservabilityBundleConfigMap() string {
 }
 
 func (o Object) getWiredExtraConfig() appv1.AppExtraConfig {
-	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(&o)
 	return appv1.AppExtraConfig{
 		Kind:      "configMap",
 		Name:      observabilityBundleConfigMapMeta.GetName(),
