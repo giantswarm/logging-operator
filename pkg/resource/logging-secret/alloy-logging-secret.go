@@ -15,11 +15,13 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
-//go:embed alloy/logging.alloy.template
-var alloyLogging string
+var (
+	//go:embed alloy/logging.alloy.template
+	alloyLogging string
 
-//go:embed alloy/logging-secret.yaml.template
-var alloyLoggingSecret string
+	//go:embed alloy/logging-secret.yaml.template
+	alloyLoggingSecret string
+)
 
 func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) ([]byte, error) {
 	var values bytes.Buffer
