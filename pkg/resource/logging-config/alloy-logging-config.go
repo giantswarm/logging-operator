@@ -37,8 +37,12 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
-	data := struct{ AlloyConfig string }{
+	data := struct {
+		AlloyConfig string
+		SecretName  string
+	}{
 		AlloyConfig: alloyConfig,
+		SecretName:  loggingsecret.GetLoggingSecretName(lc),
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
@@ -59,7 +63,6 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		Installation                string
 		MaxBackoffPeriod            string
 		IsWorkloadCluster           bool
-		SecretName                  string
 		LokiURLEnvVarName           string
 		TenantIDEnvVarName          string
 		BasicAuthUsernameEnvVarName string
@@ -69,7 +72,6 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		Installation:                lc.GetInstallationName(),
 		MaxBackoffPeriod:            common.MaxBackoffPeriod,
 		IsWorkloadCluster:           common.IsWorkloadCluster(lc),
-		SecretName:                  loggingsecret.GetLoggingSecretName(lc),
 		LokiURLEnvVarName:           loggingsecret.AlloyLokiURLEnvVarName,
 		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
