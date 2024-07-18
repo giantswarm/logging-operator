@@ -88,7 +88,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected secret.
 	var currentLoggingSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: GetLoggingSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-secret not found, stop here")

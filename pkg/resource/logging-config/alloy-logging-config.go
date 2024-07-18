@@ -2,9 +2,10 @@ package loggingconfig
 
 import (
 	"bytes"
+	_ "embed"
 	"html/template"
 
-	"github.com/Masterminds/sprig"
+	"github.com/Masterminds/sprig/v3"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -75,7 +76,7 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
 	}
 
-	err = alloyLoggingTemplate.Execute(&values, data)
+	err := alloyLoggingTemplate.Execute(&values, data)
 	if err != nil {
 		return "", err
 	}
