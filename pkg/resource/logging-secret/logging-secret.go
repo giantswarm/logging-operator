@@ -17,16 +17,17 @@ const (
 )
 
 func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
-	var values []byte
+	var data map[string][]byte
 	var err error
+
 	switch lc.GetLoggingAgent() {
 	case "promtail":
-		values, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
 	case "alloy-logs":
-		values, err = GenerateAlloyLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = GenerateAlloyLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
@@ -36,9 +37,7 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 
 	secret := v1.Secret{
 		ObjectMeta: SecretMeta(lc),
-		Data: map[string][]byte{
-			"values": values,
-		},
+		Data:       data,
 	}
 
 	return secret, nil
@@ -47,7 +46,7 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 // SecretMeta returns metadata for the logging-secret
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      getLoggingSecretName(lc),
+		Name:      GetLoggingSecretName(lc),
 		Namespace: lc.GetAppsNamespace(),
 		Labels:    map[string]string{},
 	}
@@ -56,6 +55,6 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-func getLoggingSecretName(lc loggedcluster.Interface) string {
+func GetLoggingSecretName(lc loggedcluster.Interface) string {
 	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingClientSecretName)
 }

@@ -18,6 +18,9 @@ alloy-logs:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
+    envFrom:
+    - secretRef:
+        name: {{ .SecretName }}
     mounts:
       varlog: true
       dockercontainers: true

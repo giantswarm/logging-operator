@@ -244,13 +244,13 @@ loki.source.file "kubernetes_audit" {
 
 loki.write "default" {
 	endpoint {
-		url                = "{{ .LokiURL }}"
+		url                = env({{ .LokiURLEnvVarName }})
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = "{{ .TenantID }}"
+		tenant_id          = env({{ .TenantIDEnvVarName }})
 
 		basic_auth {
-			username = "{{ .BasicAuthUsername }}"
-			password = "{{ .BasicAuthPassword }}"
+			username = env({{ .BasicAuthUsernameEnvVarName }})
+			password = env({{ .BasicAuthPasswordEnvVarName }})
 		}
 	}
 	external_labels = {

@@ -1,89 +1,39 @@
 package loggingsecret
 
 import (
-	"bytes"
-	_ "embed"
 	"fmt"
-	"text/template"
 
 	v1 "k8s.io/api/core/v1"
-
-	"github.com/Masterminds/sprig/v3"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
-var (
-	//go:embed alloy/logging.alloy.template
-	alloyLogging         string
-	alloyLoggingTemplate *template.Template
-
-	//go:embed alloy/logging-secret.yaml.template
-	alloyLoggingSecret         string
-	alloyLoggingSecretTemplate *template.Template
+const (
+	AlloyLokiURLEnvVarName           = "LOKI_URL"
+	AlloyTenantIDEnvVarName          = "TENANT_ID"
+	AlloyBasicAuthUsernameEnvVarName = "BASIC_AUTH_USERNAME"
+	AlloyBasicAuthPasswordEnvVarName = "BASIC_AUTH_PASSWORD"
 )
 
-func init() {
-	alloyLoggingTemplate = template.Must(template.New("logging.alloy").Funcs(sprig.FuncMap()).Parse(alloyLogging))
-	alloyLoggingSecretTemplate = template.Must(template.New("logging-config.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingSecret))
-}
-
-func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) ([]byte, error) {
-	var values bytes.Buffer
-
-	alloyConfig, err := generateAlloyConfig(lc, credentialsSecret, lokiURL)
-	if err != nil {
-		return nil, err
-	}
-
-	data := struct{ AlloyConfig string }{
-		AlloyConfig: alloyConfig,
-	}
-
-	err = alloyLoggingSecretTemplate.Execute(&values, data)
-	if err != nil {
-		return nil, err
-	}
-
-	return values.Bytes(), nil
-}
-
-func generateAlloyConfig(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (string, error) {
-	var values bytes.Buffer
-
+func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (data map[string][]byte, err error) {
 	clusterName := lc.GetClusterName()
 
 	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	data := struct {
-		LokiURL           string
-		ClusterID         string
-		Installation      string
-		TenantID          string
-		BasicAuthUsername string
-		BasicAuthPassword string
-		MaxBackoffPeriod  string
-		IsWorkloadCluster bool
-	}{
-		LokiURL:           fmt.Sprintf(common.LokiURLFormat, lokiURL),
-		ClusterID:         clusterName,
-		Installation:      lc.GetInstallationName(),
-		TenantID:          clusterName,
-		BasicAuthUsername: clusterName,
-		BasicAuthPassword: writePassword,
-		MaxBackoffPeriod:  common.MaxBackoffPeriod,
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
-	}
+	LokiURL := fmt.Sprintf(common.LokiURLFormat, lokiURL)
+	TenantID := clusterName
+	BasicAuthUsername := clusterName
+	BasicAuthPassword := writePassword
 
-	err = alloyLoggingTemplate.Execute(&values, data)
-	if err != nil {
-		return "", err
-	}
+	data[AlloyLokiURLEnvVarName] = []byte(LokiURL)
+	data[AlloyTenantIDEnvVarName] = []byte(TenantID)
+	data[AlloyBasicAuthUsernameEnvVarName] = []byte(BasicAuthUsername)
+	data[AlloyBasicAuthPasswordEnvVarName] = []byte(BasicAuthPassword)
 
-	return values.String(), nil
+	return data, nil
 }
