@@ -14,7 +14,7 @@ const (
 	AlloyLokiURLEnvVarName           = "LOKI_URL"
 	AlloyTenantIDEnvVarName          = "TENANT_ID"
 	AlloyBasicAuthUsernameEnvVarName = "BASIC_AUTH_USERNAME"
-	AlloyBasicAuthPasswordEnvVarName = "BASIC_AUTH_PASSWORD"
+	AlloyBasicAuthPasswordEnvVarName = "BASIC_AUTH_PASSWORD" // #nosec G101
 )
 
 func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
