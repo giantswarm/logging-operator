@@ -77,7 +77,7 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
-	flag.StringVar(&loggingAgent, "logging-agent", "promtail", "select logging agent to use (promtail or alloy)")
+	flag.StringVar(&loggingAgent, "logging-agent", "promtail", "select logging agent to use (promtail or alloy-logs)")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")

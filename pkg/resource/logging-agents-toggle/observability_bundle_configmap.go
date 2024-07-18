@@ -32,7 +32,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 	}
 
 	// Enforce promtail as logging agent when observability-bundle version <= 1.4.0
-	if observabilityBundleVersion.LE(semver.MustParse("1.4.0")) && lc.GetLoggingAgent() == "alloy" {
+	if observabilityBundleVersion.LE(semver.MustParse("1.4.0")) && lc.GetLoggingAgent() == "alloy-logs" {
 		logger := log.FromContext(ctx)
 		logger.Info("Logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
 		lc.SetLoggingAgent("promtail")
@@ -46,7 +46,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 		appsToEnable["alloy-logs"] = app{
 			Enabled: false,
 		}
-	case "alloy":
+	case "alloy-logs":
 		appsToEnable["alloy-logs"] = app{
 			Enabled: true,
 		}
