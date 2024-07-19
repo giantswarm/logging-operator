@@ -26,7 +26,7 @@ func GenerateLoggingConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
-	case "alloy-logs":
+	case common.AlloyLogAgentName:
 		values, err = GenerateAlloyLoggingConfig(lc)
 		if err != nil {
 			return v1.ConfigMap{}, err
