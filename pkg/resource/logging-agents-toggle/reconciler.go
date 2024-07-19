@@ -45,7 +45,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired configmap to enable logging agents.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc, observabilityBundleVersion)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(ctx, lc, observabilityBundleVersion)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -106,7 +106,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get expected configmap.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(lc, observabilityBundleVersion)
+	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(ctx, lc, observabilityBundleVersion)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

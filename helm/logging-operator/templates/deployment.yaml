@@ -38,6 +38,7 @@ spec:
           - -enable-logging={{ .Values.loggingOperator.loggingEnabled }}
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}
+          - -logging-agent={{ .Values.loggingOperator.loggingAgent }}
         livenessProbe:
           httpGet:
             path: /healthz

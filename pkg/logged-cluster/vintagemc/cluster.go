@@ -17,6 +17,14 @@ func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
 }
 
+func (o Object) GetLoggingAgent() string {
+	return o.Options.LoggingAgent
+}
+
+func (o *Object) SetLoggingAgent(loggingAgent string) {
+	o.Options.LoggingAgent = loggingAgent
+}
+
 func (o Object) IsInsecureCA() bool {
 	return o.Options.InsecureCA
 }
@@ -59,7 +67,7 @@ func (o Object) GetObservabilityBundleConfigMap() string {
 func (o Object) UnwireLogging(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()
 
-	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(&o)
 	if desiredApp.Spec.UserConfig.ConfigMap.Name == observabilityBundleConfigMapMeta.GetName() ||
 		desiredApp.Spec.UserConfig.ConfigMap.Namespace == observabilityBundleConfigMapMeta.GetNamespace() {
 		desiredApp.Spec.UserConfig.ConfigMap.Name = ""
@@ -73,7 +81,7 @@ func (o Object) UnwireLogging(currentApp appv1.App) *appv1.App {
 func (o Object) WireLogging(currentApp appv1.App) *appv1.App {
 	desiredApp := currentApp.DeepCopy()
 
-	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(o)
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(&o)
 	if desiredApp.Spec.UserConfig.ConfigMap.Name != observabilityBundleConfigMapMeta.GetName() ||
 		desiredApp.Spec.UserConfig.ConfigMap.Namespace != observabilityBundleConfigMapMeta.GetNamespace() {
 		desiredApp.Spec.UserConfig.ConfigMap.Name = observabilityBundleConfigMapMeta.GetName()

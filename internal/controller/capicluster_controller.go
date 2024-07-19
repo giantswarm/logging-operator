@@ -70,7 +70,7 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	logger.Info("Reconciling CAPI Cluster", "name", cluster.GetName())
 
-	loggedCluster := capicluster.Object{
+	loggedCluster := &capicluster.Object{
 		Object:  cluster,
 		Options: loggedcluster.O,
 	}

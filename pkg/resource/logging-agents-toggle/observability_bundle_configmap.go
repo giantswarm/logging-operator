@@ -1,9 +1,12 @@
 package loggingagentstoggle
 
 import (
+	"context"
+
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -20,16 +23,40 @@ type app struct {
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable logging agents.
-func GenerateObservabilityBundleConfigMap(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
+func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
 	appsToEnable := map[string]app{}
 
 	promtailAppName := "promtail"
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
 		promtailAppName = "promtail-app"
 	}
-	appsToEnable[promtailAppName] = app{
-		Enabled: true,
+
+	// Enforce promtail as logging agent when observability-bundle version < 1.5.0
+	if observabilityBundleVersion.LT(semver.MustParse("1.5.0")) && lc.GetLoggingAgent() == "alloy-logs" {
+		logger := log.FromContext(ctx)
+		logger.Info("Logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
+		lc.SetLoggingAgent("promtail")
 	}
+
+	switch lc.GetLoggingAgent() {
+	case "promtail":
+		appsToEnable[promtailAppName] = app{
+			Enabled: true,
+		}
+		appsToEnable["alloy-logs"] = app{
+			Enabled: false,
+		}
+	case "alloy-logs":
+		appsToEnable["alloy-logs"] = app{
+			Enabled: true,
+		}
+		appsToEnable[promtailAppName] = app{
+			Enabled: false,
+		}
+	default:
+		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
+	}
+
 	if observabilityBundleVersion.GE(semver.MustParse("0.10.0")) {
 		appsToEnable["grafanaAgent"] = app{
 			Enabled: true,

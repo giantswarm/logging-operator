@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Alloy as logging agent
+  Add `--logging-agent` flag to toggle between Promtail and Alloy
+
 ## [0.6.0] - 2024-07-09
 
 ### Changed
