@@ -9,7 +9,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
+	alloysecret "github.com/giantswarm/logging-operator/pkg/resource/alloy-secret"
 )
 
 var (
@@ -42,7 +42,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 		SecretName  string
 	}{
 		AlloyConfig: alloyConfig,
-		SecretName:  loggingsecret.GetLoggingSecretName(lc),
+		SecretName:  alloysecret.SecretName,
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
@@ -72,10 +72,10 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		Installation:                lc.GetInstallationName(),
 		MaxBackoffPeriod:            common.MaxBackoffPeriod,
 		IsWorkloadCluster:           common.IsWorkloadCluster(lc),
-		LokiURLEnvVarName:           loggingsecret.AlloyLokiURLEnvVarName,
-		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
-		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
-		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
+		LokiURLEnvVarName:           alloysecret.AlloyLokiURLEnvVarName,
+		TenantIDEnvVarName:          alloysecret.AlloyTenantIDEnvVarName,
+		BasicAuthUsernameEnvVarName: alloysecret.AlloyBasicAuthUsernameEnvVarName,
+		BasicAuthPasswordEnvVarName: alloysecret.AlloyBasicAuthPasswordEnvVarName,
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)
