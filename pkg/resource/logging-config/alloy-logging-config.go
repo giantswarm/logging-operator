@@ -51,7 +51,12 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
-	return values.String(), nil
+	v, err := yaml.Marshal(values.String())
+	if err != nil {
+		return "", err
+	}
+
+	return v, nil
 }
 
 func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
@@ -84,10 +89,5 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
-	v, err := yaml.Marshal(values.String())
-	if err != nil {
-		return "", err
-	}
-
-	return string(v), nil
+	return values.String(), nil
 }
