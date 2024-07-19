@@ -6,6 +6,7 @@ import (
 	"html/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -83,5 +84,10 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
-	return values.String(), nil
+	v, err := yaml.Marshal(values.String())
+	if err != nil {
+		return "", err
+	}
+
+	return string(v), nil
 }
