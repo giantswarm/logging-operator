@@ -18,7 +18,8 @@ type Values struct {
 }
 
 type app struct {
-	Enabled bool `yaml:"enabled" json:"enabled"`
+	Enabled   bool   `yaml:"enabled" json:"enabled"`
+	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty"`
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
@@ -49,6 +50,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 	case common.AlloyLogAgentName:
 		appsToEnable[common.AlloyLogAgentName] = app{
 			Enabled:   true,
+			Namespace: common.AlloyLogAgentNamespace,
 		}
 		appsToEnable[promtailAppName] = app{
 			Enabled: false,

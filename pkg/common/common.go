@@ -22,6 +22,7 @@ const (
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
 
 	AlloyLogAgentName      = "alloy-logs"
+	AlloyLogAgentNamespace = "kube-system"
 
 	MaxBackoffPeriod = "10m"
 	LokiURLFormat    = "https://%s/loki/api/v1/push"
