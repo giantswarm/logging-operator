@@ -3,10 +3,9 @@ package loggingconfig
 import (
 	"bytes"
 	_ "embed"
-	"html/template"
+	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -51,12 +50,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
-	v, err := yaml.Marshal(values.String())
-	if err != nil {
-		return "", err
-	}
-
-	return string(v), nil
+	return values.String(), nil
 }
 
 func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
