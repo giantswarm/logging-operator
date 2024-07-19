@@ -56,7 +56,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
-	return v, nil
+	return string(v), nil
 }
 
 func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
