@@ -3,10 +3,7 @@ package loggingagentstoggle
 import (
 	"context"
 	"reflect"
-	"time"
 
-	"github.com/blang/semver"
-	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -33,14 +30,9 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("Logging agents toggle create")
 
-	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-agents-toggle - observability bundle app not found, requeueing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
+	observabilityBundleVersion, ok := common.ObservabilityBundleAppVersionFromContext(ctx)
+	if !ok {
+		err := errors.New("logging-agent-toggle - observability bundle app version not found in context")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
@@ -85,23 +77,9 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("Logging agents toggle delete")
 
-	// Get observability bundle app metadata.
-	appMeta := common.ObservabilityBundleAppMeta(lc)
-	// Retrieve the app.
-	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-agents-toggle - observability bundle app not found, skipping deletion")
-			// If the app is not found we ignore the error and return, as this means the app was already deleted.
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	observabilityBundleVersion, err := semver.Parse(currentApp.Spec.Version)
-	if err != nil {
+	observabilityBundleVersion, ok := common.ObservabilityBundleAppVersionFromContext(ctx)
+	if !ok {
+		err := errors.New("logging-agent-toggle - observability bundle app version not found in context")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 

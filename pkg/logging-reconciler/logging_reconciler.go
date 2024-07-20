@@ -21,10 +21,16 @@ import (
 type LoggingReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
+	PreFetchers []PreFetcher
 	Reconcilers []reconciler.Interface
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
+	ctx, result, err = l.preFetch(ctx, lc)
+	if err != nil {
+		return result, errors.WithStack(err)
+	}
+
 	if common.IsLoggingEnabled(lc) {
 		result, err = l.reconcileCreate(ctx, lc)
 	} else {
@@ -100,4 +106,17 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (l *LoggingReconciler) preFetch(ctx context.Context, lc loggedcluster.Interface) (context.Context, ctrl.Result, error) {
+	var err error
+	var result ctrl.Result
+	for _, preFetcher := range l.PreFetchers {
+		ctx, result, err = preFetcher(ctx, lc, l.Client)
+		if err != nil || !result.IsZero() {
+			return nil, result, errors.WithStack(err)
+		}
+	}
+
+	return ctx, ctrl.Result{}, nil
 }
