@@ -42,7 +42,18 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 	return metadata
 }
 
+type observabilityBundleAppVersionContextKey int
+
+var observabilityBundleAppVersionKey observabilityBundleAppVersionContextKey
+
+// GetObservabilityBundleAppVersion returns the version of the observability bundle app.
+// It caches the version in the context to avoid multiple calls to the API.
 func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.Client, ctx context.Context) (version semver.Version, err error) {
+	version, ok := ctx.Value(observabilityBundleAppVersionKey).(semver.Version)
+	if ok {
+		return version, nil
+	}
+
 	// Get observability bundle app metadata.
 	appMeta := ObservabilityBundleAppMeta(lc)
 	// Retrieve the app.
@@ -51,5 +62,13 @@ func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.
 	if err != nil {
 		return version, err
 	}
-	return semver.Parse(currentApp.Spec.Version)
+
+	version, err = semver.Parse(currentApp.Spec.Version)
+	if err != nil {
+		return version, err
+	}
+
+	ctx = context.WithValue(ctx, observabilityBundleAppVersionKey, version)
+
+	return version, nil
 }

@@ -30,9 +30,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("logging-secret create")
 
 	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&loggingCredentialsSecret)
+	loggingCredentialsSecret, err := loggingcredentials.Read(ctx, lc, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

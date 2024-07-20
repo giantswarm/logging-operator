@@ -29,9 +29,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("lokiauth create")
 
 	// Retrieve secret containing credentials
-	var lokiAuthSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&lokiAuthSecret)
+	lokiAuthSecret, err := loggingcredentials.Read(ctx, lc, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

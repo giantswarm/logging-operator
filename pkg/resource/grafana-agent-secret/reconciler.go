@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -49,9 +48,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Check existence of grafana-agent app
-	var currentApp appv1.App
-	appMeta := common.ObservabilityBundleAppMeta(lc)
-	err = r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
+	_, err = common.ReadGrafanaAgentApp(ctx, lc, r.Client)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-secret - app not found, requeuing")
@@ -62,9 +59,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&loggingCredentialsSecret)
+	loggingCredentialsSecret, err := loggingcredentials.Read(ctx, lc, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

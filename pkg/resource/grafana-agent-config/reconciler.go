@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -47,11 +46,8 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, nil
 	}
 
-	// Get observability bundle app metadata.
-	appMeta := common.ObservabilityBundleAppMeta(lc)
 	// Retrieve the app.
-	var currentApp appv1.App
-	err = r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
+	currentApp, err := common.ReadGrafanaAgentApp(ctx, lc, r.Client)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config - app not found, requeuing")

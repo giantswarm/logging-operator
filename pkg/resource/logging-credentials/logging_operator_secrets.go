@@ -1,6 +1,7 @@
 package loggingcredentials
 
 import (
+	"context"
 	"crypto/rand"
 	"math/big"
 
@@ -8,9 +9,11 @@ import (
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -148,4 +151,25 @@ func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1
 	}
 
 	return secretUpdated
+}
+
+type loggingCredentialsContextKey int
+
+var loggingCredentialsSecretKey loggingCredentialsContextKey
+
+func Read(ctx context.Context, lc loggedcluster.Interface, client client.Client) (v1.Secret, error) {
+	loggingCredentialsSecret, ok := ctx.Value(loggingCredentialsSecretKey).(v1.Secret)
+	if ok {
+		return loggingCredentialsSecret, nil
+	}
+
+	err := client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace},
+		&loggingCredentialsSecret)
+	if err != nil {
+		return v1.Secret{}, nil
+	}
+
+	ctx = context.WithValue(ctx, loggingCredentialsSecretKey, loggingCredentialsSecret)
+
+	return loggingCredentialsSecret, nil
 }
