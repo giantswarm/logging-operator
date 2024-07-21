@@ -50,29 +50,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if secret already exists.
-	logger.Info("logging-secret - getting", "namespace", desiredLoggingSecret.GetNamespace(), "name", desiredLoggingSecret.GetName())
-	var currentLoggingSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLoggingSecret.GetName(), Namespace: desiredLoggingSecret.GetNamespace()}, &currentLoggingSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-secret not found, creating")
-			err = r.Client.Create(ctx, &desiredLoggingSecret)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	if !needUpdate(currentLoggingSecret, desiredLoggingSecret) {
-		logger.Info("logging-secret up to date")
-		return ctrl.Result{}, nil
-	}
-
-	logger.Info("logging-secret - updating")
-	err = r.Client.Update(ctx, &desiredLoggingSecret)
+	err = common.Ensure(ctx, r.Client, desiredLoggingSecret, needUpdate, "logging-secret")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

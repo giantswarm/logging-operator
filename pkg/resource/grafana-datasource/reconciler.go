@@ -6,9 +6,9 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 
@@ -43,33 +43,12 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if datasource already exists.
-	logger.Info("grafanadatasource - getting", "namespace", desiredDatasourceSecret.GetNamespace(), "name", desiredDatasourceSecret.GetName())
-	var currentDatasourceSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredDatasourceSecret.GetName(), Namespace: desiredDatasourceSecret.GetNamespace()}, &currentDatasourceSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafanadatasource not found, creating")
-			err = r.Client.Create(ctx, &desiredDatasourceSecret)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	if !needUpdate(currentDatasourceSecret, desiredDatasourceSecret) {
-		logger.Info("grafanadatasource up to date")
-		return ctrl.Result{}, nil
-	}
-
-	logger.Info("grafanadatasource - updating")
-	err = r.Client.Update(ctx, &desiredDatasourceSecret)
+	err = common.Ensure(ctx, r.Client, desiredDatasourceSecret, needUpdate, "grafanadatasource")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	logger.Info("grafanadatasource - done")
 	return ctrl.Result{}, nil
 }
 

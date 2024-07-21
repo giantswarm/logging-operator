@@ -31,7 +31,7 @@ type Reconciler struct {
 // ReconcileCreate ensure logging agents are enabled in the given cluster.
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Logging agents toggle create")
+	logger.Info("logging-agents-toggle - create")
 
 	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
 	if err != nil {
@@ -50,32 +50,12 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if configmap is already installed.
-	logger.Info("Logging agents toggle checking", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
-	var currentConfigMap v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredConfigMap.GetName(), Namespace: desiredConfigMap.GetNamespace()}, &currentConfigMap)
+	err = common.Ensure(ctx, r.Client, desiredConfigMap, needUpdate, "logging-agent-toggle")
 	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			// Install configmap.
-			logger.Info("Logging agents toggle not found, creating")
-			err = r.Client.Create(ctx, &desiredConfigMap)
-		}
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	if needUpdate(currentConfigMap, desiredConfigMap) {
-		logger.Info("Logging agents toggle updating")
-		// Update configmap
-		// Configmap is installed and need to be updated.
-		err := r.Client.Update(ctx, &desiredConfigMap)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	} else {
-		logger.Info("Logging agents toggle up to date")
-	}
+	logger.Info("logging-agent-toggle - done")
 
 	return ctrl.Result{}, nil
 }

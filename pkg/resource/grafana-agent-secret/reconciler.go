@@ -82,29 +82,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if secret already exists.
-	logger.Info("grafana-agent-secret - getting", "namespace", desiredGrafanaAgentSecret.GetNamespace(), "name", desiredGrafanaAgentSecret.GetName())
-	var currentGrafanaAgentSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredGrafanaAgentSecret.GetName(), Namespace: desiredGrafanaAgentSecret.GetNamespace()}, &currentGrafanaAgentSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-secret not found, creating")
-			err = r.Client.Create(ctx, &desiredGrafanaAgentSecret)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	if !needUpdate(currentGrafanaAgentSecret, desiredGrafanaAgentSecret) {
-		logger.Info("grafana-agent-secret up to date")
-		return ctrl.Result{}, nil
-	}
-
-	logger.Info("grafana-agent-secret - updating")
-	err = r.Client.Update(ctx, &desiredGrafanaAgentSecret)
+	err = common.Ensure(ctx, r.Client, desiredGrafanaAgentSecret, needUpdate, "grafana-agent-secret")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

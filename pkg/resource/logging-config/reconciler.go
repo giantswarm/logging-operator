@@ -9,6 +9,7 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -34,29 +35,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if config already exists.
-	logger.Info("logging-config - getting", "namespace", desiredLoggingConfig.GetNamespace(), "name", desiredLoggingConfig.GetName())
-	var currentLoggingConfig v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLoggingConfig.GetName(), Namespace: desiredLoggingConfig.GetNamespace()}, &currentLoggingConfig)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-config not found, creating")
-			err = r.Client.Create(ctx, &desiredLoggingConfig)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	if !needUpdate(currentLoggingConfig, desiredLoggingConfig) {
-		logger.Info("logging-config up to date")
-		return ctrl.Result{}, nil
-	}
-
-	logger.Info("logging-config - updating")
-	err = r.Client.Update(ctx, &desiredLoggingConfig)
+	err = common.Ensure(ctx, r.Client, desiredLoggingConfig, needUpdate, "logging-config")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
