@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -13,32 +12,29 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type Desired interface {
-	v1.ConfigMap | v1.Secret
-}
-
-type DesiredPtr[T any] interface {
+type Ptr[T any] interface {
 	client.Object
 	*T
 }
 
-func PointerTo[T any](v T) *T {
-	return &v
-}
-
-func Ensure[T Desired, PT DesiredPtr[T]](ctx context.Context, client client.Client, desiredResource T, needUpdate func(T, T) bool, reconcilerName string) error {
+// Ensure ensure the desiredResource exists and is up to date in the Kubernetes API.
+// If the resource does not exist, it will be created.
+// If the resource exists but is not up to date, it will be updated when needUpdate returns true.
+func Ensure[T any, PT Ptr[T]](ctx context.Context, client client.Client, desiredResource T, needUpdate func(T, T) bool, reconcilerName string) error {
 	var (
 		currentResource    T
 		currentResourcePtr = PT(&currentResource)
 		desiredResourcePtr = PT(&desiredResource)
 	)
+
 	logger := log.FromContext(ctx)
 
-	// Check if config already exists.
+	// Check if resource already exists.
 	logger.Info(fmt.Sprintf("%s - getting", reconcilerName), "namespace", desiredResourcePtr.GetNamespace(), "name", desiredResourcePtr.GetName())
 	err := client.Get(ctx, types.NamespacedName{Name: desiredResourcePtr.GetName(), Namespace: desiredResourcePtr.GetNamespace()}, currentResourcePtr)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
+			// Resource was not found, create it.
 			logger.Info(fmt.Sprintf("%s - creating", reconcilerName), "namespace", desiredResourcePtr.GetNamespace(), "name", desiredResourcePtr.GetName())
 			err = client.Create(ctx, desiredResourcePtr)
 			if err != nil {
@@ -49,11 +45,13 @@ func Ensure[T Desired, PT DesiredPtr[T]](ctx context.Context, client client.Clie
 		return errors.WithStack(err)
 	}
 
+	// Resource exists, check if it needs to be updated.
 	if !needUpdate(currentResource, desiredResource) {
 		logger.Info(fmt.Sprintf("%s - up to date", reconcilerName), "namespace", desiredResourcePtr.GetNamespace(), "name", desiredResourcePtr.GetName())
 		return nil
 	}
 
+	// Update the resource.
 	logger.Info(fmt.Sprintf("%s -updating", reconcilerName), "namespace", desiredResourcePtr.GetNamespace(), "name", desiredResourcePtr.GetName())
 	err = client.Update(ctx, desiredResourcePtr)
 	if err != nil {
