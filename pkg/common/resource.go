@@ -56,7 +56,7 @@ func EnsureCreatedOrUpdated[T any, PT Ptr[T]](ctx context.Context, client client
 	}
 
 	// Update the resource.
-	logger.Info(fmt.Sprintf("%s -updating", reconcilerName), "namespace", desiredResourcePtr.GetNamespace(), "name", desiredResourcePtr.GetName())
+	logger.Info(fmt.Sprintf("%s - updating", reconcilerName), "namespace", desiredResourcePtr.GetNamespace(), "name", desiredResourcePtr.GetName())
 	err = client.Update(ctx, desiredResourcePtr)
 	if err != nil {
 		return errors.WithStack(err)
