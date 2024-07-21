@@ -6,9 +6,9 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 
@@ -43,29 +43,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if auth config already exists.
-	logger.Info("lokiauth - getting", "namespace", desiredLokiAuthSecret.GetNamespace(), "name", desiredLokiAuthSecret.GetName())
-	var currentLokiAuthSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLokiAuthSecret.GetName(), Namespace: desiredLokiAuthSecret.GetNamespace()}, &currentLokiAuthSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("lokiauth not found, creating")
-			err = r.Client.Create(ctx, &desiredLokiAuthSecret)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	if !needUpdate(currentLokiAuthSecret, desiredLokiAuthSecret) {
-		logger.Info("lokiauth up to date")
-		return ctrl.Result{}, nil
-	}
-
-	logger.Info("lokiauth - updating")
-	err = r.Client.Update(ctx, &desiredLokiAuthSecret)
+	err = common.Ensure(ctx, r.Client, desiredLokiAuthSecret, needUpdate, "lokiauth")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
