@@ -12,6 +12,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+// Generic constaint to handle pointer type.
+// This constaint allow to use a pointer to T as generic type.
+// This contraint inherits from client.Object as we expect
+// pointer to T to satisfy the client.Object interface.
 type Ptr[T any] interface {
 	client.Object
 	*T
