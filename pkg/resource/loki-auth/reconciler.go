@@ -43,7 +43,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	err = common.Ensure(ctx, r.Client, desiredLokiAuthSecret, needUpdate, "lokiauth")
+	err = common.EnsureCreatedOrUpdated(ctx, r.Client, desiredLokiAuthSecret, needUpdate, "lokiauth")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

@@ -17,10 +17,10 @@ type Ptr[T any] interface {
 	*T
 }
 
-// Ensure ensure the desiredResource exists and is up to date in the Kubernetes API.
+// EnsureCreatedOrUpdated ensure the desiredResource exists and is up to date in the Kubernetes API.
 // If the resource does not exist, it will be created.
 // If the resource exists but is not up to date, it will be updated when needUpdate returns true.
-func Ensure[T any, PT Ptr[T]](ctx context.Context, client client.Client, desiredResource T, needUpdate func(T, T) bool, reconcilerName string) error {
+func EnsureCreatedOrUpdated[T any, PT Ptr[T]](ctx context.Context, client client.Client, desiredResource T, needUpdate func(T, T) bool, reconcilerName string) error {
 	var (
 		currentResource    T
 		currentResourcePtr = PT(&currentResource)

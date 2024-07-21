@@ -68,7 +68,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	err = common.Ensure(ctx, r.Client, desiredGrafanaAgentConfig, needUpdate, "grafana-agent-config")
+	err = common.EnsureCreatedOrUpdated(ctx, r.Client, desiredGrafanaAgentConfig, needUpdate, "grafana-agent-config")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

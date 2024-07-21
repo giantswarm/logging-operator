@@ -50,7 +50,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	err = common.Ensure(ctx, r.Client, desiredConfigMap, needUpdate, "logging-agent-toggle")
+	err = common.EnsureCreatedOrUpdated(ctx, r.Client, desiredConfigMap, needUpdate, "logging-agent-toggle")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
