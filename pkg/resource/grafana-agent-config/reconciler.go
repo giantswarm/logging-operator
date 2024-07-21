@@ -68,29 +68,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if config already exists.
-	logger.Info("grafana-agent-config - getting", "namespace", desiredGrafanaAgentConfig.GetNamespace(), "name", desiredGrafanaAgentConfig.GetName())
-	var currentGrafanaAgentConfig v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredGrafanaAgentConfig.GetName(), Namespace: desiredGrafanaAgentConfig.GetNamespace()}, &currentGrafanaAgentConfig)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-config not found, creating")
-			err = r.Client.Create(ctx, &desiredGrafanaAgentConfig)
-			if err != nil {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	if !needUpdate(currentGrafanaAgentConfig, desiredGrafanaAgentConfig) {
-		logger.Info("grafana-agent-config up to date")
-		return ctrl.Result{}, nil
-	}
-
-	logger.Info("grafana-agent-config - updating")
-	err = r.Client.Update(ctx, &desiredGrafanaAgentConfig)
+	err = common.Ensure(ctx, r.Client, desiredGrafanaAgentConfig, needUpdate, "grafana-agent-config")
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
