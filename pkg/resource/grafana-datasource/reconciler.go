@@ -29,10 +29,9 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("grafanadatasource create")
 
 	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&loggingCredentialsSecret)
-	if err != nil {
+	loggingCredentialsSecret, ok := loggingcredentials.FromContext(ctx)
+	if !ok {
+		err := errors.New("grafanadatasource - logging credentials secret not found in context")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 

@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
@@ -165,6 +166,12 @@ func main() {
 	loggingReconciler := loggingreconciler.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		PreFetchers: []loggingreconciler.PreFetcher{
+			common.NewLokiIngressURLContext,
+			common.NewGrafanaAgentAppContext,
+			common.NewObservabilityBundleAppVersionContext,
+			loggingcredentials.NewContext,
+		},
 		Reconcilers: []reconciler.Interface{
 			&loggingAgentsToggle,
 			&loggingWiring,

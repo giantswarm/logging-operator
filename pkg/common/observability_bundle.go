@@ -2,13 +2,17 @@ package common
 
 import (
 	"context"
+	"time"
 
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/blang/semver"
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
+	"github.com/pkg/errors"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
@@ -42,14 +46,37 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 	return metadata
 }
 
-func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.Client, ctx context.Context) (version semver.Version, err error) {
+type observabilityBundleAppVersionContextKey int
+
+var observabilityBundleAppVersionKey observabilityBundleAppVersionContextKey
+
+// NewObservabilityBundleAppVersionContext retrieves the observability bundle app version from the API and stores it in the context.
+func NewObservabilityBundleAppVersionContext(ctx context.Context, lc loggedcluster.Interface, client client.Client) (context.Context, ctrl.Result, error) {
 	// Get observability bundle app metadata.
 	appMeta := ObservabilityBundleAppMeta(lc)
 	// Retrieve the app.
 	var currentApp appv1.App
-	err = client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
+	err := client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
-		return version, err
+		// Handle case where the app is not found.
+		if apimachineryerrors.IsNotFound(err) {
+			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+			return nil, ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+		}
+		return nil, ctrl.Result{}, errors.WithStack(err)
 	}
-	return semver.Parse(currentApp.Spec.Version)
+
+	version, err := semver.Parse(currentApp.Spec.Version)
+	if err != nil {
+		return nil, ctrl.Result{}, err
+	}
+
+	ctx = context.WithValue(ctx, observabilityBundleAppVersionKey, version)
+
+	return ctx, ctrl.Result{}, nil
+}
+
+func ObservabilityBundleAppVersionFromContext(ctx context.Context) (semver.Version, bool) {
+	version, ok := ctx.Value(observabilityBundleAppVersionKey).(semver.Version)
+	return version, ok
 }

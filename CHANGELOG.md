@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Add PreFetcher to store following values within the context to avoid code duplication across resources:
+  - Observability bundle app version
+  - Grafana agent app
+  - Loki ingress URL
+  - Logging credentials
+
 ## [0.7.0] - 2024-07-19
 
 ### Added
