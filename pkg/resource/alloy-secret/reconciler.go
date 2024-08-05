@@ -32,8 +32,8 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("alloy-secret - create")
 
-	if lc.GetLoggingAgent() != common.AlloyLogAgentAppName {
-		logger.Info(fmt.Sprintf("alloy-secret - logging agent is not %s, skipping", common.AlloyLogAgentAppName))
+	if lc.GetLoggingAgent() != common.LoggingAgentAlloy {
+		logger.Info(fmt.Sprintf("alloy-secret - logging agent is not %s, skipping", common.LoggingAgentAlloy))
 		result, err := r.ReconcileDelete(ctx, lc)
 		if err != nil {
 			return result, errors.WithStack(err)
