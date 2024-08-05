@@ -18,7 +18,8 @@ type Values struct {
 }
 
 type app struct {
-	Enabled bool `yaml:"enabled" json:"enabled"`
+	Enabled   bool   `yaml:"enabled" json:"enabled"`
+	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty"`
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
@@ -32,23 +33,24 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 	}
 
 	// Enforce promtail as logging agent when observability-bundle version < 1.5.0
-	if observabilityBundleVersion.LT(semver.MustParse("1.5.0")) && lc.GetLoggingAgent() == "alloy-logs" {
+	if observabilityBundleVersion.LT(semver.MustParse("1.5.0")) && lc.GetLoggingAgent() == common.LoggingAgentAlloy {
 		logger := log.FromContext(ctx)
 		logger.Info("Logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
-		lc.SetLoggingAgent("promtail")
+		lc.SetLoggingAgent(common.LoggingAgentPromtail)
 	}
 
 	switch lc.GetLoggingAgent() {
-	case "promtail":
+	case common.LoggingAgentPromtail:
 		appsToEnable[promtailAppName] = app{
 			Enabled: true,
 		}
-		appsToEnable["alloy-logs"] = app{
+		appsToEnable[common.AlloyLogAgentAppName] = app{
 			Enabled: false,
 		}
-	case "alloy-logs":
-		appsToEnable["alloy-logs"] = app{
-			Enabled: true,
+	case common.LoggingAgentAlloy:
+		appsToEnable[common.AlloyLogAgentAppName] = app{
+			Enabled:   true,
+			Namespace: common.AlloyLogAgentAppNamespace,
 		}
 		appsToEnable[promtailAppName] = app{
 			Enabled: false,

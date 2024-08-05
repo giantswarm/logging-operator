@@ -21,6 +21,14 @@ const (
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
 
+	// Possible values for --logging-agent flag.
+	LoggingAgentPromtail = "promtail"
+	LoggingAgentAlloy    = "alloy"
+
+	// Alloy app name and namespace when using Alloy as logging agent.
+	AlloyLogAgentAppName      = "alloy-logs"
+	AlloyLogAgentAppNamespace = "kube-system"
+
 	MaxBackoffPeriod = "10m"
 	LokiURLFormat    = "https://%s/loki/api/v1/push"
 )

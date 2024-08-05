@@ -7,7 +7,7 @@
 # - Running as root user is required in order to be able to read log files within
 #   /var/log/journal and /run/log/journal directories.
 # - NODENAME env var is used as additional label for kubernetes_audit logs.
-alloy-logs:
+alloy:
   alloy:
     configMap:
       create: true

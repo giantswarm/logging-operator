@@ -21,12 +21,12 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 	var err error
 
 	switch lc.GetLoggingAgent() {
-	case "promtail":
+	case common.LoggingAgentPromtail:
 		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
-	case "alloy-logs":
+	case common.LoggingAgentAlloy:
 		data, err = GenerateAlloyLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
