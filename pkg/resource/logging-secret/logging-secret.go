@@ -21,7 +21,7 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 	var err error
 
 	switch lc.GetLoggingAgent() {
-	case common.LoggingAgentPromtail
+	case common.LoggingAgentPromtail:
 		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
