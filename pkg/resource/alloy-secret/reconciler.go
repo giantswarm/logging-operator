@@ -32,8 +32,8 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("alloy-secret - create")
 
-	if lc.GetLoggingAgent() != common.AlloyLogAgentName {
-		logger.Info(fmt.Sprintf("alloy-secret - logging agent is not %s, skipping", common.AlloyLogAgentName))
+	if lc.GetLoggingAgent() != common.AlloyLogAgentAppName {
+		logger.Info(fmt.Sprintf("alloy-secret - logging agent is not %s, skipping", common.AlloyLogAgentAppName))
 		result, err := r.ReconcileDelete(ctx, lc)
 		if err != nil {
 			return result, errors.WithStack(err)
@@ -44,10 +44,10 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	// Check existence of Alloy app
 	var currentApp appv1.App
 	appMeta := common.ObservabilityBundleAppMeta(lc)
-	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName(common.AlloyLogAgentName), Namespace: appMeta.GetNamespace()}, &currentApp)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName(common.AlloyLogAgentAppName), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info(fmt.Sprintf("alloy-secret - %s app not found, requeuing", common.AlloyLogAgentName))
+			logger.Info(fmt.Sprintf("alloy-secret - %s app not found, requeuing", common.AlloyLogAgentAppName))
 			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
 			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
 		}

@@ -26,7 +26,7 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 		if err != nil {
 			return v1.Secret{}, err
 		}
-	case common.AlloyLogAgentName:
+	case common.AlloyLogAgentAppName:
 		data, err = GenerateAlloyLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
