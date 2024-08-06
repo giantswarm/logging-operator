@@ -26,7 +26,7 @@ const (
 	LoggingAgentAlloy    = "alloy"
 
 	// Alloy app name and namespace when using Alloy as logging agent.
-	AlloyLogAgentAppName      = "alloy-logs"
+	AlloyLogAgentAppName      = "alloyLogs"
 	AlloyLogAgentAppNamespace = "kube-system"
 
 	MaxBackoffPeriod = "10m"
