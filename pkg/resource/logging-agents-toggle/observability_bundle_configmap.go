@@ -27,9 +27,9 @@ type app struct {
 func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
 	appsToEnable := map[string]app{}
 
-	promtailAppName := "promtail"
+	promtailAppName := common.PromtailObservabilityBundleAppName
 	if observabilityBundleVersion.LT(semver.MustParse("1.0.0")) {
-		promtailAppName = "promtail-app"
+		promtailAppName = common.PromtailObservabilityBundleLegacyAppName
 	}
 
 	// Enforce promtail as logging agent when observability-bundle version < 1.5.0
@@ -44,11 +44,11 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 		appsToEnable[promtailAppName] = app{
 			Enabled: true,
 		}
-		appsToEnable[common.AlloyLogAgentAppName] = app{
+		appsToEnable[common.AlloyObservabilityBundleAppName] = app{
 			Enabled: false,
 		}
 	case common.LoggingAgentAlloy:
-		appsToEnable[common.AlloyLogAgentAppName] = app{
+		appsToEnable[common.AlloyObservabilityBundleAppName] = app{
 			Enabled:   true,
 			Namespace: common.AlloyLogAgentAppNamespace,
 		}
