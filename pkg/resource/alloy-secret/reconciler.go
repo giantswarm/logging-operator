@@ -47,7 +47,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName(common.AlloyLogAgentAppName), Namespace: appMeta.GetNamespace()}, &currentApp)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info(fmt.Sprintf("alloy-secret - %s app not found, requeuing", common.AlloyLogAgentAppName))
+			logger.Info(fmt.Sprintf("alloy-secret - %s app not found, requeuing", lc.AppConfigName(common.AlloyLogAgentAppName)))
 			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
 			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
 		}
