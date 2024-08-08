@@ -25,8 +25,13 @@ const (
 	LoggingAgentPromtail = "promtail"
 	LoggingAgentAlloy    = "alloy"
 
+	// App name keys in the observability bundle
+	AlloyObservabilityBundleAppName          = "alloyLogs"
+	PromtailObservabilityBundleAppName       = "promtail"
+	PromtailObservabilityBundleLegacyAppName = "promtail-app"
+
 	// Alloy app name and namespace when using Alloy as logging agent.
-	AlloyLogAgentAppName      = "alloyLogs"
+	AlloyLogAgentAppName      = "alloy-logs"
 	AlloyLogAgentAppNamespace = "kube-system"
 
 	MaxBackoffPeriod = "10m"
