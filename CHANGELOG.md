@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2024-08-08
+
 ### Fixed
 
 - Fix incorrect Alloy secret and Alloy config templating.
@@ -246,7 +248,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/giantswarm/logging-operator/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/giantswarm/logging-operator/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/giantswarm/logging-operator/compare/v0.5.5...v0.6.0
 [0.5.5]: https://github.com/giantswarm/logging-operator/compare/v0.5.4...v0.5.5
