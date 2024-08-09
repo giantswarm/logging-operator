@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix alloy-secret naming
+  - Rename secret to alloy-logging-secret
+  - Prefix secret with cluster name
+  - Create secret in the cluster namespace
+
 ## [0.7.1] - 2024-08-08
 
 ### Fixed
