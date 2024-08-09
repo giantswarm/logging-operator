@@ -51,7 +51,7 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), secretName),
-		Namespace: lc.GetAppsNamespace(),
+		Namespace: common.AlloyLogAgentAppNamespace,
 		Labels:    map[string]string{},
 	}
 
