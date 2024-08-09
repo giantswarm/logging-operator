@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	secretName = "alloy-logging-secret"
+	secretName = "alloy-logging-secret" // #nosec G101
 
 	AlloyLokiURLEnvVarName           = "LOKI_URL"
 	AlloyTenantIDEnvVarName          = "TENANT_ID"
