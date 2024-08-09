@@ -49,8 +49,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 		}
 	case common.LoggingAgentAlloy:
 		appsToEnable[common.AlloyObservabilityBundleAppName] = app{
-			Enabled:   true,
-			Namespace: lc.GetAppsNamespace(),
+			Enabled: true,
 		}
 		appsToEnable[promtailAppName] = app{
 			Enabled: false,
