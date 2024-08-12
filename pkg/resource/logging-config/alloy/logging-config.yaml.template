@@ -46,7 +46,3 @@ alloy:
       - name: runlogjournal
         hostPath:
           path: /run/log/journal
-kyvernoPolicyExceptions:
-  enabled: true
-  # Ensure the kyverno policy exceptions are created in the namespace where alloy is installed
-  namespace: null
