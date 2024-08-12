@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix required observability bundle version to run Alloy as logging agent.
+
 ## [0.7.2] - 2024-08-12
 
 ### Fixed
