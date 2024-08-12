@@ -37,12 +37,14 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 		return "", err
 	}
 
+	secretMeta := alloysecret.SecretMeta(lc)
+
 	data := struct {
 		AlloyConfig string
 		SecretName  string
 	}{
 		AlloyConfig: alloyConfig,
-		SecretName:  alloysecret.SecretName,
+		SecretName:  secretMeta.GetName(),
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)

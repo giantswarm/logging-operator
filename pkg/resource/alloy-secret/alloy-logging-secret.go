@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	SecretName = "alloy-secret"
+	secretName = "alloy-logging-secret" // #nosec G101
 
 	AlloyLokiURLEnvVarName           = "LOKI_URL"
 	AlloyTenantIDEnvVarName          = "TENANT_ID"
@@ -50,7 +50,7 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 // SecretMeta returns metadata for the Alloy secret.
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      SecretName,
+		Name:      fmt.Sprintf("%s-%s", lc.GetClusterName(), secretName),
 		Namespace: common.AlloyLogAgentAppNamespace,
 		Labels:    map[string]string{},
 	}
