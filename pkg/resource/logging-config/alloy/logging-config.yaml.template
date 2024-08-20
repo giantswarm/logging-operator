@@ -28,10 +28,20 @@ alloy:
       - name: runlogjournal
         mountPath: /run/log/journal
         readOnly: true
+      # This is needed to allow alloy to create files when using readOnlyRootFilesystem
+      - name: alloy-tmp
+        mountPath: /tmp/alloy
     securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
       runAsUser: 0
       runAsGroup: 0
       runAsNonRoot: false
+      seccompProfile:
+        type: RuntimeDefault
   controller:
     type: daemonset
     tolerations:
@@ -46,3 +56,5 @@ alloy:
       - name: runlogjournal
         hostPath:
           path: /run/log/journal
+      - name: alloy-tmp
+        emptyDir: {}
