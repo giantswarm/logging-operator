@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Change the datasource url to be the multi-tenant-proxy in front of the loki-gateway.
+- Add secret management for the proxy by duplicating loki-auth.
 
 ## [0.7.3] - 2024-08-13
 

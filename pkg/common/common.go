@@ -14,9 +14,9 @@ import (
 const (
 	// ReadUser is the global user for reading logs
 	ReadUser = "read"
-	// Loki Ingress
-	lokiIngressNamespace = "loki"
-	lokiIngressName      = "loki-gateway"
+	// Grafana Multi Tenant Proxy Ingress
+	proxyIngressNamespace = "monitoring"
+	proxyIngressName      = "grafana-multi-tenant-proxy"
 	// grafana-agent secret name
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
@@ -35,7 +35,7 @@ const (
 	AlloyLogAgentAppNamespace = "kube-system"
 
 	MaxBackoffPeriod = "10m"
-	LokiURLFormat    = "https://%s/loki/api/v1/push"
+	LokiURLFormat    = "https://write.%s/loki/api/v1/push"
 )
 
 func GrafanaAgentExtraSecretName() string {
@@ -58,17 +58,17 @@ func IsWorkloadCluster(lc loggedcluster.Interface) bool {
 	return lc.GetInstallationName() != lc.GetClusterName()
 }
 
-// Read Loki URL from ingress
-func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
-	var lokiIngress netv1.Ingress
+// Read Proxy URL from ingress
+func ReadProxyIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
+	var proxyIngress netv1.Ingress
 
-	err := client.Get(ctx, types.NamespacedName{Name: lokiIngressName, Namespace: lokiIngressNamespace}, &lokiIngress)
+	err := client.Get(ctx, types.NamespacedName{Name: proxyIngressName, Namespace: proxyIngressNamespace}, &proxyIngress)
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
 
 	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
-	ingressURL := lokiIngress.Spec.Rules[0].Host
+	ingressURL := proxyIngress.Spec.Rules[0].Host
 
 	return ingressURL, nil
 }

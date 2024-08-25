@@ -50,6 +50,7 @@ import (
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
 	lokiauth "github.com/giantswarm/logging-operator/pkg/resource/loki-auth"
+	proxyauth "github.com/giantswarm/logging-operator/pkg/resource/proxy-auth"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -143,6 +144,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	proxyAuth := proxyauth.Reconciler{
+		Client: mgr.GetClient(),
+	}
+
 	loggingSecret := loggingsecret.Reconciler{
 		Client: mgr.GetClient(),
 	}
@@ -178,6 +183,7 @@ func main() {
 			&loggingSecrets,
 			&grafanaDatasource,
 			&lokiAuth,
+			&proxyAuth,
 			&loggingSecret,
 			&loggingConfig,
 			&grafanaAgentSecret,
