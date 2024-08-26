@@ -12,7 +12,7 @@ jobs:
       - run: |-
           cd helm/logging-operator
           helm dep up
-          helm template helm/logging-operator
+          helm template .
 
 
 workflows:
