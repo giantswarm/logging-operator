@@ -35,7 +35,7 @@ const (
 	AlloyLogAgentAppNamespace = "kube-system"
 
 	MaxBackoffPeriod = "10m"
-	LokiURLFormat    = "https://write.%s/loki/api/v1/push"
+	LokiURLFormat    = "https://%s/loki/api/v1/push"
 )
 
 func GrafanaAgentExtraSecretName() string {
