@@ -23,6 +23,7 @@ def test_api_working(kube_cluster: Cluster) -> None:
 
 # scope "module" means this is run only once, for the first test case requesting! It might be tricky
 # if you want to assert this multiple times
+# -- Checking that the operator's deployment is present on the cluster
 @pytest.fixture(scope="module")
 def ic_deployment(kube_cluster: Cluster) -> List[pykube.Deployment]:
     logger.info("Waiting for logging-operator deployment..")
@@ -54,6 +55,7 @@ def pods(kube_cluster: Cluster) -> List[pykube.Pod]:
 
 # when we start the tests on circleci, we have to wait for pods to be available, hence
 # this additional delay and retries
+# -- Checking that all pods from the operator's deployment are available (i.e in "Ready" state)
 @pytest.mark.smoke
 @pytest.mark.upgrade
 @pytest.mark.flaky(reruns=5, reruns_delay=10)
