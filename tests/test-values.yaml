@@ -1,4 +1,4 @@
-lobal:
+global:
   podSecurityStandards:
     enforced: true
 loggingOperator:

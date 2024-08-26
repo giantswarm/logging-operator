@@ -9,8 +9,10 @@ jobs:
       - image: giantswarm/helm-chart-testing:v3.11.0
     steps:
       - checkout
-      - run: cd helm/logging-operator && helm dep up
-      - run: helm template helm/logging-operator
+      - run: |-
+          cd helm/logging-operator
+          helm dep up
+          helm template helm/logging-operator
 
 
 workflows:
