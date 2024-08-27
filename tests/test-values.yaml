@@ -1,0 +1,8 @@
+global:
+  podSecurityStandards:
+    enforced: true
+loggingOperator:
+  loggingEnabled: true
+  vintageMode: false
+managementCluster:
+  insecureCA: false

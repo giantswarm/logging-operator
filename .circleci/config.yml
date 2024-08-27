@@ -3,6 +3,18 @@ version: 2.1
 orbs:
   architect: giantswarm/architect@5.6.0
 
+jobs:
+  template-chart:
+    docker:
+      - image: giantswarm/helm-chart-testing:v3.11.0
+    steps:
+      - checkout
+      - run: |-
+          cd helm/logging-operator
+          helm dep up
+          helm template .
+
+
 workflows:
   build:
     jobs:
@@ -12,6 +24,15 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+      
+      - template-chart:
+          name: "template-chart"
+          filters:
+            branches:
+              ignore:
+                - main
+          requires:
+            - "go-build"
 
       - architect/push-to-registries:
           context: architect
@@ -29,11 +50,22 @@ workflows:
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "logging-operator"
+          persist_chart_archive: true
           requires:
             - push-to-registries
           filters:
             tags:
               only: /^v.*/
+      
+      - architect/run-tests-with-ats:
+          name: run-chart-tests-with-ats
+          filters:
+            # Do not trigger the job on merge to main.
+            branches:
+              ignore:
+                - main
+          requires:
+            - push-logging-operator-to-app-catalog
 
       - architect/push-to-app-collection:
           context: "architect"
