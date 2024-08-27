@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2024-08-27
+
 ### Added
 
 - Add helm chart templating test in ci pipeline.
@@ -268,7 +270,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/giantswarm/logging-operator/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/giantswarm/logging-operator/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/giantswarm/logging-operator/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/giantswarm/logging-operator/compare/v0.7.0...v0.7.1
