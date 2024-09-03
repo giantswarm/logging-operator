@@ -1,4 +1,4 @@
-package lokiauth
+package proxyauth
 
 import (
 	"context"
@@ -18,39 +18,39 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// Loki auth: a secret for the Loki-multi-tenant-proxy config
+// Proxy auth: a secret for the grafana-multi-tenant-proxy config
 type Reconciler struct {
 	client.Client
 }
 
-// ReconcileCreate ensures Loki-multi-tenant auth map is created with the right credentials
+// ReconcileCreate ensures grafana-multi-tenant-proxy auth map is created with the right credentials
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("lokiauth create")
+	logger.Info("proxyauth create")
 
 	// Retrieve secret containing credentials
-	var lokiAuthSecret v1.Secret
+	var proxyAuthSecret v1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&lokiAuthSecret)
+		&proxyAuthSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired secret
-	desiredLokiAuthSecret, err := GenerateLokiAuthSecret(lc, &lokiAuthSecret)
+	desiredProxyAuthSecret, err := GenerateProxyAuthSecret(lc, &proxyAuthSecret)
 	if err != nil {
-		logger.Info("lokiauth - failed generating auth config!", "error", err)
+		logger.Info("proxyAuth - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Check if auth config already exists.
-	logger.Info("lokiauth - getting", "namespace", desiredLokiAuthSecret.GetNamespace(), "name", desiredLokiAuthSecret.GetName())
-	var currentLokiAuthSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLokiAuthSecret.GetName(), Namespace: desiredLokiAuthSecret.GetNamespace()}, &currentLokiAuthSecret)
+	logger.Info("proxyAuth - getting", "namespace", desiredProxyAuthSecret.GetNamespace(), "name", desiredProxyAuthSecret.GetName())
+	var currentProxyAuthSecret v1.Secret
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredProxyAuthSecret.GetName(), Namespace: desiredProxyAuthSecret.GetNamespace()}, &currentProxyAuthSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("lokiauth not found, creating")
-			err = r.Client.Create(ctx, &desiredLokiAuthSecret)
+			logger.Info("proxyAuth not found, creating")
+			err = r.Client.Create(ctx, &desiredProxyAuthSecret)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -59,25 +59,25 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		}
 	}
 
-	if !needUpdate(currentLokiAuthSecret, desiredLokiAuthSecret) {
-		logger.Info("lokiauth up to date")
+	if !needUpdate(currentProxyAuthSecret, desiredProxyAuthSecret) {
+		logger.Info("proxyauth up to date")
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("lokiauth - updating")
-	err = r.Client.Update(ctx, &desiredLokiAuthSecret)
+	logger.Info("proxyauth - updating")
+	err = r.Client.Update(ctx, &desiredProxyAuthSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info("lokiauth - done")
+	logger.Info("proxyauth - done")
 	return ctrl.Result{}, nil
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("lokiauth delete")
+	logger.Info("proxyAuth delete")
 
 	return ctrl.Result{}, nil
 }

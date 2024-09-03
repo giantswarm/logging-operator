@@ -53,7 +53,7 @@ type promtailConfigClientBasicAuth struct {
 }
 
 // GeneratePromtailLoggingSecret returns a secret for
-// the Loki-multi-tenant-proxy auth config
+// the Loki-multi-tenant-proxy config
 func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
 	clusterName := lc.GetClusterName()
 

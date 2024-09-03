@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	lokiURL                   = "http://loki-gateway.loki.svc"
+	lokiURL                   = "http://grafana-multi-tenant-proxy.monitoring.svc"
 	datasourceName            = "Loki"
 	datasourceSecretName      = "loki-datasource"
 	datasourceSecretNamespace = "monitoring"
