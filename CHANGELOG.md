@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Disable logger development mode to avoid panicking, use zap as logger
+- Disable logger development mode to avoid panicking, use zap as logger.
+
+### Removed
+
+- Delete old loki-auth-proxy configuration in favor of the new grafana-auth-proxy.
 
 ## [0.9.0] - 2024-09-03
 
