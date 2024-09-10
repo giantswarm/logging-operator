@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/giantswarm/grafana-multi-tenant-proxy/pkg/config"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,16 +22,6 @@ const (
 	// DefaultReadOrgIDs - make sure to have at least 2 tenants, to prevent writing with this user
 	DefaultReadOrgIDs = "giantswarm|default"
 )
-
-type Values struct {
-	Users []user `yaml:"users" json:"users"`
-}
-
-type user struct {
-	Username string `yaml:"username" json:"username"`
-	Password string `yaml:"password" json:"password"`
-	Orgid    string `yaml:"orgid" json:"orgid"`
-}
 
 // ProxyConfigSecretMeta returns metadata for the grafana-multi-tenant-proxy secret
 func ProxyAuthSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
@@ -63,8 +54,8 @@ func listWriteUsers(credentialsSecret *v1.Secret) []string {
 // the grafana-multi-tenant-proxy auth config
 func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (v1.Secret, error) {
 	// Init empty users structure
-	values := Values{
-		Users: []user{},
+	authCfg := config.AuthenticationConfig{
+		Users: []config.User{},
 	}
 	// Prepare read user's orgid with default values
 	readOrgid := DefaultReadOrgIDs
@@ -77,12 +68,12 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 			return v1.Secret{}, errors.WithStack(err)
 		}
 
-		values.Users = append(values.Users, user{
+		authCfg.Users = append(authCfg.Users, config.User{
 			Username: writeUser,
 			Password: writePassword,
 			// we set the tenant even though it may be given by the sender (promtail)
 			// depending of grafana-multi-teant-proxy config
-			Orgid: writeUser,
+			OrgID: writeUser,
 		})
 
 		// Add write user to allowed tenants for read user
@@ -96,13 +87,13 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
-	values.Users = append(values.Users, user{
+	authCfg.Users = append(authCfg.Users, config.User{
 		Username: readUser,
 		Password: readPassword,
-		Orgid:    readOrgid,
+		OrgID:    readOrgid,
 	})
 
-	v, err := yaml.Marshal(values)
+	v, err := yaml.Marshal(authCfg)
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
