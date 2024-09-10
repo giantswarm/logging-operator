@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Delete old loki-auth-proxy configuration in favor of the new grafana-auth-proxy.
+- Remove old loki-auth reconciler.
 
 ## [0.9.0] - 2024-09-03
 
