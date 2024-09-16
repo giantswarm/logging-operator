@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use `giantswarm` tenant by default instead of cluster name.
 
+## [0.10.0] - 2024-09-10
+
+### Changed
+
+- Use grafana multi-tenant-proxy public types instead of vendoring them.
+
 ### Fixed
 
 - Disable logger development mode to avoid panicking, use zap as logger.
@@ -18,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Delete old loki-auth-proxy configuration in favor of the new grafana-auth-proxy.
-- Remove previus loki-auth reconciler
+- Remove old loki-auth reconciler.
 
 ## [0.9.0] - 2024-09-03
 
@@ -294,7 +300,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/giantswarm/logging-operator/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/giantswarm/logging-operator/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/giantswarm/logging-operator/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/giantswarm/logging-operator/compare/v0.7.2...v0.7.3
