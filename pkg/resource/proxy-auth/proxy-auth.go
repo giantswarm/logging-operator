@@ -73,7 +73,7 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 			Password: writePassword,
 			// we set the tenant even though it may be given by the sender (promtail)
 			// depending of grafana-multi-teant-proxy config
-			Orgid: "giantswarm",
+			Orgid: common.DefaultWriteTenant,
 		})
 
 		// Add write user to allowed tenants for read user
