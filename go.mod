@@ -17,7 +17,7 @@ require (
 	k8s.io/api v0.31.1
 	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.31.1
-	sigs.k8s.io/cluster-api v1.8.2
+	sigs.k8s.io/cluster-api v1.8.3
 	sigs.k8s.io/controller-runtime v0.19.0
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -93,6 +93,6 @@ require (
 )
 
 replace (
-	github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.4.2
+	github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.5.0
 	github.com/imdario/mergo => github.com/imdario/mergo v0.3.6
 )
