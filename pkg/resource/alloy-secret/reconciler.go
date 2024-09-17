@@ -17,6 +17,7 @@ import (
 
 // Reconciler implements a reconciler.Interface to handle
 // Alloy secret which stores sensitive configuration values.
+// TODO(theo): Remove this reconciler and the whole package. It was needed to ensure the secret created previously is now deleted. This is now replaced by the secret created in the logging-secret resource.
 type Reconciler struct {
 	client.Client
 }
