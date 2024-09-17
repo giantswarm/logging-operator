@@ -35,9 +35,10 @@ type promtailExtraEnv struct {
 }
 
 type promtailConfigSnippets struct {
-	ExtraScrapeConfigs  string               `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
-	ExtraRelabelConfigs []extraRelabelConfig `yaml:"extraRelabelConfigs" json:"extraRelabelConfigs"`
-	AddScrapeJobLabel   bool                 `yaml:"addScrapeJobLabel" json:"addScrapeJobLabel"`
+	PipelineStages      []map[interface{}]interface{} `yaml:"pipelineStages" json:"pipelineStages"`
+	ExtraScrapeConfigs  string                        `yaml:"extraScrapeConfigs" json:"extraScrapeConfigs"`
+	ExtraRelabelConfigs []extraRelabelConfig          `yaml:"extraRelabelConfigs" json:"extraRelabelConfigs"`
+	AddScrapeJobLabel   bool                          `yaml:"addScrapeJobLabel" json:"addScrapeJobLabel"`
 }
 
 type promtailConfig struct {
@@ -92,13 +93,25 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
 					Name: "NODENAME",
 					ValueFrom: promtailExtraEnvValuefrom{
 						FieldRef: promtailExtraEnvFieldref{
-							FieldPath: "spec.nodeName",
+							FieldPath: "regextraRelabelConfigexspec.nodeName",
 						},
 					},
 				},
 			},
 			Config: promtailConfig{
 				Snippets: promtailConfigSnippets{
+					PipelineStages: []map[interface{}]interface{}{
+						{
+							"cri": map[interface{}]interface{}{},
+							"structured_metadata": map[interface{}]interface{}{
+								"filename": nil,
+								"stream":   nil,
+							},
+							"labeldrop": map[interface{}]interface{}{
+								"filename": nil,
+								"stream":   nil,
+							},
+					},
 					ExtraScrapeConfigs: `# this one includes also system logs reported by systemd-journald
 - job_name: systemd_journal_run
   journal:
@@ -120,7 +133,7 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
   - source_labels: ['__tmp_systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
-    target_label: 'node_name'
+    target_label: 'node'
   pipeline_stages:
   - json:
       expressions:
@@ -148,7 +161,7 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
   - source_labels: ['__tmp_systemd_unit']
     target_label: 'systemd_unit'
   - source_labels: ['__journal__hostname']
-    target_label: 'node_name'
+    target_label: 'node'
   pipeline_stages:
   - json:
       expressions:
@@ -163,7 +176,7 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
     labels:
       scrape_job: audit-logs
       __path__: /var/log/apiserver/audit.log
-      node_name: ${NODENAME:-unknown}
+      node: ${NODENAME:-unknown}
   pipeline_stages:
   - json:
       expressions:
@@ -173,8 +186,12 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
         resource: resource
         namespace: namespace
       source: objectRef
-  - labels:
+  - structured_metadata:
       resource:
+      filename:
+  - labeldrop:
+      filename
+  - labels:
       namespace:
 `,
 					ExtraRelabelConfigs: extraRelabelConfigs,

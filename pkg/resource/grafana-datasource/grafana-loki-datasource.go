@@ -62,7 +62,6 @@ func DatasourceSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // GenerateDatasourceSecret returns a secret for
 // the Loki datasource for Grafana
 func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (v1.Secret, error) {
-
 	user := common.ReadUser
 
 	password, err := loggingcredentials.GetPassword(lc, credentialsSecret, user)

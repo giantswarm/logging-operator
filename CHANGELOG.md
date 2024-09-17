@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Move high cardinality values into structured-metadata:
+  - kubernetes audit log `resource` label
+  - `filename` label
+  - log `output stream` label
+- Rename `node_name` label into `node` to match metric label.
+
 ## [0.10.0] - 2024-09-10
 
 ### Changed
