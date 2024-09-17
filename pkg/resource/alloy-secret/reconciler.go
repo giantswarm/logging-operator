@@ -2,7 +2,6 @@ package alloysecret
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -65,9 +64,4 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	logger.Info("alloy-secret - secret deleted")
 	return ctrl.Result{}, nil
-}
-
-// needUpdate return true if current.Data and desired.Data do not match.
-func needUpdate(current, desired v1.Secret) bool {
-	return !reflect.DeepEqual(current.Data, desired.Data)
 }
