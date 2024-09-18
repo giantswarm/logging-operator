@@ -18,6 +18,8 @@ promtail:
         {{- end }}
         - source_labels: ['node_name']
           target_label: 'node'
+        - regex: 'node_name'
+          action: labeldrop
       extraScrapeConfigs: |
         # this one includes also system logs reported by systemd-journald
         - job_name: systemd_journal_run
