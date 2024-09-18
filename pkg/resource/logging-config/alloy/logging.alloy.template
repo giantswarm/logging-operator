@@ -245,14 +245,14 @@ loki.process "kubernetes_audit" {
 	stage.structured_metadata {
 		values = {
 			"resource" = "",
-			"filename" = "",,
+			"filename" = "",
 		}
 	}
 
 	stage.label_drop {
-		values = {
+		values = [
 			"filename",
-		}
+		]
 	}
 
 	stage.labels {
