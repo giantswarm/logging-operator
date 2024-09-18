@@ -24,7 +24,7 @@ var (
 
 func init() {
 	alloyLoggingTemplate = template.Must(template.New("logging.alloy").Funcs(sprig.FuncMap()).Parse(alloyLogging))
-	alloyLoggingConfigTemplate = template.Must(template.New("logging-config.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingConfig))
+	alloyLoggingConfigTemplate = template.Must(template.New("logging-config.alloy").Funcs(sprig.FuncMap()).Parse(alloyLoggingConfig))
 }
 
 // GenerateAlloyLoggingConfig returns a configmap for
