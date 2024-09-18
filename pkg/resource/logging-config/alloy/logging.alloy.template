@@ -101,10 +101,10 @@ loki.process "kubernetes_pods" {
 	}
 
 	stage.label_drop {
-		values = {
+		values = [
 			"filename",
 			"stream",
-		}
+		]
 	}
 }
 

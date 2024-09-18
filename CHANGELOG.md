@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - log `output stream` label
 - Rename `node_name` label into `node` to match metric label.
 
+### Fixed
+
+- Fix v0.11.0 release was not published
+
 ## [0.11.0] - 2024-09-18
 
 ### Fixed

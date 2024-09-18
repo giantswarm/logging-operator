@@ -9,13 +9,15 @@ promtail:
   config:
     snippets:
       addScrapeJobLabel: true
-      {{- if .IsWorkloadCluster }}
       extraRelabelConfigs:
+        {{- if .IsWorkloadCluster }}
         - action: keep
           regex: kube-system|giantswarm
           source_labels:
           - __meta_kubernetes_namespace
-      {{- end }}
+        {{- end }}
+        - source_labels: ['node_name']
+          target_label: 'node'
       extraScrapeConfigs: |
         # this one includes also system logs reported by systemd-journald
         - job_name: systemd_journal_run
