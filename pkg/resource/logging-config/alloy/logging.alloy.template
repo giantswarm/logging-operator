@@ -35,7 +35,7 @@ discovery.relabel "kubernetes_pods" {
 	}
 
 	rule {
-		source_labels = ["__meta_kubernetes_pod_node"]
+		source_labels = ["__meta_kubernetes_pod_node_name"]
 		target_label  = "node"
 	}
 
