@@ -93,7 +93,7 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
 					Name: "NODENAME",
 					ValueFrom: promtailExtraEnvValuefrom{
 						FieldRef: promtailExtraEnvFieldref{
-							FieldPath: "regextraRelabelConfigexspec.nodeName",
+							FieldPath: "spec.nodeName",
 						},
 					},
 				},
@@ -103,14 +103,19 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
 					PipelineStages: []map[interface{}]interface{}{
 						{
 							"cri": map[interface{}]interface{}{},
+						},
+						{
 							"structured_metadata": map[interface{}]interface{}{
 								"filename": nil,
 								"stream":   nil,
 							},
+						},
+						{
 							"labeldrop": map[interface{}]interface{}{
 								"filename": nil,
 								"stream":   nil,
 							},
+						},
 					},
 					ExtraScrapeConfigs: `# this one includes also system logs reported by systemd-journald
 - job_name: systemd_journal_run
