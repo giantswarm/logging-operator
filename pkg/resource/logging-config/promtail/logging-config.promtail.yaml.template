@@ -95,6 +95,7 @@ promtail:
                 resource: resource
                 namespace: namespace
               source: objectRef
+          {{- if .SupportsStructuredMetadata }}
           - structured_metadata:
               resource:
               filename:
@@ -102,6 +103,12 @@ promtail:
               - filename
           - labels:
               namespace:
+          {{- else }}
+          - labels:
+              namespace:
+              filename:
+          {{- end }}
+      {{- if .SupportsStructuredMetadata }}
       pipelineStages:
         - cri: {}
         - structured_metadata:
@@ -110,6 +117,7 @@ promtail:
         - labeldrop:
             - filename
             - stream
+      {{- end }}
   extraArgs:
   - -log-config-reverse-order
   - -config.expand-env=true
