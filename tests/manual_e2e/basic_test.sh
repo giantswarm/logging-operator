@@ -40,9 +40,9 @@ main() {
 
   echo "Checking if logging-operator app is in deployed state"
 
-  deployed=$(kubectl get app -n giantswarm logging-operator -o yaml | yq .status.release.status)
+  appStatus=$(kubectl get app -n giantswarm logging-operator -o yaml | yq .status.release.status)
 
-  [[ "$deployed" != "deployed" ]] \
+  [[ "$appStatus" != "deployed" ]] \
     && exit_error "logging-operator app is not in deployed state. Please fix the app before retrying" || echo "logging-operator app is indeed in deployed state"
 
   echo "Creating WC"
