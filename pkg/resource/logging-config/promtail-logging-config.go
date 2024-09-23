@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	//go:embed promtail/logging-config.yaml.template
+	//go:embed promtail/logging-config.promtail.yaml.template
 	promtailLoggingConfig         string
 	promtailLoggingConfigTemplate *template.Template
 )
 
 func init() {
-	promtailLoggingConfigTemplate = template.Must(template.New("logging-config.promtail").Funcs(sprig.FuncMap()).Parse(promtailLoggingConfig))
+	promtailLoggingConfigTemplate = template.Must(template.New("logging-config.promtail.yaml").Funcs(sprig.FuncMap()).Parse(promtailLoggingConfig))
 }
 
 // GeneratePromtailLoggingConfig returns a configmap for
