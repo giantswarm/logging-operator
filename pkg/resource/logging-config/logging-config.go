@@ -6,6 +6,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/blang/semver"
 	"github.com/pkg/errors"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -16,13 +17,13 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(lc loggedcluster.Interface) (v1.ConfigMap, error) {
+func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(lc)
+		values, err = GeneratePromtailLoggingConfig(lc, observabilityBundleVersion)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
