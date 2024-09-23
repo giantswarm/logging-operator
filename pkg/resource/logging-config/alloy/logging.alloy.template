@@ -36,7 +36,7 @@ discovery.relabel "kubernetes_pods" {
 
 	rule {
 		source_labels = ["__meta_kubernetes_pod_node_name"]
-		target_label  = "node_name"
+		target_label  = "node"
 	}
 
 	rule {
@@ -75,13 +75,13 @@ discovery.relabel "kubernetes_pods" {
 		replacement   = "/var/log/pods/*$1/*.log"
 	}
 
-{{- if .IsWorkloadCluster }}
+	{{- if .IsWorkloadCluster }}
 	rule {
 		source_labels = ["__meta_kubernetes_namespace"]
 		regex         = "kube-system|giantswarm"
 		action        = "keep"
 	}
-{{- end }}
+	{{- end }}
 }
 
 local.file_match "kubernetes_pods" {
@@ -92,6 +92,20 @@ loki.process "kubernetes_pods" {
 	forward_to = [loki.write.default.receiver]
 
 	stage.cri { }
+
+	stage.structured_metadata {
+		values = {
+			"filename" = "",
+			"stream" = "",
+		}
+	}
+
+	stage.label_drop {
+		values = [
+			"filename",
+			"stream",
+		]
+	}
 }
 
 loki.source.file "kubernetes_pods" {
@@ -136,7 +150,7 @@ discovery.relabel "systemd_journal_run" {
 
 	rule {
 		source_labels = ["__journal__hostname"]
-		target_label  = "node_name"
+		target_label  = "node"
 	}
 }
 
@@ -187,7 +201,7 @@ discovery.relabel "systemd_journal_var" {
 
 	rule {
 		source_labels = ["__journal__hostname"]
-		target_label  = "node_name"
+		target_label  = "node"
 	}
 }
 
@@ -206,7 +220,7 @@ local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apiserver/audit.log",
-		node_name   = coalesce(env("NODENAME"), "unknown"),
+		node   = coalesce(env("NODENAME"), "unknown"),
 		scrape_job  = "audit-logs",
 	}]
 }
@@ -228,10 +242,22 @@ loki.process "kubernetes_audit" {
 		source = "objectRef"
 	}
 
+	stage.structured_metadata {
+		values = {
+			"resource" = "",
+			"filename" = "",
+		}
+	}
+
+	stage.label_drop {
+		values = [
+			"filename",
+		]
+	}
+
 	stage.labels {
 		values = {
-			namespace = null,
-			resource  = null,
+			namespace = "",
 		}
 	}
 }

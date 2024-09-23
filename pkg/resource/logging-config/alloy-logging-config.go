@@ -17,14 +17,14 @@ var (
 	alloyLogging         string
 	alloyLoggingTemplate *template.Template
 
-	//go:embed alloy/logging-config.yaml.template
+	//go:embed alloy/logging-config.alloy.yaml.template
 	alloyLoggingConfig         string
 	alloyLoggingConfigTemplate *template.Template
 )
 
 func init() {
 	alloyLoggingTemplate = template.Must(template.New("logging.alloy").Funcs(sprig.FuncMap()).Parse(alloyLogging))
-	alloyLoggingConfigTemplate = template.Must(template.New("logging-config.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingConfig))
+	alloyLoggingConfigTemplate = template.Must(template.New("logging-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyLoggingConfig))
 }
 
 // GenerateAlloyLoggingConfig returns a configmap for
