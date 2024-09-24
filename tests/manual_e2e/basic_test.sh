@@ -57,7 +57,10 @@ main() {
 
   echo "WC named 'loggingoperatortest' created. Waiting for it to be ready"
 
-  sleep 1200
+  # Waiting for 1min for the cluster resource to be created
+  sleep 60
+
+  kubectl wait -n org-giantswarm --for=condition=Ready cluster/loggingoperatortest --timeout=20m
 
   echo "Checking if the logging agent is up and running on the WC"
 
@@ -69,8 +72,10 @@ main() {
   alloy=$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-alloy-logs)
 
   if [[ ! -z "$promtail" ]]; then
+    kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-promtail --timeout=10m
     check_daemonset_status $1 "promtail"
   elif [[ ! -z "$alloy" ]]; then
+    kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-alloy-logs --timeout=10m
     check_daemonset_status $1 "alloy-logs"
   else
     echo "No metrics agent app found. Cleaning the WC"
