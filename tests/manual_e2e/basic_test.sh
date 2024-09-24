@@ -14,8 +14,8 @@ clean_wc() {
 
 # Helper function - checks the status of the daemonset
 check_daemonset_status() {
-  local daemonsetDesiredReplicas=$(kubectl get daemonset -n kube-system --context teleport.giantswarm.io-$1-loggingoperatortest $2 -o yaml | yq .status.desiredNumberScheduled)
-  local daemonsetReadyReplicas=$(kubectl get daemonset -n kube-system --context teleport.giantswarm.io-$1-loggingoperatortest $2 -o yaml | yq .status.numberReady)
+  local daemonsetDesiredReplicas="$(kubectl get daemonset -n kube-system --context teleport.giantswarm.io-$1-loggingoperatortest $2 -o yaml | yq .status.desiredNumberScheduled)"
+  local daemonsetReadyReplicas="$(kubectl get daemonset -n kube-system --context teleport.giantswarm.io-$1-loggingoperatortest $2 -o yaml | yq .status.numberReady)"
 
   [[ "$daemonsetDesiredReplicas" != "$daemonsetReadyReplicas" ]] \
     && echo "$2 app deployed but some daemonset's pods aren't in a ready state" || echo "$2 app is deployed and all daemonset's pods are ready"
@@ -27,7 +27,7 @@ check_configs() {
   local config
 
   [[ "$2" == "config" ]] \
-    && config=$(kubectl get configmap -n org-giantswarm loggingoperatortest-$1-$2) || config=$(kubectl get secret -n org-giantswarm loggingoperatortest-$1-$2)
+    && config="$(kubectl get configmap -n org-giantswarm loggingoperatortest-$1-$2) || config=$(kubectl get secret -n org-giantswarm loggingoperatortest-$1-$2)"
 
   [[ -z "$config" ]] && echo "$1-$2 not found" || echo "$1-$2 found. Test succeeded"
 }
@@ -40,7 +40,7 @@ main() {
 
   echo "Checking if logging-operator app is in deployed state"
 
-  appStatus=$(kubectl get app -n giantswarm logging-operator -o yaml | yq .status.release.status)
+  appStatus="$(kubectl get app -n giantswarm logging-operator -o yaml | yq .status.release.status)"
 
   [[ "$appStatus" != "deployed" ]] \
     && exit_error "logging-operator app is not in deployed state. Please fix the app before retrying" || echo "logging-operator app is indeed in deployed state"
@@ -68,8 +68,8 @@ main() {
   tsh kube login $1-loggingoperatortest
   tsh kube login $1
 
-  promtail=$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-promtail)
-  alloy=$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-alloy-logs)
+  promtail="$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-promtail)"
+  alloy="$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-alloy-logs)"
 
   if [[ ! -z "$promtail" ]]; then
     kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-promtail --timeout=10m
