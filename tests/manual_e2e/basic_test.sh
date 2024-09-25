@@ -27,7 +27,7 @@ check_configs() {
   local config
 
   [[ "$2" == "config" ]] \
-    && config="$(kubectl get configmap -n org-giantswarm loggingoperatortest-$1-$2) || config=$(kubectl get secret -n org-giantswarm loggingoperatortest-$1-$2)"
+    && config="$(kubectl get configmap -n org-giantswarm loggingoperatortest-$1-$2)" || config="$(kubectl get secret -n org-giantswarm loggingoperatortest-$1-$2)"
 
   [[ -z "$config" ]] && echo "$1-$2 not found" || echo "$1-$2 found. Test succeeded"
 }
@@ -58,9 +58,12 @@ main() {
   echo "WC named 'loggingoperatortest' created. Waiting for it to be ready"
 
   # Waiting for 1min for the cluster resource to be created
-  sleep 60
+  sleep 120
 
   kubectl wait -n org-giantswarm --for=condition=Ready cluster/loggingoperatortest --timeout=20m
+
+  # Giving time for the logging agent app to be created
+  sleep 60
 
   echo "Checking if the logging agent is up and running on the WC"
 
@@ -73,23 +76,28 @@ main() {
 
   if [[ ! -z "$promtail" ]]; then
     kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-promtail --timeout=10m
+    sleep 120 # Giving extra time for the daemonset's pods to be ready
     check_daemonset_status $1 "promtail"
   elif [[ ! -z "$alloy" ]]; then
     kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-alloy-logs --timeout=10m
+    sleep 120 # Giving extra time for the daemonset's pods to be ready
     check_daemonset_status $1 "alloy-logs"
   else
-    echo "No metrics agent app found. Cleaning the WC"
+    echo "No logging agent app found. Cleaning the WC"
     clean_wc
     exit 1
   fi
 
-  
-  check_configs "grafana-agent" "config"
-  check_configs "grafana-agent" "secret"
-  check_configs "logging" "config"
-  check_configs "logging" "secret"
+  configTypes=("config" "secret")
+  configNames=("grafana-agent" "logging")
 
-  echo "cleaning WC"
+  for type in "${configTypes[@]}"; do
+    for name in "${configNames[@]}"; do
+      check_configs $name $type
+    done
+  done
+
+  echo "Basic checks finished. Cleaning WC"
 
   clean_wc
 }
