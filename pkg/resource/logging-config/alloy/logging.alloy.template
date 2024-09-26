@@ -4,7 +4,7 @@ loki.source.podlogs "kubernetes_pods" {
 
   selector {
     match_labels = {
-      giantswarm.io/managed-by = "logging-operator"
+      "giantswarm.io/managed-by" = "logging-operator"
     }
   }
 }
