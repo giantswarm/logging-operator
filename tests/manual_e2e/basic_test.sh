@@ -59,7 +59,7 @@ main() {
 
   echo "WC named 'loggingoperatortest' created. Waiting for it to be ready"
 
-  # Waiting for 1min for the cluster resource to be created
+  # Allowing a bit of time for the cluster resource to be created
   sleep 120
 
   kubectl wait -n org-giantswarm --for=condition=Ready clusters.cluster.x-k8s.io/loggingoperatortest --timeout=20m
