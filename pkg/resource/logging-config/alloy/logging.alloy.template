@@ -1,10 +1,16 @@
 // Kubernetes pods logs
-discovery.kubernetes "kubernetes_pods" {
-	role = "pod"
+loki.source.podlogs "kubernetes_pods" {
+  forward_to      = [loki.process.kubernetes_pods.receiver]
+
+  selector {
+    match_labels = {
+      giantswarm.io/managed-by = "logging-operator"
+    }
+  }
 }
 
-discovery.relabel "kubernetes_pods" {
-	targets = discovery.kubernetes.kubernetes_pods.targets
+loki.relabel "kubernetes_pods" {
+	forward_to      = [loki.process.kubernetes_pods.receiver]
 
 	rule {
 		source_labels = ["__meta_kubernetes_pod_controller_name"]
@@ -61,21 +67,6 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
-	rule {
-		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-		separator     = "/"
-		target_label  = "__path__"
-		replacement   = "/var/log/pods/*$1/*.log"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash", "__meta_kubernetes_pod_annotation_kubernetes_io_config_hash", "__meta_kubernetes_pod_container_name"]
-		separator     = "/"
-		regex         = "true/(.*)"
-		target_label  = "__path__"
-		replacement   = "/var/log/pods/*$1/*.log"
-	}
-
 	{{- if .IsWorkloadCluster }}
 	rule {
 		source_labels = ["__meta_kubernetes_namespace"]
@@ -83,10 +74,6 @@ discovery.relabel "kubernetes_pods" {
 		action        = "keep"
 	}
 	{{- end }}
-}
-
-local.file_match "kubernetes_pods" {
-	path_targets = discovery.relabel.kubernetes_pods.output
 }
 
 loki.process "kubernetes_pods" {
@@ -107,12 +94,6 @@ loki.process "kubernetes_pods" {
 			"stream",
 		]
 	}
-}
-
-loki.source.file "kubernetes_pods" {
-	targets               = local.file_match.kubernetes_pods.targets
-	forward_to            = [loki.process.kubernetes_pods.receiver]
-	legacy_positions_file = "/run/promtail/positions.yaml"
 }
 
 // journald logs from /run/log/journal
