@@ -57,8 +57,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	podLogs := PodLogs()
 	err := r.Client.Delete(ctx, podLogs)
-	err = client.IgnoreNotFound(err)
-	if err != nil {
+	if client.IgnoreNotFound(err) != nil {
 		logger.Error(err, "podlogs - delete failed")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
