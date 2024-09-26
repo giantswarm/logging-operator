@@ -49,6 +49,7 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
+	podlogsv1alpha2 "github.com/giantswarm/logging-operator/pkg/resource/podlogs/apis/monitoring/v1alpha2"
 	proxyauth "github.com/giantswarm/logging-operator/pkg/resource/proxy-auth"
 	//+kubebuilder:scaffold:imports
 )
@@ -62,6 +63,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(capiv1beta1.AddToScheme(scheme))
 	utilruntime.Must(appv1.AddToScheme(scheme))
+	utilruntime.Must(podlogsv1alpha2.AddToScheme(scheme))
 
 	//+kubebuilder:scaffold:scheme
 }
