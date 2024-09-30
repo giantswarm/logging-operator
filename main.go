@@ -182,9 +182,9 @@ func main() {
 			&proxyAuth,
 			&loggingSecret,
 			&loggingConfig,
+			&podLogs,
 			&grafanaAgentSecret,
 			&grafanaAgentConfig,
-			&podLogs,
 		},
 	}
 
