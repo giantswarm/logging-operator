@@ -76,6 +76,7 @@ main() {
   promtail="$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-promtail)"
   alloy="$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-alloy-logs)"
 
+  # We need either promtail or alloy to be running on the workload cluster
   if [[ -n "$promtail" ]]; then
     kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-promtail --timeout=10m
     sleep 120 # Giving extra time for the daemonset's pods to be ready
