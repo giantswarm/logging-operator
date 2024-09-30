@@ -2,6 +2,7 @@ package podlogs
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 
@@ -36,7 +37,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	podLogs := PodLogs()
-	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, podLogs, func() error {
+	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, podLogs, func() error {
 		podLogs.Spec = PodLogsSpec()
 
 		return nil
@@ -45,6 +46,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		logger.Error(err, "podlogs - create failed")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
+	logger.Info(fmt.Sprintf("podlogs - result: %v", result))
 
 	logger.Info("podlogs - created")
 	return ctrl.Result{}, nil
