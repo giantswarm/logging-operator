@@ -53,7 +53,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	if lastErr != nil {
 		// Returns the last error if any.
 		// This is to ensure at least one error is returned if any of the PodLogs failed to be created.
-		return ctrl.Result{}, errors.WithStack(err)
+		return ctrl.Result{}, errors.WithStack(lastErr)
 	}
 
 	logger.Info("podlogs - created")
@@ -78,7 +78,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	if lastErr != nil {
 		// Returns the last error if any.
 		// This is to ensure at least one error is returned if any of the PodLogs failed to be deleted.
-		return ctrl.Result{}, errors.WithStack(err)
+		return ctrl.Result{}, errors.WithStack(lastErr)
 	}
 
 	logger.Info("podlogs - deleted")
