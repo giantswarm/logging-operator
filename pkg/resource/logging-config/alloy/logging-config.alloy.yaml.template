@@ -13,7 +13,6 @@ alloy:
       create: true
       content: |-
 {{ .AlloyConfig | indent 8 }}
-    stabilityLevel: "experimental"
     extraEnv:
     - name: NODENAME
       valueFrom:

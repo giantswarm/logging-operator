@@ -279,7 +279,3 @@ logging {
   level  = "warn"
   format = "logfmt"
 }
-
-livedebugging {
-  enabled = true
-}
