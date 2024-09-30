@@ -40,7 +40,6 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
-	alloysecret "github.com/giantswarm/logging-operator/pkg/resource/alloy-secret"
 	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
 	grafanaagentsecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
@@ -159,10 +158,6 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	alloySecret := alloysecret.Reconciler{
-		Client: mgr.GetClient(),
-	}
-
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.LoggingAgent = loggingAgent
 	loggedcluster.O.InstallationName = installationName
@@ -182,7 +177,6 @@ func main() {
 			&loggingConfig,
 			&grafanaAgentSecret,
 			&grafanaAgentConfig,
-			&alloySecret,
 		},
 	}
 
