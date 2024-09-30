@@ -86,7 +86,7 @@ main() {
     sleep 120 # Giving extra time for the daemonset's pods to be ready
     check_daemonset_status "$1" "alloy-logs"
   else
-    echo "No logging agent app found. Cleaning the WC"
+    echo "Error : No logging agent app found. Cleaning the WC"
     clean_wc
     exit 1
   fi
