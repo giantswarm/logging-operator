@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# This scripts fetches the Go definitions for PodLogs from Grafana Alloy at
+# https://github.com/grafana/alloy/tree/main/internal/component/loki/source/podlogs/internal/apis/monitoring/v1alpha2
+# and stored them in the apis/ directory.
 
 SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE}") && pwd -P)
 
