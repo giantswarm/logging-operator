@@ -20,7 +20,7 @@ check_daemonset_status() {
   readyReplicas="$(kubectl get daemonset -n kube-system --context teleport.giantswarm.io-"$1"-loggingoperatortest "$2" -o yaml | yq .status.numberReady)"
 
   [[ "$desiredReplicas" != "$readyReplicas" ]] \
-    && echo "Error : $2 app deployed but some daemonset's pods aren't in a ready state" || echo "$2 app is deployed and all daemonset's pods are ready"
+    && echo "Error: $2 app deployed but some daemonset's pods aren't in a ready state" || echo "$2 app is deployed and all daemonset's pods are ready"
 }
 
 # Helper function - checks the existence of the grafana-agent and logging cms and secrets
@@ -31,7 +31,7 @@ check_configs() {
   [[ "$2" == "config" ]] \
     && config="$(kubectl get configmap -n org-giantswarm loggingoperatortest-"$1"-"$2")" || config="$(kubectl get secret -n org-giantswarm loggingoperatortest-"$1"-"$2")"
 
-  [[ -z "$config" ]] && echo "Error : $1-$2 not found" || echo "$1-$2 found. Test succeeded"
+  [[ -z "$config" ]] && echo "Error: $1-$2 not found" || echo "$1-$2 found. Test succeeded"
 }
 
 main() {
@@ -45,7 +45,7 @@ main() {
   appStatus="$(kubectl get app -n giantswarm logging-operator -o yaml | yq .status.release.status)"
 
   [[ "$appStatus" != "deployed" ]] \
-    && exit_error "Error : logging-operator app is not in deployed state. Please fix the app before retrying" || echo "logging-operator app is indeed in deployed state"
+    && exit_error "Error: logging-operator app is not in deployed state. Please fix the app before retrying" || echo "logging-operator app is indeed in deployed state"
 
   echo "Creating WC"
 
@@ -86,7 +86,7 @@ main() {
     sleep 120 # Giving extra time for the daemonset's pods to be ready
     check_daemonset_status "$1" "alloy-logs"
   else
-    echo "Error : No logging agent app found. Cleaning the WC"
+    echo "Error: No logging agent app found. Cleaning the WC"
     clean_wc
     exit 1
   fi
