@@ -37,16 +37,19 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	podLogs := PodLogs()
-	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, podLogs, func() error {
-		podLogs.Spec = PodLogsSpec()
+	for _, p := range podLogs {
+		po := p.GetBase()
+		result, err := controllerutil.CreateOrUpdate(ctx, r.Client, po, func() error {
+			po.Spec = p.GetSpec()
 
-		return nil
-	})
-	if err != nil {
-		logger.Error(err, "podlogs - create failed")
-		return ctrl.Result{}, errors.WithStack(err)
+			return nil
+		})
+		if err != nil {
+			logger.WithValues("podlogs", p.GetName()).Error(err, "podlogs - create failed")
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+		logger.WithValues("podlogs", p.GetName()).Info(fmt.Sprintf("podlogs - result: %v", result))
 	}
-	logger.Info(fmt.Sprintf("podlogs - result: %v", result))
 
 	logger.Info("podlogs - created")
 	return ctrl.Result{}, nil
@@ -58,10 +61,13 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("podlogs - delete")
 
 	podLogs := PodLogs()
-	err := r.Client.Delete(ctx, podLogs)
-	if client.IgnoreNotFound(err) != nil {
-		logger.Error(err, "podlogs - delete failed")
-		return ctrl.Result{}, errors.WithStack(err)
+	for _, p := range podLogs {
+		po := p.GetBase()
+		err := r.Client.Delete(ctx, po)
+		if client.IgnoreNotFound(err) != nil {
+			logger.WithValues("podlogs", p.GetName()).Error(err, "podlogs - delete failed")
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	logger.Info("podlogs - deleted")
