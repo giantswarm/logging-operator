@@ -1,8 +1,11 @@
 package podlogs
 
 import (
+	_ "embed"
+
 	promv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
 	podlogsv1alpha2 "github.com/giantswarm/logging-operator/pkg/resource/podlogs/apis/monitoring/v1alpha2"
@@ -26,42 +29,22 @@ func (p *PodLogsObject) GetSpec() podlogsv1alpha2.PodLogsSpec {
 	return p.Spec
 }
 
+var (
+	//go:embed resources/podlogs_pod.yaml
+	byPodContent []byte
+	byPodLog     *podlogsv1alpha2.PodLogs
+)
+
+func init() {
+	err := yaml.Unmarshal(byPodContent, &byPodLog)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func PodLogs() []*PodLogsObject {
 	byPod := PodLogsObject{
-		podlogsv1alpha2.PodLogs{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "by-pod",
-				Namespace: "giantswarm",
-				Labels: map[string]string{
-					"giantswarm.io/managed-by": "logging-operator",
-				},
-			},
-			Spec: podlogsv1alpha2.PodLogsSpec{
-				Selector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						key.LoggingLabel: "enabled",
-					},
-				},
-				NamespaceSelector: metav1.LabelSelector{
-					MatchExpressions: []metav1.LabelSelectorRequirement{
-						{
-							Key:      key.LoggingLabel,
-							Operator: metav1.LabelSelectorOpNotIn,
-							Values:   []string{"enabled"},
-						},
-					},
-				},
-				RelabelConfigs: []*promv1.RelabelConfig{
-					{
-						Action:       "replace",
-						SourceLabels: []promv1.LabelName{"__meta_kubernetes_pod_label_giantswarm_io_logging_tenant"},
-						TargetLabel:  "tenant_id",
-						Replacement:  &replacement,
-						Regex:        "(.*)",
-					},
-				},
-			},
-		},
+		*byPodLog.DeepCopy(),
 	}
 
 	byNamespace := PodLogsObject{
