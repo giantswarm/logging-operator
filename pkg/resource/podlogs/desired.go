@@ -4,6 +4,7 @@ import (
 	promv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/logging-operator/pkg/key"
 	podlogsv1alpha2 "github.com/giantswarm/logging-operator/pkg/resource/podlogs/apis/monitoring/v1alpha2"
 )
 
@@ -25,13 +26,13 @@ func PodLogsSpec() podlogsv1alpha2.PodLogsSpec {
 	p := podlogsv1alpha2.PodLogsSpec{
 		Selector: metav1.LabelSelector{
 			MatchLabels: map[string]string{
-				"giantswarm.io/logging": "enabled",
+				key.LoggingLabel: "enabled",
 			},
 		},
 		NamespaceSelector: metav1.LabelSelector{
 			MatchExpressions: []metav1.LabelSelectorRequirement{
 				{
-					Key:      "giantswarm.io/cluster",
+					Key:      key.LoggingLabel,
 					Operator: metav1.LabelSelectorOpNotIn,
 					Values:   []string{"enabled"},
 				},
