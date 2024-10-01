@@ -42,10 +42,10 @@ func PodLogs() []*PodLogsGetter {
 		},
 	}
 
-	byPod := PodLogsGetter{
+	podSelector := PodLogsGetter{
 		podlogsv1alpha2.PodLogs{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "by-pod",
+				Name:      "pod-selector",
 				Namespace: namespace,
 				Labels: map[string]string{
 					label.ManagedBy: "logging-operator",
@@ -83,10 +83,10 @@ func PodLogs() []*PodLogsGetter {
 		},
 	}
 
-	byNamespace := PodLogsGetter{
+	namespaceSelector := PodLogsGetter{
 		podlogsv1alpha2.PodLogs{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "by-namespace",
+				Name:      "namespace-selector",
 				Namespace: namespace,
 				Labels: map[string]string{
 					label.ManagedBy: "logging-operator",
@@ -131,8 +131,8 @@ func PodLogs() []*PodLogsGetter {
 
 	podlogs := []*PodLogsGetter{
 		&kubeSystem,
-		&byPod,
-		&byNamespace,
+		&podSelector,
+		&namespaceSelector,
 	}
 
 	return podlogs
