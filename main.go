@@ -48,7 +48,6 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
-	"github.com/giantswarm/logging-operator/pkg/resource/podlogs"
 	podlogsv1alpha2 "github.com/giantswarm/logging-operator/pkg/resource/podlogs/apis/monitoring/v1alpha2"
 	proxyauth "github.com/giantswarm/logging-operator/pkg/resource/proxy-auth"
 	//+kubebuilder:scaffold:imports
@@ -161,10 +160,6 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	podLogs := podlogs.Reconciler{
-		Client: mgr.GetClient(),
-	}
-
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.LoggingAgent = loggingAgent
 	loggedcluster.O.InstallationName = installationName
@@ -182,7 +177,6 @@ func main() {
 			&proxyAuth,
 			&loggingSecret,
 			&loggingConfig,
-			&podLogs,
 			&grafanaAgentSecret,
 			&grafanaAgentConfig,
 		},

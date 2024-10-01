@@ -58,3 +58,55 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+podLogs:
+- name: kube-system
+  namespace: giantswarm
+  spec:
+    selector: {}
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: kube-system
+- name: pod-selector
+  namespace: giantswarm
+  spec:
+    selector:
+      matchLabels:
+        giantswarm.io/logging: enabled
+    namespaceSelector:
+      matchExpressions:
+      - key: giantswarm.io/logging
+        operator: NotExists
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - kube-system
+    relabelings:
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_pod_label_giantswarm_io_logging_tenant"]
+      regex: "(.*)"
+      replacement: "$1"
+      targetLabel: "tenant_id"
+- name: namespace-selector
+  namespace: giantswarm
+  spec:
+    selector:
+      matchExpressions:
+      - key: giantswarm.io/logging
+        operator: NotIn
+        values:
+          - disabled
+    namespaceSelector:
+      - key: giantswarm.io/logging
+        operator: In
+        values:
+        - enabled
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - kube-system
+    relabelings:
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_namespace_label_namespace_giantswarm_io_logging_tenant"]
+      regex: "(.*)"
+      replacement: "$1"
+      targetLabel: "tenant_id"
