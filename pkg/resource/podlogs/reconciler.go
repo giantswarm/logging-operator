@@ -36,17 +36,25 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return result, nil
 	}
 
-	podLogGetter := PodLog()
-	podLog := podLogGetter.GetWithMetaOnly()
-	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, podLog, func() error {
-		podLog.Spec = podLogGetter.GetSpec()
-		return nil
-	})
-	if err != nil {
-		logger.WithValues("podlogs", podLog.GetName()).Error(err, "podlogs - create failed")
-		return ctrl.Result{}, errors.WithStack(err)
+	podLogs := PodLogs()
+	var lastErr error
+	for _, podLogGetter := range podLogs {
+		podLog := podLogGetter.GetWithMetaOnly()
+		result, err := controllerutil.CreateOrUpdate(ctx, r.Client, podLog, func() error {
+			podLog.Spec = podLogGetter.GetSpec()
+			return nil
+		})
+		if err != nil {
+			logger.WithValues("podlogs", podLog.GetName()).Error(err, "podlogs - create failed")
+			lastErr = errors.WithStack(err)
+		}
+		logger.WithValues("podlogs", podLog.GetName()).Info(fmt.Sprintf("podlogs - create result: %v", result))
 	}
-	logger.WithValues("podlogs", podLog.GetName()).Info(fmt.Sprintf("podlogs - create result: %v", result))
+	if lastErr != nil {
+		// Returns the last error if any.
+		// This is to ensure at least one error is returned if any of the PodLogs failed to be created.
+		return ctrl.Result{}, errors.WithStack(lastErr)
+	}
 
 	logger.Info("podlogs - created")
 	return ctrl.Result{}, nil
@@ -57,12 +65,20 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("podlogs - delete")
 
-	podLogGetter := PodLog()
-	podLog := podLogGetter.GetWithMetaOnly()
-	err := r.Client.Delete(ctx, podLog)
-	if client.IgnoreNotFound(err) != nil {
-		logger.WithValues("podlogs", podLog.GetName()).Error(err, "podlogs - delete failed")
-		return ctrl.Result{}, errors.WithStack(err)
+	podLogs := PodLogs()
+	var lastErr error
+	for _, podLogGetter := range podLogs {
+		podLog := podLogGetter.GetWithMetaOnly()
+		err := r.Client.Delete(ctx, podLog)
+		if client.IgnoreNotFound(err) != nil {
+			logger.WithValues("podlogs", podLog.GetName()).Error(err, "podlogs - delete failed")
+			lastErr = errors.WithStack(err)
+		}
+	}
+	if lastErr != nil {
+		// Returns the last error if any.
+		// This is to ensure at least one error is returned if any of the PodLogs failed to be deleted.
+		return ctrl.Result{}, errors.WithStack(lastErr)
 	}
 
 	logger.Info("podlogs - deleted")
