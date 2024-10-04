@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Change Alloy config to discovery logging targets using the `giantswarm.io/logging` label.
+  Targets are pods with the label `giantswarm.io/logging=enabled` or pods in a namespace with the label `giantswarm.io/logging=enabled`.
+  Pods with the label `giantswarm.io/logging=disabled` are ignored.
+
 ## [0.12.1] - 2024-09-23
 
 ### Fixed

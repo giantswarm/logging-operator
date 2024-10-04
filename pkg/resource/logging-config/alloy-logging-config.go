@@ -8,6 +8,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
@@ -67,6 +68,7 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		TenantIDEnvVarName          string
 		BasicAuthUsernameEnvVarName string
 		BasicAuthPasswordEnvVarName string
+		LoggingLabel                string
 	}{
 		ClusterID:                   clusterName,
 		Installation:                lc.GetInstallationName(),
@@ -76,6 +78,7 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
+		LoggingLabel:                key.LoggingLabel,
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)

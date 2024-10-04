@@ -1,9 +1,47 @@
-discovery.kubernetes "kubernetes_pods" {
-	role = "pod"
+// Read namespaces with logging enabled from file
+local.file "namespaces" {
+	filename = "/etc/alloy-namespaces/namespaces"
 }
 
+// Select all Pods from Namespaces with logging enabled
+// Filter out Pods whith logging disabled
+discovery.kubernetes "kubernetes_namespaces" {
+	role = "pod"
+
+	namespaces {
+		names = split(local.file.namespaces.content, ",")
+	}
+
+	selectors {
+		role = "pod"
+		label = "{{ .LoggingLabel }}!=disabled"
+	}
+}
+
+// Select Pods with logging enabled
+discovery.kubernetes "kubernetes_pods" {
+	role = "pod"
+
+	selectors {
+		role = "pod"
+		label = "{{ .LoggingLabel }}=enabled"
+	}
+}
+
+// Filter out Pods with logging enabled in Namespaces with logging enabled
+// This is to avoid duplicated targets
 discovery.relabel "kubernetes_pods" {
 	targets = discovery.kubernetes.kubernetes_pods.targets
+
+	rule {
+		action = "drop"
+		source_labels = ["__meta_kubernetes_namespace"]
+		regex = replace(local.file.namespaces.content, ",", "|")
+	}
+}
+
+discovery.relabel "kubernetes" {
+	targets = concat(discovery.relabel.kubernetes_pods.output, discovery.kubernetes.kubernetes_namespaces.targets)
 
 	rule {
 		source_labels = ["__meta_kubernetes_pod_controller_name"]
@@ -84,11 +122,11 @@ discovery.relabel "kubernetes_pods" {
 	{{- end }}
 }
 
-local.file_match "kubernetes_pods" {
-	path_targets = discovery.relabel.kubernetes_pods.output
+local.file_match "kubernetes" {
+	path_targets = discovery.relabel.kubernetes.output
 }
 
-loki.process "kubernetes_pods" {
+loki.process "kubernetes" {
 	forward_to = [loki.write.default.receiver]
 
 	stage.cri { }
@@ -108,9 +146,9 @@ loki.process "kubernetes_pods" {
 	}
 }
 
-loki.source.file "kubernetes_pods" {
-	targets               = local.file_match.kubernetes_pods.targets
-	forward_to            = [loki.process.kubernetes_pods.receiver]
+loki.source.file "kubernetes" {
+	targets               = local.file_match.kubernetes.targets
+	forward_to            = [loki.process.kubernetes.receiver]
 	legacy_positions_file = "/run/promtail/positions.yaml"
 }
 
