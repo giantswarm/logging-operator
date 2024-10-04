@@ -31,6 +31,9 @@ alloy:
       # This is needed to allow alloy to create files when using readOnlyRootFilesystem
       - name: alloy-tmp
         mountPath: /tmp/alloy
+      - name: alloy-namespaces
+        mountPath: /etc/alloy-namespaces
+        readOnly: true
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -44,6 +47,22 @@ alloy:
         type: RuntimeDefault
   controller:
     type: daemonset
+    extraContainers:
+      - name: alloy-namespaces
+        image: bitnami/kubectl:latest
+        command:
+          - /bin/bash
+        args:
+          - -c
+          - while true; do
+              kubectl get namespaces -lgiantswarm.io/logging=enabled -o jsonpath='{.items[*].metadata.name}' | sed "s/ /,/g" > /tmp/alloy-namespaces/namespaces-candidates;
+              test ! -s /tmp/alloy-namespaces/namespaces-candidates && echo -n "giantswarm-nonexistent-namespace" > /tmp/alloy-namespaces/namespaces-candidates;
+              diff -sq /tmp/alloy-namespaces/namespaces-candidates /tmp/alloy-namespaces/namespaces || cp /tmp/alloy-namespaces/namespaces-candidates /tmp/alloy-namespaces/namespaces;
+              sleep 5;
+            done
+        volumeMounts:
+          - name: alloy-namespaces
+            mountPath: /tmp/alloy-namespaces
     tolerations:
     - effect: NoSchedule
       key: node-role.kubernetes.io/master
@@ -57,4 +76,6 @@ alloy:
         hostPath:
           path: /run/log/journal
       - name: alloy-tmp
+        emptyDir: {}
+      - name: alloy-namespaces
         emptyDir: {}
