@@ -1,3 +1,4 @@
+{{- if .IsWorkloadCluster }}
 // Read namespaces with logging enabled from file
 local.file "namespaces" {
 	filename = "/etc/alloy-namespaces/namespaces"
@@ -9,7 +10,7 @@ discovery.kubernetes "kubernetes_namespaces" {
 	role = "pod"
 
 	namespaces {
-		names = split(local.file.namespaces.content, ",")
+		names = concat(split(local.file.namespaces.content, ","), ["kube-system", "giantswarm"])
 	}
 
 	selectors {
@@ -36,12 +37,22 @@ discovery.relabel "kubernetes_pods" {
 	rule {
 		action = "drop"
 		source_labels = ["__meta_kubernetes_namespace"]
-		regex = replace(local.file.namespaces.content, ",", "|")
+		regex = join([replace(local.file.namespaces.content, ",", "|"), "kube-system", "giantswarm"], "|")
 	}
 }
 
 discovery.relabel "kubernetes" {
 	targets = concat(discovery.relabel.kubernetes_pods.output, discovery.kubernetes.kubernetes_namespaces.targets)
+{{- else }}
+
+// Select all pods on the management cluster
+discovery.kubernetes "kubernetes_pods" {
+	role = "pod"
+}
+
+discovery.relabel "kubernetes" {
+	targets = discovery.kubernetes.kubernetes_pods.targets
+{{- end }}
 
 	rule {
 		source_labels = ["__meta_kubernetes_pod_controller_name"]
@@ -112,14 +123,6 @@ discovery.relabel "kubernetes" {
 		target_label  = "__path__"
 		replacement   = "/var/log/pods/*$1/*.log"
 	}
-
-	{{- if .IsWorkloadCluster }}
-	rule {
-		source_labels = ["__meta_kubernetes_namespace"]
-		regex         = "kube-system|giantswarm"
-		action        = "keep"
-	}
-	{{- end }}
 }
 
 local.file_match "kubernetes" {
