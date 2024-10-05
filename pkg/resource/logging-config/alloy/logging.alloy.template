@@ -332,6 +332,6 @@ loki.write "default" {
 }
 
 logging {
-  level  = "warn"
+  level  = "debug"
   format = "logfmt"
 }
