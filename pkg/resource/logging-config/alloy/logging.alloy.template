@@ -110,6 +110,11 @@ discovery.relabel "kubernetes" {
 	}
 
 	rule {
+		source_labels = ["__meta_kubernetes_pod_label_giantswarm_io_logging_tenant"]
+		target_label = "bob"
+	}
+
+	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
 		target_label  = "__path__"
