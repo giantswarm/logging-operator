@@ -4,6 +4,10 @@ local.file "namespaces" {
 	filename = "/etc/alloy-namespaces/namespaces"
 }
 
+local.file "namespaces_tenant" {
+	filename = "/etc/alloy-namespaces/namespaces-tenant"
+}
+
 // Select all Pods from Namespaces with logging enabled
 // Filter out Pods whith logging disabled
 discovery.kubernetes "kubernetes_namespaces" {
@@ -107,6 +111,18 @@ discovery.relabel "kubernetes" {
 	rule {
 		source_labels = ["__meta_kubernetes_pod_container_name"]
 		target_label  = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_label_giantswarm_io_logging_tenant"]
+		target_label  = "tenant_pod"
+	}
+
+	rule {
+		source_labels = concat(["__meta_kubernetes_namespace"], split(local.file.namespaces_tenant.content, ";"))
+		regex         = "(.+);.*(\1):([0-9]+);.*"
+		replacement   = "$2"
+		target_label  = "tenant_namespace"
 	}
 
 	rule {
