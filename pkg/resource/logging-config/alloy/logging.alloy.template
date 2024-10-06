@@ -120,7 +120,7 @@ discovery.relabel "kubernetes" {
 
 	rule {
 		source_labels = concat(["__meta_kubernetes_namespace"], split(local.file.namespaces_tenant.content, ";"))
-		regex         = "$1"
+		regex         = "(.+);.*(\1):([0-9]+);.*"
 		target_label  = "tenant_namespace"
 	}
 
