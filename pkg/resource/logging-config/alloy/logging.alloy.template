@@ -1,11 +1,11 @@
+local.file "namespaces_tenant" {
+	filename = "/etc/alloy-namespaces/namespaces-tenant"
+}
+
 {{- if .IsWorkloadCluster }}
 // Read namespaces with logging enabled from file
 local.file "namespaces" {
 	filename = "/etc/alloy-namespaces/namespaces"
-}
-
-local.file "namespaces_tenant" {
-	filename = "/etc/alloy-namespaces/namespaces-tenant"
 }
 
 // Select all Pods from Namespaces with logging enabled
@@ -119,9 +119,8 @@ discovery.relabel "kubernetes" {
 	}
 
 	rule {
-		source_labels = ["__meta_kubernetes_namespace"]
-		regex         = "(.+);.*(\1):([0-9]+);.*"
-		replacement   = "$2"
+		source_labels = concat(["__meta_kubernetes_namespace"], split(local.file.namespaces_tenant.content, ";"))
+		regex         = "$1"
 		target_label  = "tenant_namespace"
 	}
 
