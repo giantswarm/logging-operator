@@ -58,7 +58,7 @@ alloy:
               kubectl get namespaces -l{{ .LoggingLabel }}=enabled -o jsonpath='{.items[*].metadata.name}' | sed "s/ /,/g" > /tmp/alloy-namespaces/namespaces-candidates;
               test ! -s /tmp/alloy-namespaces/namespaces-candidates && echo -n "giantswarm-nonexistent-namespace" > /tmp/alloy-namespaces/namespaces-candidates;
               diff -sq /tmp/alloy-namespaces/namespaces-candidates /tmp/alloy-namespaces/namespaces || cp /tmp/alloy-namespaces/namespaces-candidates /tmp/alloy-namespaces/namespaces;
-              kubectl get namespaces -l{{ .LoggingLabel }}=enabled -o go-template='{{ range .items }}{{ printf "%s:%s" .metadata.name (or (index .metadata.labels "giantswarm.io/logging_tenant") "") }};{{ end }}' > /tmp/alloy-namespaces/namespaces-tenant-candidates;
+              kubectl get namespaces -l{{ .LoggingLabel }}=enabled -o go-template={{`'{{ range .items }}{{ printf "%s:%s" .metadata.name (or (index .metadata.labels "giantswarm.io/logging_tenant") "") }};{{ end }}'`}} > /tmp/alloy-namespaces/namespaces-tenant-candidates;
               diff -sq /tmp/alloy-namespaces/namespaces-tenant-candidates /tmp/alloy-namespaces/namespaces-tenant || cp /tmp/alloy-namespaces/namespaces-tenant-candidates /tmp/alloy-namespaces/namespaces-tenant;
               sleep 5;
             done
