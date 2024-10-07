@@ -59,13 +59,17 @@ alloy:
       - name: alloy-tmp
         emptyDir: {}
 podLogs:
-- name: kube-system
+- name: namespace-default
   namespace: giantswarm
   spec:
     selector: {}
     namespaceSelector:
-      matchLabels:
-        kubernetes.io/metadata.name: kube-system
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+        - kube-system
+        - giantswarm
 - name: pod-selector
   namespace: giantswarm
   spec:
@@ -80,6 +84,7 @@ podLogs:
         operator: NotIn
         values:
         - kube-system
+        - giantswarm
     relabelings:
     - action: replace
       sourceLabels: ["__meta_kubernetes_pod_label_giantswarm_io_logging_tenant"]
@@ -104,6 +109,7 @@ podLogs:
         operator: NotIn
         values:
         - kube-system
+        - giantswarm
     relabelings:
     - action: replace
       sourceLabels: ["__meta_kubernetes_namespace_label_namespace_giantswarm_io_logging_tenant"]
