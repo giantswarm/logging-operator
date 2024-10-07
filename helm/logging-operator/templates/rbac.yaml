@@ -134,17 +134,6 @@ rules:
       - list
       - watch
       - update
-  - apiGroups:
-      - monitoring.grafana.com
-    resources:
-      - podlogs
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - update
-      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
