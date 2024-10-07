@@ -101,6 +101,7 @@ podLogs:
         values:
           - disabled
     namespaceSelector:
+      matchExpressions:
       - key: giantswarm.io/logging
         operator: In
         values:
