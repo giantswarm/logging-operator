@@ -17,7 +17,7 @@ func PodLogs() []*PodLogsGetter {
 	kubeSystem := PodLogsGetter{
 		podlogsv1alpha2.PodLogs{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "kube-system",
+				Name:      "namespace-default",
 				Namespace: namespace,
 				Labels: map[string]string{
 					label.ManagedBy: "logging-operator",
@@ -25,17 +25,12 @@ func PodLogs() []*PodLogsGetter {
 			},
 			Spec: podlogsv1alpha2.PodLogsSpec{
 				NamespaceSelector: metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"kubernetes.io/metadata.name": "kube-system",
-					},
-				},
-				RelabelConfigs: []*promv1.RelabelConfig{
-					{
-						Action:       "replace",
-						SourceLabels: []promv1.LabelName{"__meta_kubernetes_namespace_label_namespace_giantswarm_io_logging_tenant"},
-						TargetLabel:  "tenant_id",
-						Replacement:  &replacement,
-						Regex:        "(.*)",
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						{
+							Key:      "kubernetes.io/metadata.name",
+							Operator: metav1.LabelSelectorOpIn,
+							Values:   []string{"kube-system", "giantswarm"},
+						},
 					},
 				},
 			},
@@ -66,7 +61,7 @@ func PodLogs() []*PodLogsGetter {
 						{
 							Key:      "kubernetes.io/metadata.name",
 							Operator: metav1.LabelSelectorOpNotIn,
-							Values:   []string{"kube-system"},
+							Values:   []string{"kube-system", "giantswarm"},
 						},
 					},
 				},
@@ -112,7 +107,7 @@ func PodLogs() []*PodLogsGetter {
 						{
 							Key:      "kubernetes.io/metadata.name",
 							Operator: metav1.LabelSelectorOpNotIn,
-							Values:   []string{"kube-system"},
+							Values:   []string{"kube-system", "giantswarm"},
 						},
 					},
 				},
