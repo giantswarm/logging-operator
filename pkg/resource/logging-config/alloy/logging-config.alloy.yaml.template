@@ -79,7 +79,7 @@ podLogs:
     namespaceSelector:
       matchExpressions:
       - key: giantswarm.io/logging
-        operator: NotExists
+        operator: DoesNotExist
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values:
@@ -99,7 +99,7 @@ podLogs:
       - key: giantswarm.io/logging
         operator: NotIn
         values:
-          - disabled
+        - disabled
     namespaceSelector:
       matchExpressions:
       - key: giantswarm.io/logging
