@@ -7,6 +7,10 @@ loki.source.podlogs "kubernetes_pods" {
       "giantswarm.io/managed-by" = "alloy-logs",
     }
   }
+
+  clustering {
+    enabled = true
+  }
 }
 
 loki.relabel "kubernetes_pods" {
