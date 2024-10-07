@@ -59,6 +59,7 @@ alloy:
       - name: alloy-tmp
         emptyDir: {}
 podLogs:
+{{- if .IsWorkloadCluster }}
 - name: namespace-default
   namespace: giantswarm
   spec:
@@ -107,3 +108,10 @@ podLogs:
         values:
         - kube-system
         - giantswarm
+{{- else }}
+- name: pod-selector
+  namespace: giantswarm
+  spec:
+    selector: {}
+    namespaceSelector: {}
+{{- end }}
