@@ -38,11 +38,13 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 	}
 
 	data := struct {
-		AlloyConfig string
-		SecretName  string
+		AlloyConfig       string
+		IsWorkloadCluster bool
+		SecretName        string
 	}{
-		AlloyConfig: alloyConfig,
-		SecretName:  common.AlloyLogAgentAppName,
+		AlloyConfig:       alloyConfig,
+		IsWorkloadCluster: common.IsWorkloadCluster(lc),
+		SecretName:        common.AlloyLogAgentAppName,
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
