@@ -9,10 +9,6 @@ loki.source.podlogs "kubernetes_pods" {
   }
 }
 
-discovery.kubernetes "kubernetes_pods" {
-  role = "pod"
-}
-
 loki.relabel "kubernetes_pods" {
 	forward_to      = [loki.process.kubernetes_pods.receiver]
 
