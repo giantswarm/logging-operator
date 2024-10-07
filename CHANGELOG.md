@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add manual e2e testing procedure and script.
+- [Alloy] Add capability to dynamically configure log targets using the `giantswarm.io/logging` label
 
 ### Changed
 
-- Use PodLogs for Kubernetes pods discovery.
+- [Alloy] Use PodLogs for Kubernetes pods discovery.
+- [Alloy] Enable clustering
 
 ### Removed
 
