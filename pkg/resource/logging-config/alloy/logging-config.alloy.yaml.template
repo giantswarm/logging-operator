@@ -85,12 +85,6 @@ podLogs:
         values:
         - kube-system
         - giantswarm
-    relabelings:
-    - action: replace
-      sourceLabels: ["__meta_kubernetes_pod_label_giantswarm_io_logging_tenant"]
-      regex: "(.*)"
-      replacement: "$1"
-      targetLabel: "tenant_id"
 - name: namespace-selector
   namespace: giantswarm
   spec:
@@ -111,9 +105,3 @@ podLogs:
         values:
         - kube-system
         - giantswarm
-    relabelings:
-    - action: replace
-      sourceLabels: ["__meta_kubernetes_namespace_label_namespace_giantswarm_io_logging_tenant"]
-      regex: "(.*)"
-      replacement: "$1"
-      targetLabel: "tenant_id"
