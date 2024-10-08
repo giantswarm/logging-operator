@@ -61,6 +61,7 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+{{- if .SupportPodLogs }}
 podLogs:
 {{- if .IsWorkloadCluster }}
 {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
@@ -126,4 +127,5 @@ podLogs:
   spec:
     selector: {}
     namespaceSelector: {}
+{{- end }}
 {{- end }}

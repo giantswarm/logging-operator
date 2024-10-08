@@ -28,7 +28,7 @@ func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersio
 			return v1.ConfigMap{}, err
 		}
 	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(lc, defaultWorkloadClusterNamespaces)
+		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultWorkloadClusterNamespaces)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
