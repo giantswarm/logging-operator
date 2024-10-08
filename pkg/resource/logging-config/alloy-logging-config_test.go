@@ -23,11 +23,11 @@ var (
 
 func TestGenerateAlloyLoggingConfig(t *testing.T) {
 	testCases := []struct {
-		goldenFile                       string
-		observabilityBundleVersion       string
-		defaultNamespaces []string
-		installationName                 string
-		clusterName                      string
+		goldenFile                 string
+		observabilityBundleVersion string
+		defaultNamespaces          []string
+		installationName           string
+		clusterName                string
 	}{
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.162_MC.yaml",
@@ -42,32 +42,32 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			clusterName:                "test-cluster",
 		},
 		{
-			goldenFile:                       "alloy/test/logging-config.alloy.170_MC.yaml",
-			observabilityBundleVersion:       "1.7.0",
-			defaultNamespaces: []string{"test-selector"},
-			installationName:                 "test-installation",
-			clusterName:                      "test-installation",
+			goldenFile:                 "alloy/test/logging-config.alloy.170_MC.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          []string{"test-selector"},
+			installationName:           "test-installation",
+			clusterName:                "test-installation",
 		},
 		{
-			goldenFile:                       "alloy/test/logging-config.alloy.170_WC.yaml",
-			observabilityBundleVersion:       "1.7.0",
-			defaultNamespaces: []string{"test-selector"},
-			installationName:                 "test-installation",
-			clusterName:                      "test-cluster",
+			goldenFile:                 "alloy/test/logging-config.alloy.170_WC.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          []string{"test-selector"},
+			installationName:           "test-installation",
+			clusterName:                "test-cluster",
 		},
 		{
-			goldenFile:                       "alloy/test/logging-config.alloy.170_WC_default_namespaces_nil.yaml",
-			observabilityBundleVersion:       "1.7.0",
-			defaultNamespaces: nil,
-			installationName:                 "test-installation",
-			clusterName:                      "test-cluster",
+			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_default_namespaces_nil.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          nil,
+			installationName:           "test-installation",
+			clusterName:                "test-cluster",
 		},
 		{
-			goldenFile:                       "alloy/test/logging-config.alloy.170_WC_default_namespaces_empty.yaml",
-			observabilityBundleVersion:       "1.7.0",
-			defaultNamespaces: []string{""},
-			installationName:                 "test-installation",
-			clusterName:                      "test-cluster",
+			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_default_namespaces_empty.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          []string{""},
+			installationName:           "test-installation",
+			clusterName:                "test-cluster",
 		},
 	}
 
