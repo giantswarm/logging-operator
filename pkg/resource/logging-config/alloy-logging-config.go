@@ -22,6 +22,8 @@ var (
 	//go:embed alloy/logging-config.alloy.yaml.template
 	alloyLoggingConfig         string
 	alloyLoggingConfigTemplate *template.Template
+
+	supportPodLogs = semver.MustParse("1.6.2-b4af441ad0d6a2e1ee388eca3f96c5a4b22daf62")
 )
 
 func init() {
@@ -53,7 +55,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		LoggingLabel:                     key.LoggingLabel,
 		SecretName:                       common.AlloyLogAgentAppName,
 		// Observability bundle in older versions do not support PodLogs
-		SupportPodLogs: observabilityBundleVersion.GTE(semver.MustParse("1.7.0")),
+		SupportPodLogs: observabilityBundleVersion.EQ(supportPodLogs),
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
@@ -89,7 +91,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
 		// Observability bundle in older versions do not support PodLogs
-		SupportPodLogs: observabilityBundleVersion.GTE(semver.MustParse("1.7.0")),
+		SupportPodLogs: observabilityBundleVersion.EQ(supportPodLogs),
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)
