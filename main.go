@@ -78,7 +78,7 @@ func (s *StringSliceVar) Set(value string) error {
 }
 
 func main() {
-	var defaultWorkloadClusterNamespaces = StringSliceVar{"kube-system", "giantswarm"}
+	var defaultWorkloadClusterNamespaces StringSliceVar
 	var enableLeaderElection bool
 	var enableLogging bool
 	var loggingAgent string
