@@ -25,7 +25,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 	testCases := []struct {
 		goldenFile                       string
 		observabilityBundleVersion       string
-		defaultWorkloadClusterNamespaces []string
+		defaultNamespaces []string
 		installationName                 string
 		clusterName                      string
 	}{
@@ -44,28 +44,28 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 		{
 			goldenFile:                       "alloy/test/logging-config.alloy.170_MC.yaml",
 			observabilityBundleVersion:       "1.7.0",
-			defaultWorkloadClusterNamespaces: []string{"test-selector"},
+			defaultNamespaces: []string{"test-selector"},
 			installationName:                 "test-installation",
 			clusterName:                      "test-installation",
 		},
 		{
 			goldenFile:                       "alloy/test/logging-config.alloy.170_WC.yaml",
 			observabilityBundleVersion:       "1.7.0",
-			defaultWorkloadClusterNamespaces: []string{"test-selector"},
+			defaultNamespaces: []string{"test-selector"},
 			installationName:                 "test-installation",
 			clusterName:                      "test-cluster",
 		},
 		{
 			goldenFile:                       "alloy/test/logging-config.alloy.170_WC_default_namespaces_nil.yaml",
 			observabilityBundleVersion:       "1.7.0",
-			defaultWorkloadClusterNamespaces: nil,
+			defaultNamespaces: nil,
 			installationName:                 "test-installation",
 			clusterName:                      "test-cluster",
 		},
 		{
 			goldenFile:                       "alloy/test/logging-config.alloy.170_WC_default_namespaces_empty.yaml",
 			observabilityBundleVersion:       "1.7.0",
-			defaultWorkloadClusterNamespaces: []string{""},
+			defaultNamespaces: []string{""},
 			installationName:                 "test-installation",
 			clusterName:                      "test-cluster",
 		},
@@ -93,7 +93,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				},
 			}
 
-			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultWorkloadClusterNamespaces)
+			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultNamespaces)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

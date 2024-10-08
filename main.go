@@ -78,7 +78,7 @@ func (s *StringSliceVar) Set(value string) error {
 }
 
 func main() {
-	var defaultWorkloadClusterNamespaces StringSliceVar
+	var defaultNamespaces StringSliceVar
 	var enableLeaderElection bool
 	var enableLogging bool
 	var loggingAgent string
@@ -88,7 +88,7 @@ func main() {
 	var profilesAddr string
 	var probeAddr string
 	var vintageMode bool
-	flag.Var(&defaultWorkloadClusterNamespaces, "default-workload-cluster-namespaces", "List of namespaces to scrapes logs from by default on workload clusters")
+	flag.Var(&defaultNamespaces, "default-namespaces", "List of namespaces to scrapes logs from by default on workload clusters")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -162,7 +162,7 @@ func main() {
 
 	loggingConfig := loggingconfig.Reconciler{
 		Client:                           mgr.GetClient(),
-		DefaultWorkloadClusterNamespaces: defaultWorkloadClusterNamespaces,
+		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
 	grafanaAgentSecret := grafanaagentsecret.Reconciler{

@@ -31,7 +31,7 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultWorkloadClusterNamespaces []string) (string, error) {
+func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion)
@@ -48,7 +48,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		SupportPodLogs                   bool
 	}{
 		AlloyConfig:                      alloyConfig,
-		DefaultWorkloadClusterNamespaces: defaultWorkloadClusterNamespaces,
+		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
 		LoggingLabel:                     key.LoggingLabel,
 		SecretName:                       common.AlloyLogAgentAppName,
