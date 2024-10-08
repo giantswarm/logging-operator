@@ -8,6 +8,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
@@ -41,11 +42,13 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, defaultWorkloadClust
 		AlloyConfig                      string
 		DefaultWorkloadClusterNamespaces []string
 		IsWorkloadCluster                bool
+		LoggingLabel                     string
 		SecretName                       string
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultWorkloadClusterNamespaces,
 		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		LoggingLabel:                     key.LoggingLabel,
 		SecretName:                       common.AlloyLogAgentAppName,
 	}
 

@@ -82,13 +82,13 @@ podLogs:
   spec:
     selector:
       matchLabels:
-        giantswarm.io/logging: enabled
+        {{ .LoggingLabel }}: true
     namespaceSelector:
       matchExpressions:
-      - key: giantswarm.io/logging
+      - key: {{ .LoggingLabel }}
         operator: NotIn
         values:
-        - enabled
+        - true
       {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
@@ -102,16 +102,16 @@ podLogs:
   spec:
     selector:
       matchExpressions:
-      - key: giantswarm.io/logging
+      - key: {{ .LoggingLabel }}
         operator: NotIn
         values:
-        - disabled
+        - false
     namespaceSelector:
       matchExpressions:
-      - key: giantswarm.io/logging
+      - key: {{ .LoggingLabel }}
         operator: In
         values:
-        - enabled
+        - true
       {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
