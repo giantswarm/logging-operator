@@ -3,7 +3,7 @@ package loggingconfig
 import (
 	_ "embed"
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -77,7 +77,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to parse observability bundle version: %v", err)
 			}
-			golden, err := ioutil.ReadFile(tc.goldenFile)
+			golden, err := os.ReadFile(tc.goldenFile)
 			if err != nil {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
@@ -103,7 +103,8 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			if !cmp.Equal(string(golden), config) {
 				t.Logf("Generated config differs from %s, diff:\n%s", tc.goldenFile, cmp.Diff(string(golden), config))
 				if *update {
-					if err := ioutil.WriteFile(tc.goldenFile, []byte(config), 0644); err != nil {
+					//nolint:gosec
+					if err := os.WriteFile(tc.goldenFile, []byte(config), 0644); err != nil {
 						t.Fatalf("Failed to update golden file: %v", err)
 					}
 				}
