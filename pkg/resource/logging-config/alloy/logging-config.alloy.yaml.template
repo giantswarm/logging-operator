@@ -122,7 +122,7 @@ podLogs:
       {{- end }}
 {{- else }}
 - name: pod-selector
-  namespace: giantswarm
+  namespace: kube-system
   spec:
     selector: {}
     namespaceSelector: {}
