@@ -29,7 +29,7 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
+func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	alloyConfig, err := generateAlloyConfig(lc)
@@ -38,13 +38,15 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 	}
 
 	data := struct {
-		AlloyConfig       string
-		IsWorkloadCluster bool
-		SecretName        string
+		AlloyConfig                      string
+		DefaultWorkloadClusterNamespaces []string
+		IsWorkloadCluster                bool
+		SecretName                       string
 	}{
-		AlloyConfig:       alloyConfig,
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
-		SecretName:        common.AlloyLogAgentAppName,
+		AlloyConfig:                      alloyConfig,
+		DefaultWorkloadClusterNamespaces: defaultWorkloadClusterNamespaces,
+		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		SecretName:                       common.AlloyLogAgentAppName,
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)

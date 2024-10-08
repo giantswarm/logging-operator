@@ -63,6 +63,7 @@ alloy:
         emptyDir: {}
 podLogs:
 {{- if .IsWorkloadCluster }}
+{{- if .DefaultWorkloadClusterNamespaces }}
 - name: namespace-default
   namespace: giantswarm
   spec:
@@ -72,8 +73,10 @@ podLogs:
       - key: kubernetes.io/metadata.name
         operator: In
         values:
-        - kube-system
-        - giantswarm
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+{{- end }}
 - name: pod-selector
   namespace: giantswarm
   spec:
@@ -86,11 +89,14 @@ podLogs:
         operator: NotIn
         values:
         - enabled
+      {{- if .DefaultWorkloadClusterNamespaces }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values:
-        - kube-system
-        - giantswarm
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
 - name: namespace-selector
   namespace: giantswarm
   spec:
@@ -106,11 +112,14 @@ podLogs:
         operator: In
         values:
         - enabled
+      {{- if .DefaultWorkloadClusterNamespaces }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values:
-        - kube-system
-        - giantswarm
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
 {{- else }}
 - name: pod-selector
   namespace: giantswarm

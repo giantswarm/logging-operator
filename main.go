@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -65,7 +66,19 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 }
 
+type StringSliceVar []string
+
+func (s StringSliceVar) String() string {
+	return strings.Join(s, ",")
+}
+
+func (s *StringSliceVar) Set(value string) error {
+	*s = strings.Split(value, ",")
+	return nil
+}
+
 func main() {
+	var defaultWorkloadClusterNamespaces = StringSliceVar{"kube-system", "giantswarm"}
 	var enableLeaderElection bool
 	var enableLogging bool
 	var loggingAgent string
@@ -75,6 +88,7 @@ func main() {
 	var profilesAddr string
 	var probeAddr string
 	var vintageMode bool
+	flag.Var(&defaultWorkloadClusterNamespaces, "default-workload-cluster-namespaces", "List of namespaces to scrapes logs from by default on workload clusters")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -147,7 +161,8 @@ func main() {
 	}
 
 	loggingConfig := loggingconfig.Reconciler{
-		Client: mgr.GetClient(),
+		Client:                           mgr.GetClient(),
+		DefaultWorkloadClusterNamespaces: defaultWorkloadClusterNamespaces,
 	}
 
 	grafanaAgentSecret := grafanaagentsecret.Reconciler{
