@@ -63,7 +63,7 @@ alloy:
         emptyDir: {}
 podLogs:
 {{- if .IsWorkloadCluster }}
-{{- if gt (len .DefaultWorkloadClusterNamespaces) 0 }}
+{{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
 - name: namespace-default
   namespace: kube-system
   spec:
@@ -89,7 +89,7 @@ podLogs:
         operator: NotIn
         values:
         - enabled
-      {{- if gt (len .DefaultWorkloadClusterNamespaces) 0 }}
+      {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values:
@@ -112,7 +112,7 @@ podLogs:
         operator: In
         values:
         - enabled
-      {{- if gt (len .DefaultWorkloadClusterNamespaces) 0 }}
+      {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values:
