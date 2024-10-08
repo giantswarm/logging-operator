@@ -65,7 +65,7 @@ podLogs:
 {{- if .IsWorkloadCluster }}
 {{- if .DefaultWorkloadClusterNamespaces }}
 - name: namespace-default
-  namespace: giantswarm
+  namespace: kube-system
   spec:
     selector: {}
     namespaceSelector:
@@ -78,7 +78,7 @@ podLogs:
         {{- end }}
 {{- end }}
 - name: pod-selector
-  namespace: giantswarm
+  namespace: kube-system
   spec:
     selector:
       matchLabels:
@@ -98,7 +98,7 @@ podLogs:
         {{- end }}
       {{- end }}
 - name: namespace-selector
-  namespace: giantswarm
+  namespace: kube-system
   spec:
     selector:
       matchExpressions:
