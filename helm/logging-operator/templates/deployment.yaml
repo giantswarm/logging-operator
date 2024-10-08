@@ -39,6 +39,7 @@ spec:
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}
           - -logging-agent={{ .Values.loggingOperator.loggingAgent }}
+          - -default-workload-cluster-namespaces={{ .Values.loggingOperator.defaultWorkloadClusterNamespaces }}
         livenessProbe:
           httpGet:
             path: /healthz
