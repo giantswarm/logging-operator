@@ -23,7 +23,7 @@ var (
 	alloyLoggingConfig         string
 	alloyLoggingConfigTemplate *template.Template
 
-	supportPodLogs = semver.MustParse("1.6.2-d42c54cdac649244d06fd2c728d337658e958070")
+	supportPodLogs = semver.MustParse("1.7.0")
 )
 
 func init() {
