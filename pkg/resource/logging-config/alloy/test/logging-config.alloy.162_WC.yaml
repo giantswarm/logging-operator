@@ -305,9 +305,6 @@ alloy:
           format = "logfmt"
         }
         
-    clustering:
-      enabled: true
-      name: alloy-logs
     extraEnv:
     - name: NODENAME
       valueFrom:
