@@ -85,13 +85,13 @@ podLogs:
   spec:
     selector:
       matchLabels:
-        {{ .LoggingLabel }}: true
+        {{ .LoggingLabel }}: "true"
     namespaceSelector:
       matchExpressions:
       - key: {{ .LoggingLabel }}
         operator: NotIn
         values:
-        - true
+        - "true"
       {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
@@ -108,13 +108,13 @@ podLogs:
       - key: {{ .LoggingLabel }}
         operator: NotIn
         values:
-        - false
+        - "false"
     namespaceSelector:
       matchExpressions:
       - key: {{ .LoggingLabel }}
         operator: In
         values:
-        - true
+        - "true"
       {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
