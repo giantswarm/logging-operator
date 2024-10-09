@@ -28,9 +28,8 @@ workflows:
       - template-chart:
           name: "template-chart"
           filters:
-            branches:
-              ignore:
-                - main
+            tags:
+              only: /^v.*/
           requires:
             - "go-build"
 
@@ -38,7 +37,7 @@ workflows:
           context: architect
           name: push-to-registries
           requires:
-            - go-build
+            - template-chart
           filters:
             tags:
               only: /^v.*/
