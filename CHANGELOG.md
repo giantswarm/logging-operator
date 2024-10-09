@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove the alloy-secret resource which is no longer needed as Alloy secret was moved into logging-secret
 
+### Fixed
+
+- Fix circleci config.
+
 ## [0.12.1] - 2024-09-23
 
 ### Fixed
