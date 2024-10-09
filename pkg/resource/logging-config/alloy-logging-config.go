@@ -55,7 +55,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		LoggingLabel:                     key.LoggingLabel,
 		SecretName:                       common.AlloyLogAgentAppName,
 		// Observability bundle in older versions do not support PodLogs
-		SupportPodLogs: observabilityBundleVersion.EQ(supportPodLogs),
+		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
@@ -91,7 +91,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
 		// Observability bundle in older versions do not support PodLogs
-		SupportPodLogs: observabilityBundleVersion.EQ(supportPodLogs),
+		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)
