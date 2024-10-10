@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Alloy] Use PodLogs for Kubernetes pods discovery.
 - [Alloy] Enable clustering
+- Expose healthcheck port for kube-linter.
 
 ### Removed
 
