@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add manual e2e testing procedure and script.
+- Expose healthcheck port for kube-linter.
 
 ### Removed
 

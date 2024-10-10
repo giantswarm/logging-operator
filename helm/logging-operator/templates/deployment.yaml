@@ -53,6 +53,9 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
+        - containerPort: 8081
+          name: health
+          protocol: TCP
         - containerPort: 6060
           name: profiles
           protocol: TCP
