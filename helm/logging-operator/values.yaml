@@ -38,6 +38,7 @@ networkPolicy:
   flavor: cilium
 
 loggingOperator:
+  defaultNamespaces: "kube-system,giantswarm"
   vintageMode: true
   loggingEnabled: true
   loggingAgent: promtail
