@@ -88,7 +88,7 @@ func main() {
 	var profilesAddr string
 	var probeAddr string
 	var vintageMode bool
-	flag.Var(&defaultNamespaces, "default-namespaces", "List of namespaces to scrapes logs from by default on workload clusters")
+	flag.Var(&defaultNamespaces, "default-namespaces", "List of namespaces to collect logs from by default on workload clusters")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
