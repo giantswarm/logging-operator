@@ -10,7 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add manual e2e testing procedure and script.
-- [Alloy] Add capability to dynamically configure log targets using the `giantswarm.io/logging` label
+- [Alloy] Add capability to dynamically configure log targets using the `giantswarm.io/logging` label [#3618](https://github.com/giantswarm/roadmap/issues/3518)
+  - Changes Alloy config to use PodLogs for Kubernetes pods discovery.
+  - There is a performance impact on Kubernetes API
+  - Available from observability-bundle v17.0.0
 
 ### Changed
 
