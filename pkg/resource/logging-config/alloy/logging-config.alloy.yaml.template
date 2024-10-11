@@ -13,6 +13,11 @@ alloy:
       create: true
       content: |-
 {{ .AlloyConfig | indent 8 }}
+{{- if .SupportPodLogs }}
+    clustering:
+      enabled: true
+      name: alloy-logs
+{{- end }}
     extraEnv:
     - name: NODENAME
       valueFrom:
@@ -58,3 +63,71 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+{{- if .SupportPodLogs }}
+podLogs:
+{{- if .IsWorkloadCluster }}
+{{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
+- name: namespace-default
+  namespace: kube-system
+  spec:
+    selector: {}
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+{{- end }}
+- name: pod-selector
+  namespace: kube-system
+  spec:
+    selector:
+      matchLabels:
+        {{ .LoggingLabel }}: "true"
+    namespaceSelector:
+      matchExpressions:
+      - key: {{ .LoggingLabel }}
+        operator: NotIn
+        values:
+        - "true"
+      {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+- name: namespace-selector
+  namespace: kube-system
+  spec:
+    selector:
+      matchExpressions:
+      - key: {{ .LoggingLabel }}
+        operator: NotIn
+        values:
+        - "false"
+    namespaceSelector:
+      matchExpressions:
+      - key: {{ .LoggingLabel }}
+        operator: In
+        values:
+        - "true"
+      {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+{{- else }}
+- name: pod-selector
+  namespace: kube-system
+  spec:
+    selector: {}
+    namespaceSelector: {}
+{{- end }}
+{{- end }}

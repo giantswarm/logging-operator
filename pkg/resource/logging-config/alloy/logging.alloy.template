@@ -1,9 +1,39 @@
+// Kubernetes pods logs
+{{- if .SupportPodLogs }}
+loki.source.podlogs "kubernetes_pods" {
+  forward_to      = [loki.relabel.kubernetes_pods.receiver]
+
+  selector {
+    match_labels = {
+      "giantswarm.io/managed-by" = "alloy-logs",
+    }
+  }
+
+  clustering {
+    enabled = true
+  }
+}
+
+loki.relabel "kubernetes_pods" {
+	forward_to      = [loki.process.kubernetes_pods.receiver]
+{{- else }}
 discovery.kubernetes "kubernetes_pods" {
 	role = "pod"
 }
 
+local.file_match "kubernetes_pods" {
+	path_targets = discovery.relabel.kubernetes_pods.output
+}
+
+loki.source.file "kubernetes_pods" {
+	targets               = local.file_match.kubernetes_pods.targets
+	forward_to            = [loki.process.kubernetes_pods.receiver]
+	legacy_positions_file = "/run/promtail/positions.yaml"
+}
+
 discovery.relabel "kubernetes_pods" {
 	targets = discovery.kubernetes.kubernetes_pods.targets
+{{- end }}
 
 	rule {
 		source_labels = ["__meta_kubernetes_pod_controller_name"]
@@ -60,6 +90,7 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
+{{- if not .SupportPodLogs }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
@@ -82,10 +113,7 @@ discovery.relabel "kubernetes_pods" {
 		action        = "keep"
 	}
 	{{- end }}
-}
-
-local.file_match "kubernetes_pods" {
-	path_targets = discovery.relabel.kubernetes_pods.output
+{{- end }}
 }
 
 loki.process "kubernetes_pods" {
@@ -108,12 +136,7 @@ loki.process "kubernetes_pods" {
 	}
 }
 
-loki.source.file "kubernetes_pods" {
-	targets               = local.file_match.kubernetes_pods.targets
-	forward_to            = [loki.process.kubernetes_pods.receiver]
-	legacy_positions_file = "/run/promtail/positions.yaml"
-}
-
+// journald logs from /run/log/journal
 loki.process "systemd_journal_run" {
 	forward_to = [loki.write.default.receiver]
 
@@ -165,6 +188,7 @@ loki.source.journal "systemd_journal_run" {
 	}
 }
 
+// journald logs from /var/log/journal
 loki.process "systemd_journal_var" {
 	forward_to = [loki.write.default.receiver]
 
@@ -216,6 +240,7 @@ loki.source.journal "systemd_journal_var" {
 	}
 }
 
+// Kubernetes API server audit logs
 local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
@@ -268,6 +293,7 @@ loki.source.file "kubernetes_audit" {
 	legacy_positions_file = "/run/promtail/positions.yaml"
 }
 
+// Loki target configuration
 loki.write "default" {
 	endpoint {
 		url                = env("{{ .LokiURLEnvVarName }}")

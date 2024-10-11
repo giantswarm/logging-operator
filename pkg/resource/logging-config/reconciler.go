@@ -22,6 +22,7 @@ import (
 // Logging config: extra logging config defining what we want to retrieve.
 type Reconciler struct {
 	client.Client
+	DefaultWorkloadClusterNamespaces []string
 }
 
 // ReconcileCreate ensures logging-config is created with the right credentials
@@ -41,7 +42,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion)
+	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

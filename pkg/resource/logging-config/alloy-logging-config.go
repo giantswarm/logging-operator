@@ -6,8 +6,10 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/blang/semver"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
@@ -20,6 +22,8 @@ var (
 	//go:embed alloy/logging-config.alloy.yaml.template
 	alloyLoggingConfig         string
 	alloyLoggingConfigTemplate *template.Template
+
+	supportPodLogs = semver.MustParse("1.7.0")
 )
 
 func init() {
@@ -29,20 +33,29 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
+func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc)
+	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion)
 	if err != nil {
 		return "", err
 	}
 
 	data := struct {
-		AlloyConfig string
-		SecretName  string
+		AlloyConfig                      string
+		DefaultWorkloadClusterNamespaces []string
+		IsWorkloadCluster                bool
+		LoggingLabel                     string
+		SecretName                       string
+		SupportPodLogs                   bool
 	}{
-		AlloyConfig: alloyConfig,
-		SecretName:  common.AlloyLogAgentAppName,
+		AlloyConfig:                      alloyConfig,
+		DefaultWorkloadClusterNamespaces: defaultNamespaces,
+		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		LoggingLabel:                     key.LoggingLabel,
+		SecretName:                       common.AlloyLogAgentAppName,
+		// Observability bundle in older versions do not support PodLogs
+		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
@@ -53,7 +66,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface) (string, error) {
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
+func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (string, error) {
 	var values bytes.Buffer
 
 	clusterName := lc.GetClusterName()
@@ -67,6 +80,7 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		TenantIDEnvVarName          string
 		BasicAuthUsernameEnvVarName string
 		BasicAuthPasswordEnvVarName string
+		SupportPodLogs              bool
 	}{
 		ClusterID:                   clusterName,
 		Installation:                lc.GetInstallationName(),
@@ -76,6 +90,8 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
+		// Observability bundle in older versions do not support PodLogs
+		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)
