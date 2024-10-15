@@ -334,4 +334,3 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
-podLogs:

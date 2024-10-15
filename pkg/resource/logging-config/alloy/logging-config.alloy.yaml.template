@@ -64,9 +64,9 @@ alloy:
       - name: alloy-tmp
         emptyDir: {}
 {{- if .SupportPodLogs }}
-podLogs:
 {{- if .IsWorkloadCluster }}
 {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
+podLogs:
 - name: namespace-default
   namespace: kube-system
   spec:
@@ -81,6 +81,7 @@ podLogs:
         {{- end }}
 {{- end }}
 {{- else }}
+podLogs:
 - name: pod-selector
   namespace: kube-system
   spec:
