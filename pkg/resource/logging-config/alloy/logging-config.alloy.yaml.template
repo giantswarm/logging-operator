@@ -80,49 +80,6 @@ podLogs:
         - {{ . }}
         {{- end }}
 {{- end }}
-- name: pod-selector
-  namespace: kube-system
-  spec:
-    selector:
-      matchLabels:
-        {{ .LoggingLabel }}: "true"
-    namespaceSelector:
-      matchExpressions:
-      - key: {{ .LoggingLabel }}
-        operator: NotIn
-        values:
-        - "true"
-      {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
-      - key: kubernetes.io/metadata.name
-        operator: NotIn
-        values:
-        {{- range .DefaultWorkloadClusterNamespaces }}
-        - {{ . }}
-        {{- end }}
-      {{- end }}
-- name: namespace-selector
-  namespace: kube-system
-  spec:
-    selector:
-      matchExpressions:
-      - key: {{ .LoggingLabel }}
-        operator: NotIn
-        values:
-        - "false"
-    namespaceSelector:
-      matchExpressions:
-      - key: {{ .LoggingLabel }}
-        operator: In
-        values:
-        - "true"
-      {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
-      - key: kubernetes.io/metadata.name
-        operator: NotIn
-        values:
-        {{- range .DefaultWorkloadClusterNamespaces }}
-        - {{ . }}
-        {{- end }}
-      {{- end }}
 {{- else }}
 - name: pod-selector
   namespace: kube-system
