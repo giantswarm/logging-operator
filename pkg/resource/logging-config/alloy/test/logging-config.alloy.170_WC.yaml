@@ -335,7 +335,7 @@ alloy:
       - name: alloy-tmp
         emptyDir: {}
 podLogs:
-- name: namespace-default
+- name: default-namespaces
   namespace: kube-system
   spec:
     selector: {}

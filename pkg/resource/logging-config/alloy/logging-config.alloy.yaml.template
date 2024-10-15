@@ -67,7 +67,7 @@ alloy:
 {{- if .IsWorkloadCluster }}
 {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
 podLogs:
-- name: namespace-default
+- name: default-namespaces
   namespace: kube-system
   spec:
     selector: {}
@@ -82,7 +82,7 @@ podLogs:
 {{- end }}
 {{- else }}
 podLogs:
-- name: pod-selector
+- name: all-pods
   namespace: kube-system
   spec:
     selector: {}
