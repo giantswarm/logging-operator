@@ -9,7 +9,6 @@ import (
 	"github.com/blang/semver"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
@@ -45,14 +44,12 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		AlloyConfig                      string
 		DefaultWorkloadClusterNamespaces []string
 		IsWorkloadCluster                bool
-		LoggingLabel                     string
 		SecretName                       string
 		SupportPodLogs                   bool
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
-		LoggingLabel:                     key.LoggingLabel,
 		SecretName:                       common.AlloyLogAgentAppName,
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),

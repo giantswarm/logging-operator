@@ -16,12 +16,6 @@ alloy:
         loki.source.podlogs "kubernetes_pods" {
           forward_to      = [loki.relabel.kubernetes_pods.receiver]
         
-          selector {
-            match_labels = {
-              "giantswarm.io/managed-by" = "alloy-logs",
-            }
-          }
-        
           clustering {
             enabled = true
           }
@@ -334,31 +328,3 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
-podLogs:
-- name: pod-selector
-  namespace: kube-system
-  spec:
-    selector:
-      matchLabels:
-        giantswarm.io/logging: true
-    namespaceSelector:
-      matchExpressions:
-      - key: giantswarm.io/logging
-        operator: NotIn
-        values:
-        - true
-- name: namespace-selector
-  namespace: kube-system
-  spec:
-    selector:
-      matchExpressions:
-      - key: giantswarm.io/logging
-        operator: NotIn
-        values:
-        - false
-    namespaceSelector:
-      matchExpressions:
-      - key: giantswarm.io/logging
-        operator: In
-        values:
-        - true

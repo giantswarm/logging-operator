@@ -3,12 +3,6 @@
 loki.source.podlogs "kubernetes_pods" {
   forward_to      = [loki.relabel.kubernetes_pods.receiver]
 
-  selector {
-    match_labels = {
-      "giantswarm.io/managed-by" = "alloy-logs",
-    }
-  }
-
   clustering {
     enabled = true
   }
