@@ -47,9 +47,6 @@ promtail:
           - json:
               expressions:
                 SYSLOG_IDENTIFIER: SYSLOG_IDENTIFIER
-          - drop:
-              source: SYSLOG_IDENTIFIER
-              value: audit
         - job_name: systemd_journal_var
           journal:
             path: /var/log/journal
@@ -75,9 +72,6 @@ promtail:
           - json:
               expressions:
                 SYSLOG_IDENTIFIER: SYSLOG_IDENTIFIER
-          - drop:
-              source: SYSLOG_IDENTIFIER
-              value: audit
         - job_name: kubernetes-audit
           static_configs:
           - targets:
