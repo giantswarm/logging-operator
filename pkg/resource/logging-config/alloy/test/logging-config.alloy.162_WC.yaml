@@ -134,11 +134,6 @@ alloy:
         			SYSLOG_IDENTIFIER = "SYSLOG_IDENTIFIER",
         		}
         	}
-        
-        	stage.drop {
-        		source = "SYSLOG_IDENTIFIER"
-        		value  = "audit"
-        	}
         }
         
         discovery.relabel "systemd_journal_run" {
@@ -185,11 +180,6 @@ alloy:
         		expressions = {
         			SYSLOG_IDENTIFIER = "SYSLOG_IDENTIFIER",
         		}
-        	}
-        
-        	stage.drop {
-        		source = "SYSLOG_IDENTIFIER"
-        		value  = "audit"
         	}
         }
         
