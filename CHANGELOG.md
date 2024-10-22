@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changes Alloy config to use PodLogs for Kubernetes pods discovery.
   - There is a performance impact on Kubernetes API
   - Available from observability-bundle v17.0.0
+- Collect system audit logs
 
 ### Changed
 
