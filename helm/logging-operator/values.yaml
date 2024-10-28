@@ -41,7 +41,7 @@ loggingOperator:
   defaultNamespaces: "kube-system,giantswarm"
   vintageMode: true
   loggingEnabled: true
-  loggingAgent: promtail
+  loggingAgent: alloy
 
 managementCluster:
   name: unknown

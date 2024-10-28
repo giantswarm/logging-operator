@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Change default logging agent to Alloy instead of Promtail.
+
 ## [0.13.0] - 2024-10-24
 
 ### Added
