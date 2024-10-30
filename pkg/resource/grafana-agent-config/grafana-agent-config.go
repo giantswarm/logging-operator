@@ -30,6 +30,7 @@ type values struct {
 type grafanaAgent struct {
 	Agent      agent      `yaml:"agent" json:"agent"`
 	Controller controller `yaml:"controller" json:"controller"`
+	CRDs       crds       `yaml:"crds" json:"crds"`
 }
 
 type agent struct {
@@ -43,6 +44,10 @@ type configMap struct {
 type controller struct {
 	Replicas int            `yaml:"replicas" json:"replicas"`
 	Type     ControllerType `yaml:"type" json:"type"`
+}
+
+type crds struct {
+	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -108,6 +113,9 @@ loki.write "default" {
 			Controller: controller{
 				Replicas: 1,
 				Type:     deployment,
+			},
+			CRDs: crds{
+				Enabled: false,
 			},
 		},
 	}
