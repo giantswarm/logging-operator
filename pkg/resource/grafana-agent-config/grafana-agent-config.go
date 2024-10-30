@@ -47,7 +47,7 @@ type controller struct {
 }
 
 type crds struct {
-	Enabled bool `yaml:"enabled" json:"enabled"`
+	Create bool `yaml:"create" json:"create"`
 }
 
 // ConfigMeta returns metadata for the grafana-agent-config
@@ -115,7 +115,7 @@ loki.write "default" {
 				Type:     deployment,
 			},
 			CRDs: crds{
-				Enabled: false,
+				Create: false,
 			},
 		},
 	}
