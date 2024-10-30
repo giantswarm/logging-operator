@@ -6,131 +6,139 @@ orbs:
 jobs:
   template-chart:
     docker:
-      - image: giantswarm/helm-chart-testing:v3.11.0
+    - image: giantswarm/helm-chart-testing:v3.11.0
     steps:
-      - checkout
-      - run: |-
-          cd helm/logging-operator
-          helm dep up
-          helm template .
+    - checkout
+    - run: |-
+        cd helm/logging-operator
+        helm dep up
+        helm template .
 
 workflows:
   build:
     jobs:
-      - architect/go-build:
-          name: go-build
-          binary: logging-operator
-          filters:
-            tags:
-              only: /^v.*/
-      
-      - template-chart:
-          name: "template-chart"
-          filters:
-            tags:
-              only: /^v.*/
-          requires:
-            - "go-build"
+    - architect/go-build:
+        name: go-build
+        binary: logging-operator
+        filters:
+          tags:
+            only: /^v.*/
 
-      - architect/push-to-registries:
-          context: architect
-          name: push-to-registries
-          requires:
-            - template-chart
-          filters:
-            tags:
-              only: /^v.*/
+    - template-chart:
+        name: template-chart
+        filters:
+          tags:
+            only: /^v.*/
+        requires:
+        - go-build
 
-      - architect/push-to-app-catalog:
-          context: "architect"
-          executor: "app-build-suite"
-          name: push-logging-operator-to-app-catalog
-          app_catalog: "control-plane-catalog"
-          app_catalog_test: "control-plane-test-catalog"
-          chart: "logging-operator"
-          persist_chart_archive: true
-          requires:
-            - push-to-registries
-          filters:
-            tags:
-              only: /^v.*/
-      
-      - architect/run-tests-with-ats:
-          name: run-chart-tests-with-ats
-          filters:
+    - architect/push-to-registries:
+        context: architect
+        name: push-to-registries
+        requires:
+        - template-chart
+        filters:
+          tags:
+            only: /^v.*/
+
+          branches:
+            ignore:
+            - main
+            - master
+    - architect/push-to-app-catalog:
+        context: architect
+        executor: app-build-suite
+        name: push-logging-operator-to-app-catalog
+        app_catalog: control-plane-catalog
+        app_catalog_test: control-plane-test-catalog
+        chart: logging-operator
+        persist_chart_archive: true
+        requires:
+        - push-to-registries
+        filters:
+          tags:
+            only: /^v.*/
+
+          branches:
+            ignore:
+            - main
+            - master
+    - architect/run-tests-with-ats:
+        name: run-chart-tests-with-ats
+        filters:
             # Do not trigger the job on merge to main.
-            branches:
-              ignore:
-                - main
-          requires:
-            - push-logging-operator-to-app-catalog
+          branches:
+            ignore:
+            - main
+        requires:
+        - push-logging-operator-to-app-catalog
 
-      - architect/push-to-app-collection:
-          context: "architect"
-          name: aws-app-collection
-          app_name: "logging-operator"
-          app_namespace: "monitoring"
-          app_collection_repo: "aws-app-collection"
-          requires:
-            - push-logging-operator-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+    - architect/push-to-app-collection:
+        context: architect
+        name: aws-app-collection
+        app_name: logging-operator
+        app_namespace: monitoring
+        app_collection_repo: aws-app-collection
+        requires:
+        - push-logging-operator-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
 
-      - architect/push-to-app-collection:
-          context: "architect"
-          name: capa-app-collection
-          app_name: "logging-operator"
-          app_namespace: "monitoring"
-          app_collection_repo: "capa-app-collection"
-          requires:
-            - push-logging-operator-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+    - architect/push-to-app-collection:
+        context: architect
+        name: capa-app-collection
+        app_name: logging-operator
+        app_namespace: monitoring
+        app_collection_repo: capa-app-collection
+        requires:
+        - push-logging-operator-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
 
-      - architect/push-to-app-collection:
-          context: "architect"
-          name: capz-app-collection
-          app_name: "logging-operator"
-          app_namespace: "monitoring"
-          app_collection_repo: "capz-app-collection"
-          requires:
-            - push-logging-operator-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+    - architect/push-to-app-collection:
+        context: architect
+        name: capz-app-collection
+        app_name: logging-operator
+        app_namespace: monitoring
+        app_collection_repo: capz-app-collection
+        requires:
+        - push-logging-operator-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
 
-      - architect/push-to-app-collection:
-          context: "architect"
-          name: cloud-director-app-collection
-          app_name: "logging-operator"
-          app_namespace: "monitoring"
-          app_collection_repo: "cloud-director-app-collection"
-          requires:
-            - push-logging-operator-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+    - architect/push-to-app-collection:
+        context: architect
+        name: cloud-director-app-collection
+        app_name: logging-operator
+        app_namespace: monitoring
+        app_collection_repo: cloud-director-app-collection
+        requires:
+        - push-logging-operator-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
 
-      - architect/push-to-app-collection:
-          context: "architect"
-          name: vsphere-app-collection
-          app_name: "logging-operator"
-          app_namespace: "monitoring"
-          app_collection_repo: "vsphere-app-collection"
-          requires:
-            - push-logging-operator-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+    - architect/push-to-app-collection:
+        context: architect
+        name: vsphere-app-collection
+        app_name: logging-operator
+        app_namespace: monitoring
+        app_collection_repo: vsphere-app-collection
+        requires:
+        - push-logging-operator-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
