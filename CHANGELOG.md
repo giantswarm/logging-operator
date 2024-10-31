@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Reconcile clusters when the observability bundle version changes.
+
 ### Fixed
 
 - Disable crd installation from grafana agent as this is causing issues with the new v29 releases.

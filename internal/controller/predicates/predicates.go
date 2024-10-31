@@ -36,14 +36,13 @@ func (ObservabilityBundleAppVersionChangedPredicate) Update(e event.UpdateEvent)
 		return false
 	}
 
-	oldAppVersion, err := semver.New(oldApp.Spec.Version)
+	oldAppVersion, err := semver.Parse(oldApp.Spec.Version)
 	if err != nil {
 		return false
 	}
-	newAppVersion, err := semver.New(newApp.Spec.Version)
+	newAppVersion, err := semver.Parse(newApp.Spec.Version)
 	if err != nil {
 		return false
 	}
-	breakingVersion := semver.MustParse("1.0.0")
-	return oldAppVersion.LT(breakingVersion) && newAppVersion.GTE(breakingVersion)
+	return oldAppVersion.NE(newAppVersion)
 }
