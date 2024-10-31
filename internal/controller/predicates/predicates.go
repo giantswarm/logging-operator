@@ -27,23 +27,16 @@ func (ObservabilityBundleAppVersionChangedPredicate) Update(e event.UpdateEvent)
 		return false
 	}
 
-	var oldApp, newApp *appv1alpha1.App
+	var newApp *appv1alpha1.App
 	var ok bool
-	if oldApp, ok = e.ObjectOld.(*appv1alpha1.App); !ok {
-		return false
-	}
 	if newApp, ok = e.ObjectNew.(*appv1alpha1.App); !ok {
 		return false
 	}
 
-	oldAppVersion, err := semver.New(oldApp.Spec.Version)
-	if err != nil {
-		return false
-	}
 	newAppVersion, err := semver.New(newApp.Spec.Version)
 	if err != nil {
 		return false
 	}
 	breakingVersion := semver.MustParse("1.0.0")
-	return oldAppVersion.LT(breakingVersion) && newAppVersion.GTE(breakingVersion)
+	return newAppVersion.GTE(breakingVersion)
 }
