@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Reconcile clusters for any observability bundle version change after v1.0.0 instead of only when we upgrade to v1.0.0 because app upgrades happen way after cluster changes when upgrading a cluster.
+- Reconcile clusters when the observability bundle version changes.
 
 ## [0.14.0] - 2024-10-29
 
