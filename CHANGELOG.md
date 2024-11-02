@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixes the current version that enabled alloy-logs as the new secret mechanism only works with alloy 0.4.0 which is is the observability bundle 1.6.0
+
 ## [0.15.0] - 2024-10-31
 
 ### Changed
