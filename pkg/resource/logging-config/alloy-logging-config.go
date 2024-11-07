@@ -74,7 +74,6 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		MaxBackoffPeriod            string
 		IsWorkloadCluster           bool
 		LokiURLEnvVarName           string
-		TenantIDEnvVarName          string
 		BasicAuthUsernameEnvVarName string
 		BasicAuthPasswordEnvVarName string
 		SupportPodLogs              bool
@@ -84,7 +83,6 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		MaxBackoffPeriod:            common.MaxBackoffPeriod,
 		IsWorkloadCluster:           common.IsWorkloadCluster(lc),
 		LokiURLEnvVarName:           loggingsecret.AlloyLokiURLEnvVarName,
-		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
 		// Observability bundle in older versions do not support PodLogs

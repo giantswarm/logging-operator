@@ -84,7 +84,7 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
-{{- if not .SupportPodLogs }}
+  {{- if not .SupportPodLogs }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
@@ -107,7 +107,7 @@ discovery.relabel "kubernetes_pods" {
 		action        = "keep"
 	}
 	{{- end }}
-{{- end }}
+  {{- end }}
 }
 
 loki.process "kubernetes_pods" {
@@ -128,6 +128,16 @@ loki.process "kubernetes_pods" {
 			"stream",
 		]
 	}
+  {{- if .SupportPodLogs }}
+  // This is the only place where we need to set it because we put "giantswarm" as a default.
+  // c.f. https://github.com/grafana/alloy/blob/31b697c95ecdf7d43fa7790e31cc0f231d39fe8d/internal/component/common/loki/client/client.go#L458C18-L458C29
+  stage.labels {
+    "tenant" = __meta_kubernetes_pod_label_application_giantswarm_io_tenant
+  }
+  stage.tenant {
+    label = "tenant"
+  }
+  {{- end }}
 }
 
 // journald logs from /run/log/journal
@@ -292,7 +302,7 @@ loki.write "default" {
 	endpoint {
 		url                = env("{{ .LokiURLEnvVarName }}")
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = env("{{ .TenantIDEnvVarName }}")
+		tenant_id          = "giantswarm"
 
 		basic_auth {
 			username = env("{{ .BasicAuthUsernameEnvVarName }}")
