@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Disable grafana agent usage data reporting.
 - Move Grafana-Agent config to a template instead of go structs.
+- Use `giantswarm` tenant by default instead of cluster name.
 
 ### Fixed
 
