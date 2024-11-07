@@ -40,19 +40,14 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 		return nil, err
 	}
 
-	LokiURL := fmt.Sprintf(common.LokiURLFormat, lokiURL)
-	TenantID := clusterName
-	BasicAuthUsername := clusterName
-	BasicAuthPassword := writePassword
-
 	templateData := struct {
 		ExtraSecretEnv map[string]string
 	}{
 		ExtraSecretEnv: map[string]string{
-			AlloyLokiURLEnvVarName:           LokiURL,
-			AlloyTenantIDEnvVarName:          TenantID,
-			AlloyBasicAuthUsernameEnvVarName: BasicAuthUsername,
-			AlloyBasicAuthPasswordEnvVarName: BasicAuthPassword,
+			AlloyLokiURLEnvVarName:           fmt.Sprintf(common.LokiURLFormat, lokiURL),
+			AlloyTenantIDEnvVarName:          common.DefaultWriteTenant,
+			AlloyBasicAuthUsernameEnvVarName: clusterName,
+			AlloyBasicAuthPasswordEnvVarName: writePassword,
 		},
 	}
 
