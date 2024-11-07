@@ -62,7 +62,6 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 
 	// Loop on write users
 	for _, writeUser := range listWriteUsers(credentialsSecret) {
-
 		writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, writeUser)
 		if err != nil {
 			return v1.Secret{}, errors.WithStack(err)
@@ -71,9 +70,9 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 		authCfg.Users = append(authCfg.Users, config.User{
 			Username: writeUser,
 			Password: writePassword,
-			// we set the tenant even though it may be given by the sender (promtail)
+			// we set the default tenant even though it may be given by the sender
 			// depending of grafana-multi-teant-proxy config
-			OrgID: writeUser,
+			OrgID: common.DefaultWriteTenant,
 		})
 
 		// Add write user to allowed tenants for read user
