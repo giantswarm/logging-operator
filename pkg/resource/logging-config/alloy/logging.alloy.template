@@ -1,3 +1,11 @@
+// Kubernetes events
+{{- if .LogsEvents }}
+loki.source.kubernetes_events "local" {
+  namespaces = ` + {{ .DefaultWorkloadClusterNamespaces }} + `
+  forward_to = [loki.write.default.receiver]
+}
+{{- end }}
+
 // Kubernetes pods logs
 {{- if .SupportPodLogs }}
 loki.source.podlogs "kubernetes_pods" {

@@ -46,6 +46,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		IsWorkloadCluster                bool
 		SecretName                       string
 		SupportPodLogs                   bool
+		LogsEvents                       bool
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
@@ -53,6 +54,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		SecretName:                       common.AlloyLogAgentAppName,
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
+		LogsEvents:     true,
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
