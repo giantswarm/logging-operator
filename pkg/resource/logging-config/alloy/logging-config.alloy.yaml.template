@@ -39,6 +39,7 @@ alloy:
 
     {{- if not .SupportVPA }}
     # -- Resource requests and limits to apply to the alloy-logs container.
+    # Those values are the default on alloy-logs so we are not changing anything
     resources:
       limits:
         cpu: "1"
