@@ -36,6 +36,18 @@ alloy:
       # This is needed to allow alloy to create files when using readOnlyRootFilesystem
       - name: alloy-tmp
         mountPath: /tmp/alloy
+
+    {{- if not .SupportVPA }}
+    # -- Resource requests and limits to apply to the alloy-logs container.
+    resources:
+      limits:
+        cpu: "1"
+        memory: 256Mi
+      requests:
+        cpu: 25m
+        memory: 128Mi
+    {{- end }}
+
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -63,6 +75,13 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+
+{{- if .SupportVPA }}
+verticalPodAutoscaler:
+  # -- Creates a VerticalPodAutoscaler for the daemonset
+  enabled: true
+{{- end }}
+
 {{- if .SupportPodLogs }}
 {{- if .IsWorkloadCluster }}
 {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
