@@ -23,6 +23,7 @@ var (
 	alloyLoggingConfigTemplate *template.Template
 
 	supportPodLogs = semver.MustParse("1.7.0")
+	supportVPA     = supportPodLogs
 )
 
 func init() {
@@ -46,6 +47,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		IsWorkloadCluster                bool
 		SecretName                       string
 		SupportPodLogs                   bool
+		SupportVPA                       bool
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
@@ -53,6 +55,8 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		SecretName:                       common.AlloyLogAgentAppName,
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
+		// Observability bundle in older versions do not support VPA
+		SupportVPA: observabilityBundleVersion.GE(supportVPA),
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)

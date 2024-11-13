@@ -63,6 +63,13 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+
+{{- if .SupportVPA }}
+verticalPodAutoscaler:
+  # -- Creates a VerticalPodAutoscaler for the daemonset
+  enabled: true
+{{- end }}
+
 {{- if .SupportPodLogs }}
 {{- if .IsWorkloadCluster }}
 {{- if gt (len (.DefaultWorkloadClusterNamespaces | join ",")) 0 }}
