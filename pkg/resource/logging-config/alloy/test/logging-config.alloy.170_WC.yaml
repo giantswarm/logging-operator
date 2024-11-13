@@ -14,11 +14,11 @@ alloy:
       content: |-
         // Kubernetes pods logs
         loki.source.podlogs "kubernetes_pods" {
-          forward_to      = [loki.relabel.kubernetes_pods.receiver]
+        	forward_to      = [loki.relabel.kubernetes_pods.receiver]
         
-          clustering {
-            enabled = true
-          }
+        	clustering {
+        		enabled = true
+        	}
         }
         
         loki.relabel "kubernetes_pods" {
@@ -269,6 +269,9 @@ alloy:
         			password = env("BASIC_AUTH_PASSWORD")
         		}
         	}
+        	tls_config {
+        		insecure_skip_verify: false
+        	}
         	external_labels = {
         		cluster_id   = "test-cluster",
         		installation = "test-installation",
@@ -276,8 +279,8 @@ alloy:
         }
         
         logging {
-          level  = "warn"
-          format = "logfmt"
+        	level  = "warn"
+         	format = "logfmt"
         }
         
     clustering:
@@ -328,6 +331,9 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+verticalPodAutoscaler:
+  # -- Creates a VerticalPodAutoscaler for the daemonset
+  enabled: true
 podLogs:
 - name: default-namespaces
   namespace: kube-system

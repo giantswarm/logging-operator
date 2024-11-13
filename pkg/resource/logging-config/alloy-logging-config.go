@@ -46,8 +46,9 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		DefaultWorkloadClusterNamespaces []string
 		IsWorkloadCluster                bool
 		SecretName                       string
-		SupportPodLogs                   bool
-		SupportVPA                       bool
+
+		SupportPodLogs bool
+		SupportVPA     bool
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
@@ -82,6 +83,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		BasicAuthUsernameEnvVarName string
 		BasicAuthPasswordEnvVarName string
 		SupportPodLogs              bool
+		InsecureSkipVerify          bool
 	}{
 		ClusterID:                   clusterName,
 		Installation:                lc.GetInstallationName(),
@@ -92,7 +94,8 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
 		// Observability bundle in older versions do not support PodLogs
-		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
+		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
+		InsecureSkipVerify: lc.IsInsecureCA(),
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)

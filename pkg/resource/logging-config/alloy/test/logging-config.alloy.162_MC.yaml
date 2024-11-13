@@ -289,6 +289,9 @@ alloy:
         			password = env("BASIC_AUTH_PASSWORD")
         		}
         	}
+        	tls_config {
+        		insecure_skip_verify: false
+        	}
         	external_labels = {
         		cluster_id   = "test-installation",
         		installation = "test-installation",
@@ -296,8 +299,8 @@ alloy:
         }
         
         logging {
-          level  = "warn"
-          format = "logfmt"
+        	level  = "warn"
+         	format = "logfmt"
         }
         
     extraEnv:
