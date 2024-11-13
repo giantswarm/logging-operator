@@ -46,9 +46,8 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		DefaultWorkloadClusterNamespaces []string
 		IsWorkloadCluster                bool
 		SecretName                       string
-
-		SupportPodLogs bool
-		SupportVPA     bool
+		SupportPodLogs                   bool
+		SupportVPA                       bool
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
