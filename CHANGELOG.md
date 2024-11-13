@@ -42,6 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enable VPA on alloy if the deployed alloy version supports it.
 
+### Added
+
+- Enable VPA on alloy if the deployed alloy version supports it.
+
 ## [0.15.1] - 2024-11-04
 
 ### Fixed
