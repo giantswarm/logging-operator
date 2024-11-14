@@ -1,11 +1,11 @@
 // Kubernetes pods logs
 {{- if .SupportPodLogs }}
 loki.source.podlogs "kubernetes_pods" {
-  forward_to      = [loki.relabel.kubernetes_pods.receiver]
+	forward_to      = [loki.relabel.kubernetes_pods.receiver]
 
-  clustering {
-    enabled = true
-  }
+	clustering {
+		enabled = true
+	}
 }
 
 loki.relabel "kubernetes_pods" {
@@ -298,6 +298,10 @@ loki.write "default" {
 			username = env("{{ .BasicAuthUsernameEnvVarName }}")
 			password = env("{{ .BasicAuthPasswordEnvVarName }}")
 		}
+
+		tls_config {
+			insecure_skip_verify = {{ .InsecureSkipVerify }}
+		}
 	}
 	external_labels = {
 		cluster_id   = "{{ .ClusterID }}",
@@ -306,6 +310,6 @@ loki.write "default" {
 }
 
 logging {
-  level  = "warn"
-  format = "logfmt"
+	level  = "warn"
+	format = "logfmt"
 }

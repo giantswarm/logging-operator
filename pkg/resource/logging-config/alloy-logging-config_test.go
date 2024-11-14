@@ -98,10 +98,9 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}
 
-			//fmt.Printf("=>> config\n%s", config)
-			//fmt.Printf("=>> config_v170_MC\n%s", config_v170_MC)
-			if !cmp.Equal(string(golden), config) {
+			if string(golden) != config {
 				t.Logf("Generated config differs from %s, diff:\n%s", tc.goldenFile, cmp.Diff(string(golden), config))
+				t.Fail()
 				if *update {
 					//nolint:gosec
 					if err := os.WriteFile(tc.goldenFile, []byte(config), 0644); err != nil {
