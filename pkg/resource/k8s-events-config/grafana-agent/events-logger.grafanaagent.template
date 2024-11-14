@@ -1,0 +1,33 @@
+logging {
+	level  = "info"
+	format = "logfmt"
+}
+
+loki.source.kubernetes_events "local" {
+	namespaces = {{ .ScrapedNamespaces }}
+	forward_to = [loki.write.default.receiver]
+}
+
+remote.kubernetes.secret "credentials" {
+	namespace = "{{ .SecretNamespace }}"
+	name = "{{ .SecretName }}"
+}
+
+loki.write "default" {
+	endpoint {
+	url = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
+	tenant_id = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+	basic_auth {
+		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
+		password = remote.kubernetes.secret.credentials.data["logging-password"]
+	}
+	tls_config {
+		insecure_skip_verify = {{ .InsecureSkipVerify }}
+	}
+	}
+	external_labels = {
+		installation = "{{ .Installation }}",
+		cluster_id = "{{ .ClusterID }}",
+		scrape_job = "kubernetes-events",
+	}
+}

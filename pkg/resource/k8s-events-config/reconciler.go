@@ -1,0 +1,118 @@
+package k8seventsconfig
+
+import (
+	"context"
+	"reflect"
+	"time"
+
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+// Reconciler implements a reconciler.Interface to handle
+// EventsLogger config: extra events-logger config defining what we want to retrieve.
+type Reconciler struct {
+	client.Client
+	DefaultWorkloadClusterNamespaces []string
+}
+
+// ReconcileCreate ensures events-logger config is created with the right credentials
+func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	logger.Info("events-logger-config create")
+
+	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
+	if err != nil {
+		// Handle case where the app is not found.
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("events-logger-config - observability bundle app not found, requeueing")
+			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Get desired config
+	desiredAlloyEventsConfig, err := GenerateEventsLoggerConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces)
+	if err != nil {
+		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Check if config already exists.
+	logger.Info("events-logger-config - getting", "namespace", desiredAlloyEventsConfig.GetNamespace(), "name", desiredAlloyEventsConfig.GetName())
+	var currentAlloyEventsConfig v1.ConfigMap
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredAlloyEventsConfig.GetName(), Namespace: desiredAlloyEventsConfig.GetNamespace()}, &currentAlloyEventsConfig)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("events-logger-config not found, creating")
+			err = r.Client.Create(ctx, &desiredAlloyEventsConfig)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	if !needUpdate(currentAlloyEventsConfig, desiredAlloyEventsConfig) {
+		logger.Info("events-logger-config up to date")
+		return ctrl.Result{}, nil
+	}
+
+	logger.Info("events-logger-config - updating")
+	err = r.Client.Update(ctx, &desiredAlloyEventsConfig)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	logger.Info("events-logger-config - done")
+	return ctrl.Result{}, nil
+
+}
+
+func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	logger.Info("events-logger-config delete")
+
+	// Get expected configmap.
+	var currentAlloyEventsConfig v1.ConfigMap
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentAlloyEventsConfig)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("events-logger-config not found, stop here")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Delete configmap.
+	logger.Info("events-logger-config deleting", "namespace", currentAlloyEventsConfig.GetNamespace(), "name", currentAlloyEventsConfig.GetName())
+	err = r.Client.Delete(ctx, &currentAlloyEventsConfig)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			// Do no throw error in case it was not found, as this means
+			// it was already deleted.
+			logger.Info("events-logger-config already deleted")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	logger.Info("events-logger-config deleted")
+
+	return ctrl.Result{}, nil
+}
+
+// needUpdate return true if current.Data and desired.Data do not match.
+func needUpdate(current, desired v1.ConfigMap) bool {
+	return !reflect.DeepEqual(current.Data, desired.Data)
+}

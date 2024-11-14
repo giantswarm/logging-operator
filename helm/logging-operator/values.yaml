@@ -42,6 +42,7 @@ loggingOperator:
   vintageMode: true
   loggingEnabled: true
   loggingAgent: alloy
+  eventsLogger: alloy
 
 managementCluster:
   name: unknown

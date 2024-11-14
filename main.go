@@ -44,6 +44,7 @@ import (
 	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
 	grafanaagentsecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
+	k8seventsconfig "github.com/giantswarm/logging-operator/pkg/resource/k8s-events-config"
 	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
@@ -82,6 +83,7 @@ func main() {
 	var enableLeaderElection bool
 	var enableLogging bool
 	var loggingAgent string
+	var eventsLogger string
 	var installationName string
 	var insecureCA bool
 	var metricsAddr string
@@ -94,6 +96,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&loggingAgent, "logging-agent", common.LoggingAgentAlloy, fmt.Sprintf("select logging agent to use (%s or %s)", common.LoggingAgentPromtail, common.LoggingAgentAlloy))
+	flag.StringVar(&eventsLogger, "events-logger", common.EventsLoggerAlloy, fmt.Sprintf("select events logger to use (%s or %s)", common.EventsLoggerAlloy, common.EventsLoggerGrafanaAgent))
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -165,6 +168,11 @@ func main() {
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
+	eventsLoggerConfig := k8seventsconfig.Reconciler{
+		Client:                           mgr.GetClient(),
+		DefaultWorkloadClusterNamespaces: defaultNamespaces,
+	}
+
 	grafanaAgentSecret := grafanaagentsecret.Reconciler{
 		Client: mgr.GetClient(),
 	}
@@ -192,6 +200,7 @@ func main() {
 			&loggingConfig,
 			&grafanaAgentSecret,
 			&grafanaAgentConfig,
+			&eventsLoggerConfig,
 		},
 	}
 

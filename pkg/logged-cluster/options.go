@@ -4,6 +4,7 @@ package loggedcluster
 type Options struct {
 	EnableLoggingFlag bool
 	LoggingAgent      string
+	EventsLogger      string
 	InstallationName  string
 	InsecureCA        bool
 }
