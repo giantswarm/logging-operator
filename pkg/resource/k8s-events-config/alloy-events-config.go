@@ -38,15 +38,15 @@ func GenerateAlloyEventsConfig(lc loggedcluster.Interface, observabilityBundleVe
 	}
 
 	data := struct {
-		GrafanaAgentInnerConfig string
-		Replicas                int
-		Type                    string
-		SecretName              string
+		AlloyConfig string
+		Replicas    int
+		Type        string
+		SecretName  string
 	}{
-		GrafanaAgentInnerConfig: alloyConfig,
-		Replicas:                1,
-		Type:                    "deployment",
-		SecretName:              eventsloggersecret.GetEventsLoggerSecretName(lc),
+		AlloyConfig: alloyConfig,
+		Replicas:    1,
+		Type:        "deployment",
+		SecretName:  eventsloggersecret.GetEventsLoggerSecretName(lc),
 	}
 
 	err = grafanaAgentConfigTemplate.Execute(&values, data)
