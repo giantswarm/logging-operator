@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Private CAs in alloy logs.
+
+### Changed
+
+- Disable grafana agent usage data reporting.
+
 ## [0.15.2] - 2024-11-13
 
 ### Added

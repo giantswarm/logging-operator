@@ -35,6 +35,7 @@ type grafanaAgent struct {
 
 type agent struct {
 	ConfigMap configMap `yaml:"configMap" json:"configMap"`
+	ExtraArgs []string  `yaml:"extraArgs" json:"extraArgs"`
 }
 
 type configMap struct {
@@ -73,6 +74,9 @@ func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, appNamespace string)
 	values := values{
 		GrafanaAgent: grafanaAgent{
 			Agent: agent{
+				ExtraArgs: []string{
+					"--disable-reporting",
+				},
 				ConfigMap: configMap{
 					Content: `
 logging {
