@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Disable grafana agent usage data reporting.
 
+### Fixed
+
+- Fix logging-config unit tests
+
 ## [0.15.2] - 2024-11-13
 
 ### Added
