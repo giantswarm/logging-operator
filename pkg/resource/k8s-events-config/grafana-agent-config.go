@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 )
 
 var (
@@ -81,7 +82,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultNamespac
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
-		SecretName:         fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentExtraSecretName()),
+		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
 		SecretNamespace:    lc.GetAppsNamespace(),
 		ScrapedNamespaces:  scrapedNamespaces,
 	}

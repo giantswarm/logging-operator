@@ -1,11 +1,10 @@
-package grafanaagentsecret
+package eventsloggersecret
 
 import (
 	"fmt"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -22,26 +21,14 @@ type extraSecret struct {
 	Data map[string]string `yaml:"data" json:"data"`
 }
 
-// SecretMeta returns metadata for the grafana-agent-secret
-func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
-	metadata := metav1.ObjectMeta{
-		Name:      getGrafanaAgentSecretName(lc),
-		Namespace: lc.GetAppsNamespace(),
-		Labels:    map[string]string{},
-	}
-
-	common.AddCommonLabels(metadata.Labels)
-	return metadata
-}
-
 // GenerateGrafanaAgentSecret returns a secret for
 // the Loki-multi-tenant-proxy config
-func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
 	clusterName := lc.GetClusterName()
 	writeUser := clusterName
 	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
 	if err != nil {
-		return v1.Secret{}, errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	values := values{
@@ -58,19 +45,11 @@ func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 
 	v, err := yaml.Marshal(values)
 	if err != nil {
-		return v1.Secret{}, errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
-	secret := v1.Secret{
-		ObjectMeta: SecretMeta(lc),
-		Data: map[string][]byte{
-			"values": []byte(v),
-		},
-	}
+	data := make(map[string][]byte)
+	data["values"] = []byte(v)
 
-	return secret, nil
-}
-
-func getGrafanaAgentSecretName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentExtraSecretName())
+	return data, nil
 }

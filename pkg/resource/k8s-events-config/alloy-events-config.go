@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
 
@@ -45,8 +46,7 @@ func GenerateAlloyEventsConfig(lc loggedcluster.Interface, observabilityBundleVe
 		GrafanaAgentInnerConfig: alloyConfig,
 		Replicas:                1,
 		Type:                    "deployment",
-		// We're using the same secret used by alloy-logs to authenticate against Loki
-		SecretName: common.AlloyLogAgentAppName,
+		SecretName:              eventsloggersecret.GetEventsLoggerSecretName(lc),
 	}
 
 	err = grafanaAgentConfigTemplate.Execute(&values, data)

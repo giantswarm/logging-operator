@@ -41,8 +41,7 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
-	grafanaagentconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
-	grafanaagentsecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
+	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	k8seventsconfig "github.com/giantswarm/logging-operator/pkg/resource/k8s-events-config"
 	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
@@ -173,11 +172,7 @@ func main() {
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
-	grafanaAgentSecret := grafanaagentsecret.Reconciler{
-		Client: mgr.GetClient(),
-	}
-
-	grafanaAgentConfig := grafanaagentconfig.Reconciler{
+	eventsLoggerSecret := eventsloggersecret.Reconciler{
 		Client: mgr.GetClient(),
 	}
 
@@ -198,9 +193,8 @@ func main() {
 			&proxyAuth,
 			&loggingSecret,
 			&loggingConfig,
-			&grafanaAgentSecret,
-			&grafanaAgentConfig,
 			&eventsLoggerConfig,
+			&eventsLoggerSecret,
 		},
 	}
 
