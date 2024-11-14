@@ -277,6 +277,10 @@ alloy:
         		tls_config {
         			insecure_skip_verify = false
         		}
+        
+        		tls_config {
+        			insecure_skip_verify = false
+        		}
         	}
         	external_labels = {
         		cluster_id   = "test-cluster",

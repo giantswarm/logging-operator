@@ -317,6 +317,10 @@ loki.write "default" {
 		tls_config {
 			insecure_skip_verify = {{ .InsecureSkipVerify }}
 		}
+
+		tls_config {
+			insecure_skip_verify = {{ .InsecureSkipVerify }}
+		}
 	}
 	external_labels = {
 		cluster_id   = "{{ .ClusterID }}",
