@@ -25,6 +25,10 @@ const (
 	LoggingAgentPromtail = "promtail"
 	LoggingAgentAlloy    = "alloy"
 
+	// Possible values for --events-logger flag.
+	EventsLoggerAlloy        = "alloy"
+	EventsLoggerGrafanaAgent = "grafana-agent"
+
 	// App name keys in the observability bundle
 	AlloyObservabilityBundleAppName          = "alloyLogs"
 	PromtailObservabilityBundleAppName       = "promtail"
