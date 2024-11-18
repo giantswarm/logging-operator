@@ -4,7 +4,7 @@ package loggedcluster
 type Options struct {
 	EnableLoggingFlag bool
 	LoggingAgent      string
-	EventsLogger      string
+	KubeEventsLogger  string
 	InstallationName  string
 	InsecureCA        bool
 }

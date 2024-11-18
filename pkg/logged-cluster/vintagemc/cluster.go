@@ -25,12 +25,12 @@ func (o *Object) SetLoggingAgent(loggingAgent string) {
 	o.Options.LoggingAgent = loggingAgent
 }
 
-func (o *Object) GetEventsLogger() string {
-	return o.Options.EventsLogger
+func (o *Object) GetKubeEventsLogger() string {
+	return o.Options.KubeEventsLogger
 }
 
-func (o *Object) SetEventsLogger(eventsLogger string) {
-	o.Options.EventsLogger = eventsLogger
+func (o *Object) SetKubeEventsLogger(kubeEventsLogger string) {
+	o.Options.KubeEventsLogger = kubeEventsLogger
 }
 
 func (o Object) IsInsecureCA() bool {

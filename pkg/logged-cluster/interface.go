@@ -14,8 +14,8 @@ type Interface interface {
 	HasLoggingEnabled() bool
 	GetLoggingAgent() string
 	SetLoggingAgent(string)
-	GetEventsLogger() string
-	SetEventsLogger(string)
+	GetKubeEventsLogger() string
+	SetKubeEventsLogger(string)
 	IsInsecureCA() bool
 	GetAppsNamespace() string
 	GetEnableLoggingFlag() bool
