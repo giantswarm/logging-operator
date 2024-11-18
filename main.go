@@ -43,7 +43,7 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
-	k8seventsconfig "github.com/giantswarm/logging-operator/pkg/resource/k8s-events-config"
+	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/k8s-events-config"
 	loggingagentstoggle "github.com/giantswarm/logging-operator/pkg/resource/logging-agents-toggle"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
@@ -167,7 +167,7 @@ func main() {
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
-	eventsLoggerConfig := k8seventsconfig.Reconciler{
+	eventsLoggerConfig := eventsloggerconfig.Reconciler{
 		Client:                           mgr.GetClient(),
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
@@ -193,8 +193,8 @@ func main() {
 			&proxyAuth,
 			&loggingSecret,
 			&loggingConfig,
-			&eventsLoggerConfig,
 			&eventsLoggerSecret,
+			&eventsLoggerConfig,
 		},
 	}
 
