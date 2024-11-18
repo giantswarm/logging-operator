@@ -19,7 +19,7 @@ func GenerateEventsLoggerConfig(lc loggedcluster.Interface, observabilityBundleV
 	var values string
 	var err error
 
-	switch lc.GetEventsLogger() {
+	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
 		values, err = GenerateGrafanaAgentConfig(lc, defaultNamespaces)
 		if err != nil {
@@ -31,7 +31,7 @@ func GenerateEventsLoggerConfig(lc loggedcluster.Interface, observabilityBundleV
 			return v1.ConfigMap{}, err
 		}
 	default:
-		return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", lc.GetEventsLogger())
+		return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", lc.GetKubeEventsLogger())
 	}
 
 	configmap := v1.ConfigMap{

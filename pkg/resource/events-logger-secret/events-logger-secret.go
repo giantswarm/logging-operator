@@ -19,7 +19,7 @@ func GenerateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSe
 	var data map[string][]byte
 	var err error
 
-	switch lc.GetEventsLogger() {
+	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
 		data, err = GenerateGrafanaAgentSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
