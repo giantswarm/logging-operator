@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add support for Private CAs in alloy logs.
-- Add EventsLogger option and related methods in loggedCLuster package.
+- Add KubeEventsLogger option and related methods in loggedCLuster package.
 
 ### Changed
 
