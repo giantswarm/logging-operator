@@ -60,7 +60,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 	}
 
 	// Enforce grafana-agent as events logger when observability-bundle version < 1.9.0 because this needs alloy 0.7.0.
-	if (observabilityBundleVersion.LT(semver.MustParse("1.9.0")) && lc.GetKubeEventsLogger() == common.EventsLoggerAlloy) || observabilityBundleVersion.GE(semver.MustParse("0.10.0")) {
+	if observabilityBundleVersion.LT(semver.MustParse("1.9.0")) && lc.GetKubeEventsLogger() == common.EventsLoggerAlloy {
 		logger := log.FromContext(ctx)
 		logger.Info("Events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
 		lc.SetKubeEventsLogger(common.EventsLoggerGrafanaAgent)
