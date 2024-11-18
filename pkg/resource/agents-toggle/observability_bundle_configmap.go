@@ -1,4 +1,4 @@
-package loggingagentstoggle
+package agentstoggle
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type app struct {
 }
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
-// the observabilitybundle application to enable logging agents.
+// the observabilitybundle application to enable logging agents and events-loggers.
 func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (v1.ConfigMap, error) {
 	appsToEnable := map[string]app{}
 
@@ -59,11 +59,25 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
 	}
 
-	if observabilityBundleVersion.GE(semver.MustParse("0.10.0")) {
+	switch lc.GetKubeEventsLogger() {
+	case common.EventsLoggerGrafanaAgent:
 		appsToEnable["grafanaAgent"] = app{
 			Enabled: true,
 		}
+		appsToEnable["alloyEvents"] = app{
+			Enabled: false,
+		}
+	case common.EventsLoggerAlloy:
+		appsToEnable["grafanaAgent"] = app{
+			Enabled: false,
+		}
+		appsToEnable["alloyEvents"] = app{
+			Enabled: true,
+		}
+	default:
+		return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", lc.GetKubeEventsLogger())
 	}
+
 	values := Values{
 		Apps: appsToEnable,
 	}

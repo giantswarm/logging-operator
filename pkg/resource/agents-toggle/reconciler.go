@@ -1,4 +1,4 @@
-package loggingagentstoggle
+package agentstoggle
 
 import (
 	"context"
