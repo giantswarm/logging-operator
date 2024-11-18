@@ -49,7 +49,7 @@ func GenerateAlloyEventsConfig(lc loggedcluster.Interface, observabilityBundleVe
 		SecretName:  eventsloggersecret.GetEventsLoggerSecretName(lc),
 	}
 
-	err = grafanaAgentConfigTemplate.Execute(&values, data)
+	err = alloyEventsConfigTemplate.Execute(&values, data)
 	if err != nil {
 		return "", err
 	}
