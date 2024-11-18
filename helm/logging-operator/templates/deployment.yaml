@@ -39,6 +39,7 @@ spec:
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}
           - -logging-agent={{ .Values.loggingOperator.loggingAgent }}
+          - -events-logger={{ .Values.loggingOperator.eventsLogger }}
           - -default-namespaces={{ .Values.loggingOperator.defaultNamespaces }}
         livenessProbe:
           httpGet:
