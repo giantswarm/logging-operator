@@ -3,7 +3,6 @@ package eventsloggerconfig
 import (
 	"fmt"
 
-	"github.com/blang/semver"
 	"github.com/pkg/errors"
 
 	v1 "k8s.io/api/core/v1"
@@ -18,7 +17,7 @@ const (
 	grafanaAgentConfigName  = "grafana-agent-config"
 )
 
-func GenerateEventsLoggerConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (v1.ConfigMap, error) {
+func GenerateEventsLoggerConfig(lc loggedcluster.Interface, defaultNamespaces []string) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
@@ -29,7 +28,7 @@ func GenerateEventsLoggerConfig(lc loggedcluster.Interface, observabilityBundleV
 			return v1.ConfigMap{}, err
 		}
 	case common.EventsLoggerAlloy:
-		values, err = GenerateAlloyEventsConfig(lc, observabilityBundleVersion, defaultNamespaces)
+		values, err = GenerateAlloyEventsConfig(lc, defaultNamespaces)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}

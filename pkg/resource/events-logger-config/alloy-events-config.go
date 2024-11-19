@@ -7,7 +7,6 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/blang/semver"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -30,7 +29,7 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func GenerateAlloyEventsConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (string, error) {
+func GenerateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	alloyConfig, err := generateAlloyConfig(lc, defaultNamespaces)
