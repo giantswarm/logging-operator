@@ -1,4 +1,4 @@
-package k8seventsconfig
+package eventsloggerconfig
 
 import (
 	"fmt"
