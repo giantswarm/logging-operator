@@ -61,16 +61,6 @@ func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, defaultNamespaces []
 func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
-	scrapedNamespaces := "[]"
-	if common.IsWorkloadCluster(lc) {
-		for i, ns := range defaultNamespaces {
-			if i == len(defaultNamespaces)-1 {
-				scrapedNamespaces += fmt.Sprintf("\"%s\"", ns)
-			}
-			scrapedNamespaces += fmt.Sprintf("\"%s\", ", ns)
-		}
-	}
-
 	data := struct {
 		ClusterID          string
 		Installation       string
@@ -84,7 +74,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultNamespac
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
 		SecretNamespace:    lc.GetAppsNamespace(),
-		ScrapedNamespaces:  scrapedNamespaces,
+		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultNamespaces),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)

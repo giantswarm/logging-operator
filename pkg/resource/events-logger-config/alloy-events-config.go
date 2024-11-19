@@ -69,6 +69,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		TenantIDEnvVarName               string
 		BasicAuthUsernameEnvVarName      string
 		BasicAuthPasswordEnvVarName      string
+		ScrapedNamespaces                string
 	}{
 		ClusterID:                        lc.GetClusterName(),
 		Installation:                     lc.GetInstallationName(),
@@ -78,6 +79,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		TenantIDEnvVarName:               loggingsecret.AlloyTenantIDEnvVarName,
 		BasicAuthUsernameEnvVarName:      loggingsecret.AlloyBasicAuthUsernameEnvVarName,
 		BasicAuthPasswordEnvVarName:      loggingsecret.AlloyBasicAuthPasswordEnvVarName,
+		ScrapedNamespaces:                common.FormatScrapedNamespaces(lc, defaultNamespaces),
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)
