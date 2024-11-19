@@ -9,7 +9,7 @@ grafana-agent:
       content: |-
 {{ .GrafanaAgentInnerConfig | indent 8 }}
   controller:
-    replicas: {{ .Replicas }}
-    type: {{ .Type }}
+    replicas: 1
+    type: deployment
   crds:
-    create: {{ .Create }}
+    create: false

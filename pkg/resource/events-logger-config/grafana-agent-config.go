@@ -40,14 +40,8 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultNamespaces []
 
 	data := struct {
 		GrafanaAgentInnerConfig string
-		Replicas                int
-		Type                    string
-		Create                  string
 	}{
 		GrafanaAgentInnerConfig: grafanaAgentInnerConfig,
-		Replicas:                1,
-		Type:                    "deployment",
-		Create:                  "false",
 	}
 
 	err = grafanaAgentConfigTemplate.Execute(&values, data)
