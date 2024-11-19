@@ -13,7 +13,10 @@ import (
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
 
-const eventsLoggerSecretName = "events-logger-secret"
+const (
+	eventsLoggerSecretName = "events-logger-secret"
+	grafanaAgentSecretName = "grafana-agent-secret"
+)
 
 func GenerateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
 	var data map[string][]byte
@@ -56,5 +59,10 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 }
 
 func GetEventsLoggerSecretName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLoggerSecretName)
+	switch lc.GetKubeEventsLogger() {
+	case common.EventsLoggerGrafanaAgent:
+		return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentSecretName)
+	default:
+		return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLoggerSecretName)
+	}
 }
