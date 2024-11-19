@@ -46,7 +46,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	// Get desired secret
 	desiredEventsLoggerSecret, err := GenerateEventsLoggerSecret(lc, &eventsLoggerCredentialsSecret, lokiURL)
 	if err != nil {
-		logger.Info("logging-secret - failed generating auth config!", "error", err)
+		logger.Error("failed generating events logger secret", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
@@ -71,13 +71,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("events-logger-secret - updating")
+	logger.Info("updating events-logger-secret")
 	err = r.Client.Update(ctx, &desiredEventsLoggerSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info("events-logger-secret - done")
+	logger.Info("updated events-logger-secret")
 	return ctrl.Result{}, nil
 }
 
