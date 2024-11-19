@@ -13,7 +13,10 @@ import (
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
-const eventsLogggerConfigName = "events-logger-config"
+const (
+	eventsLogggerConfigName = "events-logger-config"
+	grafanaAgentConfigName  = "grafana-agent-config"
+)
 
 func GenerateEventsLoggerConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (v1.ConfigMap, error) {
 	var values string
@@ -57,5 +60,10 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 }
 
 func getEventsLoggerConfigName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLogggerConfigName)
+	switch lc.GetKubeEventsLogger() {
+	case common.EventsLoggerGrafanaAgent:
+		return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentConfigName)
+	default:
+		return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLogggerConfigName)
+	}
 }
