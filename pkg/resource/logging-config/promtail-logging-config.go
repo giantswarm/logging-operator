@@ -17,6 +17,8 @@ var (
 	//go:embed promtail/logging-config.promtail.yaml.template
 	promtailLoggingConfig         string
 	promtailLoggingConfigTemplate *template.Template
+
+	supportsStructuredMetadata = semver.MustParse("1.0.0")
 )
 
 func init() {
@@ -34,7 +36,7 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface, observabilityBund
 	}{
 		IsWorkloadCluster: common.IsWorkloadCluster(lc),
 		// Promtail in older versions do not support structured metadata.
-		SupportsStructuredMetadata: observabilityBundleVersion.GTE(semver.MustParse("1.0.0")),
+		SupportsStructuredMetadata: observabilityBundleVersion.GTE(supportsStructuredMetadata),
 	}
 
 	err := promtailLoggingConfigTemplate.Execute(&values, data)
