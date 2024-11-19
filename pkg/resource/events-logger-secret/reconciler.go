@@ -46,7 +46,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	// Get desired secret
 	desiredEventsLoggerSecret, err := GenerateEventsLoggerSecret(lc, &eventsLoggerCredentialsSecret, lokiURL)
 	if err != nil {
-		logger.Error("failed generating events logger secret", err)
+		logger.Error(err, "failed generating events logger secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
