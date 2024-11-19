@@ -3,6 +3,7 @@ package eventsloggerconfig
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -63,6 +64,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 	data := struct {
 		ClusterID                        string
 		Installation                     string
+		InsecureSkipVerify               string
 		DefaultWorkloadClusterNamespaces []string
 		MaxBackoffPeriod                 string
 		LokiURLEnvVarName                string
@@ -73,6 +75,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 	}{
 		ClusterID:                        lc.GetClusterName(),
 		Installation:                     lc.GetInstallationName(),
+		InsecureSkipVerify:               fmt.Sprintf("%t", lc.IsInsecureCA()),
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		MaxBackoffPeriod:                 common.MaxBackoffPeriod,
 		LokiURLEnvVarName:                loggingsecret.AlloyLokiURLEnvVarName,

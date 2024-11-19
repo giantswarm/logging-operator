@@ -14,6 +14,10 @@ loki.write "default" {
 			username = env("{{ .BasicAuthUsernameEnvVarName }}")
 			password = env("{{ .BasicAuthPasswordEnvVarName }}")
 		}
+
+		tls_config {
+			insecure_skip_verify = {{ .InsecureSkipVerify }}
+		}
 	}
 	external_labels = {
 		cluster_id   = "{{ .ClusterID }}",
