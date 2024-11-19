@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	eventsLoggerSecretName = "events-logger-secret"
-	grafanaAgentSecretName = "grafana-agent-secret"
+	eventsLoggerSecretName = "events-logger-secret" // #nosec G101
+	grafanaAgentSecretName = "grafana-agent-secret" // #nosec G101
 )
 
 func GenerateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
