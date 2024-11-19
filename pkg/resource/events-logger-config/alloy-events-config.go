@@ -40,13 +40,9 @@ func GenerateAlloyEventsConfig(lc loggedcluster.Interface, observabilityBundleVe
 
 	data := struct {
 		AlloyConfig string
-		Replicas    int
-		Type        string
 		SecretName  string
 	}{
 		AlloyConfig: alloyConfig,
-		Replicas:    1,
-		Type:        "deployment",
 		SecretName:  eventsloggersecret.GetEventsLoggerSecretName(lc),
 	}
 
