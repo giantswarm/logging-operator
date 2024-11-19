@@ -30,7 +30,7 @@ func init() {
 
 // GenerateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func GenerateGrafanaAgentConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
+func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, defaultNamespaces)

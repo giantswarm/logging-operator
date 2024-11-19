@@ -29,7 +29,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("events-logger-config create")
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := GenerateEventsLoggerConfig(lc, r.DefaultWorkloadClusterNamespaces)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc, r.DefaultWorkloadClusterNamespaces)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

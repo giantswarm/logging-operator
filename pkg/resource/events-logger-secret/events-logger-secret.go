@@ -18,13 +18,13 @@ const (
 	grafanaAgentSecretName = "grafana-agent-secret" // #nosec G101
 )
 
-func GenerateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func generateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		data, err = GenerateGrafanaAgentSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = generateGrafanaAgentSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
@@ -39,7 +39,7 @@ func GenerateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSe
 	}
 
 	secret := v1.Secret{
-		ObjectMeta: SecretMeta(lc),
+		ObjectMeta: secretMeta(lc),
 		Data:       data,
 	}
 
@@ -47,7 +47,7 @@ func GenerateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSe
 }
 
 // SecretMeta returns metadata for the events-logger-secret
-func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func secretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      GetEventsLoggerSecretName(lc),
 		Namespace: lc.GetAppsNamespace(),

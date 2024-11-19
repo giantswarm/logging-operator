@@ -29,7 +29,7 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func GenerateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
+func generateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	alloyConfig, err := generateAlloyConfig(lc, defaultNamespaces)

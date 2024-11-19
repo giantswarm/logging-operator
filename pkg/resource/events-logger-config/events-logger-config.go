@@ -17,18 +17,18 @@ const (
 	grafanaAgentConfigName  = "grafana-agent-config"
 )
 
-func GenerateEventsLoggerConfig(lc loggedcluster.Interface, defaultNamespaces []string) (v1.ConfigMap, error) {
+func generateEventsLoggerConfig(lc loggedcluster.Interface, defaultNamespaces []string) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		values, err = GenerateGrafanaAgentConfig(lc, defaultNamespaces)
+		values, err = generateGrafanaAgentConfig(lc, defaultNamespaces)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.EventsLoggerAlloy:
-		values, err = GenerateAlloyEventsConfig(lc, defaultNamespaces)
+		values, err = generateAlloyEventsConfig(lc, defaultNamespaces)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
@@ -37,7 +37,7 @@ func GenerateEventsLoggerConfig(lc loggedcluster.Interface, defaultNamespaces []
 	}
 
 	configmap := v1.ConfigMap{
-		ObjectMeta: ConfigMeta(lc),
+		ObjectMeta: configMeta(lc),
 		Data: map[string]string{
 			"values": values,
 		},
@@ -47,7 +47,7 @@ func GenerateEventsLoggerConfig(lc loggedcluster.Interface, defaultNamespaces []
 }
 
 // ConfigMeta returns metadata for the logging-config
-func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      getEventsLoggerConfigName(lc),
 		Namespace: lc.GetAppsNamespace(),
