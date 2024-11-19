@@ -29,20 +29,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("events-logger-config create")
 
 	// Get desired config
-	desiredAlloyEventsConfig, err := GenerateEventsLoggerConfig(lc, r.DefaultWorkloadClusterNamespaces)
+	desiredEventsLoggerConfig, err := GenerateEventsLoggerConfig(lc, r.DefaultWorkloadClusterNamespaces)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Check if config already exists.
-	logger.Info("events-logger-config - getting", "namespace", desiredAlloyEventsConfig.GetNamespace(), "name", desiredAlloyEventsConfig.GetName())
-	var currentAlloyEventsConfig v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredAlloyEventsConfig.GetName(), Namespace: desiredAlloyEventsConfig.GetNamespace()}, &currentAlloyEventsConfig)
+	logger.Info("events-logger-config - getting", "namespace", desiredEventsLoggerConfig.GetNamespace(), "name", desiredEventsLoggerConfig.GetName())
+	var currentEventsLoggerConfig v1.ConfigMap
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredEventsLoggerConfig.GetName(), Namespace: desiredEventsLoggerConfig.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-config not found, creating")
-			err = r.Client.Create(ctx, &desiredAlloyEventsConfig)
+			err = r.Client.Create(ctx, &desiredEventsLoggerConfig)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -51,13 +51,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	if !needUpdate(currentAlloyEventsConfig, desiredAlloyEventsConfig) {
+	if !needUpdate(currentEventsLoggerConfig, desiredEventsLoggerConfig) {
 		logger.Info("events-logger-config up to date")
 		return ctrl.Result{}, nil
 	}
 
 	logger.Info("events-logger-config - updating")
-	err = r.Client.Update(ctx, &desiredAlloyEventsConfig)
+	err = r.Client.Update(ctx, &desiredEventsLoggerConfig)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
