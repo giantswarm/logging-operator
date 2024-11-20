@@ -57,27 +57,25 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 	var values bytes.Buffer
 
 	data := struct {
-		ClusterID                        string
-		Installation                     string
-		InsecureSkipVerify               string
-		DefaultWorkloadClusterNamespaces []string
-		MaxBackoffPeriod                 string
-		LokiURLEnvVarName                string
-		TenantIDEnvVarName               string
-		BasicAuthUsernameEnvVarName      string
-		BasicAuthPasswordEnvVarName      string
-		ScrapedNamespaces                string
+		ClusterID                   string
+		Installation                string
+		InsecureSkipVerify          string
+		MaxBackoffPeriod            string
+		LokiURLEnvVarName           string
+		TenantIDEnvVarName          string
+		BasicAuthUsernameEnvVarName string
+		BasicAuthPasswordEnvVarName string
+		ScrapedNamespaces           string
 	}{
-		ClusterID:                        lc.GetClusterName(),
-		Installation:                     lc.GetInstallationName(),
-		InsecureSkipVerify:               fmt.Sprintf("%t", lc.IsInsecureCA()),
-		DefaultWorkloadClusterNamespaces: defaultNamespaces,
-		MaxBackoffPeriod:                 common.MaxBackoffPeriod,
-		LokiURLEnvVarName:                loggingsecret.AlloyLokiURLEnvVarName,
-		TenantIDEnvVarName:               loggingsecret.AlloyTenantIDEnvVarName,
-		BasicAuthUsernameEnvVarName:      loggingsecret.AlloyBasicAuthUsernameEnvVarName,
-		BasicAuthPasswordEnvVarName:      loggingsecret.AlloyBasicAuthPasswordEnvVarName,
-		ScrapedNamespaces:                common.FormatScrapedNamespaces(lc, defaultNamespaces),
+		ClusterID:                   lc.GetClusterName(),
+		Installation:                lc.GetInstallationName(),
+		InsecureSkipVerify:          fmt.Sprintf("%t", lc.IsInsecureCA()),
+		MaxBackoffPeriod:            common.MaxBackoffPeriod,
+		LokiURLEnvVarName:           loggingsecret.AlloyLokiURLEnvVarName,
+		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
+		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
+		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
+		ScrapedNamespaces:           common.FormatScrapedNamespaces(lc, defaultNamespaces),
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)
