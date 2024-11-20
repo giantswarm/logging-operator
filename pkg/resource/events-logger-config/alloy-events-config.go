@@ -10,7 +10,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
 
@@ -42,7 +41,7 @@ func generateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []s
 		SecretName  string
 	}{
 		AlloyConfig: alloyConfig,
-		SecretName:  eventsloggersecret.GetEventsLoggerSecretName(lc),
+		SecretName:  common.AlloyEventsLoggerAppName,
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
