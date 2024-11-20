@@ -178,6 +178,7 @@ func main() {
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.LoggingAgent = loggingAgent
+	loggedcluster.O.KubeEventsLogger = eventsLogger
 	loggedcluster.O.InstallationName = installationName
 	loggedcluster.O.InsecureCA = insecureCA
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
