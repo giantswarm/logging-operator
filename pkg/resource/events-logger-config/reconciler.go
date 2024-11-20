@@ -1,11 +1,10 @@
-package grafanaagentconfig
+package eventsloggerconfig
 
 import (
 	"context"
 	"reflect"
 	"time"
 
-	"github.com/blang/semver"
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -24,6 +23,7 @@ import (
 // GrafanaAgent config: extra grafana-agent config defining what we want to retrieve.
 type Reconciler struct {
 	client.Client
+	DefaultWorkloadClusterNamespaces []string
 }
 
 // ReconcileCreate ensures grafana-agent config is created with the right credentials
@@ -31,28 +31,11 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafana-agent-config create")
 
-	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-config - observability bundle app not found, requeueing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// The grafana agent was added only for bundle version 0.9.0 and above (cf. https://github.com/giantswarm/observability-bundle/compare/v0.8.9...v0.9.0)
-	if observabilityBundleVersion.LT(semver.MustParse("0.9.0")) {
-		return ctrl.Result{}, nil
-	}
-
 	// Get observability bundle app metadata.
 	appMeta := common.ObservabilityBundleAppMeta(lc)
 	// Retrieve the app.
 	var currentApp appv1.App
-	err = r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
-	if err != nil {
+	if err := r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp); err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config - app not found, requeuing")
 			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
@@ -62,20 +45,27 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired config
-	desiredGrafanaAgentConfig, err := GenerateGrafanaAgentConfig(lc, currentApp.Spec.Namespace)
+	values, err := generateGrafanaAgentConfig(lc, r.DefaultWorkloadClusterNamespaces)
 	if err != nil {
 		logger.Info("grafana-agent-config - failed generating grafana-agent config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	desiredEventsLoggerConfig := v1.ConfigMap{
+		ObjectMeta: configMeta(lc),
+		Data: map[string]string{
+			"values": values,
+		},
+	}
+
 	// Check if config already exists.
-	logger.Info("grafana-agent-config - getting", "namespace", desiredGrafanaAgentConfig.GetNamespace(), "name", desiredGrafanaAgentConfig.GetName())
-	var currentGrafanaAgentConfig v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredGrafanaAgentConfig.GetName(), Namespace: desiredGrafanaAgentConfig.GetNamespace()}, &currentGrafanaAgentConfig)
+	logger.Info("grafana-agent-config - getting", "namespace", desiredEventsLoggerConfig.GetNamespace(), "name", desiredEventsLoggerConfig.GetName())
+	var currentEventsLoggerConfig v1.ConfigMap
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredEventsLoggerConfig.GetName(), Namespace: desiredEventsLoggerConfig.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config not found, creating")
-			err = r.Client.Create(ctx, &desiredGrafanaAgentConfig)
+			err = r.Client.Create(ctx, &desiredEventsLoggerConfig)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -84,13 +74,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	if !needUpdate(currentGrafanaAgentConfig, desiredGrafanaAgentConfig) {
+	if !needUpdate(currentEventsLoggerConfig, desiredEventsLoggerConfig) {
 		logger.Info("grafana-agent-config up to date")
 		return ctrl.Result{}, nil
 	}
 
 	logger.Info("grafana-agent-config - updating")
-	err = r.Client.Update(ctx, &desiredGrafanaAgentConfig)
+	err = r.Client.Update(ctx, &desiredEventsLoggerConfig)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -105,8 +95,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("grafana-agent-config delete")
 
 	// Get expected configmap.
-	var currentGrafanaAgentConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentGrafanaAgentConfig)
+	var currentEventsLoggerConfig v1.ConfigMap
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config not found, stop here")
@@ -116,8 +106,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Delete configmap.
-	logger.Info("grafana-agent-config deleting", "namespace", currentGrafanaAgentConfig.GetNamespace(), "name", currentGrafanaAgentConfig.GetName())
-	err = r.Client.Delete(ctx, &currentGrafanaAgentConfig)
+	logger.Info("grafana-agent-config deleting", "namespace", currentEventsLoggerConfig.GetNamespace(), "name", currentEventsLoggerConfig.GetName())
+	err = r.Client.Delete(ctx, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means

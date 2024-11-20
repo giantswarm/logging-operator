@@ -1,4 +1,4 @@
-package grafanaagentsecret
+package eventsloggersecret
 
 import (
 	"fmt"
