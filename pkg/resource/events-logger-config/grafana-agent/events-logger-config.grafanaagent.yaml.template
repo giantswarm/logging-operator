@@ -7,7 +7,7 @@ grafana-agent:
   agent:
     configMap:
       content: |-
-{{ .GrafanaAgentInnerConfig | indent 8 }}
+{{ .GrafanaAgentInnerConfig | nindent 8 }}
   controller:
     replicas: 1
     type: deployment

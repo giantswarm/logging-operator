@@ -8,7 +8,7 @@ alloy:
     configMap:
       create: true
       content: |-
-{{ .AlloyConfig | indent 8 }}
+{{ .AlloyConfig | nindent 8 }}
     envFrom:
     - secretRef:
         name: {{ .SecretName }}
