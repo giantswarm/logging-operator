@@ -40,7 +40,7 @@ const (
 	AlloyLogAgentAppName      = "alloy-logs"
 	AlloyLogAgentAppNamespace = "kube-system"
 
-	// Alloy app name and namespace when using ALloy as events logger.
+	// Alloy app name and namespace when using Alloy as events logger.
 	AlloyEventsLoggerAppName      = "alloy-events"
 	AlloyEventsLoggerAppNamespace = "kube-system"
 
