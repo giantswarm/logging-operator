@@ -4,15 +4,7 @@ logging {
 }
 
 loki.source.kubernetes_events "local" {
-	{{- if and (.IsWorkloadCluster) (gt (len (.ScrapedNamespaces | join ",")) 0 )}}
-	namespaces = [
-		{{- range .ScrapedNamespaces }}
-		"{{ . }}",
-		{{- end }}
-	]
-	{{- else }}
-	namespaces = []
-	{{- end }}
+	namespaces = {{ .ScrapedNamespaces }}
 	forward_to = [loki.write.default.receiver]
 }
 

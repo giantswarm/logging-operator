@@ -51,7 +51,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	desired := v1.ConfigMap{
+	desiredEventsLoggerConfig := v1.ConfigMap{
 		ObjectMeta: configMeta(lc),
 		Data: map[string]string{
 			"values": values,
@@ -59,13 +59,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Check if config already exists.
-	logger.Info("grafana-agent-config - getting", "namespace", desired.GetNamespace(), "name", desired.GetName())
-	var currentGrafanaAgentConfig v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desired.GetName(), Namespace: desired.GetNamespace()}, &currentGrafanaAgentConfig)
+	logger.Info("grafana-agent-config - getting", "namespace", desiredEventsLoggerConfig.GetNamespace(), "name", desiredEventsLoggerConfig.GetName())
+	var currentEventsLoggerConfig v1.ConfigMap
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredEventsLoggerConfig.GetName(), Namespace: desiredEventsLoggerConfig.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config not found, creating")
-			err = r.Client.Create(ctx, &desired)
+			err = r.Client.Create(ctx, &desiredEventsLoggerConfig)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -74,13 +74,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	if !needUpdate(currentGrafanaAgentConfig, desired) {
+	if !needUpdate(currentEventsLoggerConfig, desiredEventsLoggerConfig) {
 		logger.Info("grafana-agent-config up to date")
 		return ctrl.Result{}, nil
 	}
 
 	logger.Info("grafana-agent-config - updating")
-	err = r.Client.Update(ctx, &desired)
+	err = r.Client.Update(ctx, &desiredEventsLoggerConfig)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -95,8 +95,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("grafana-agent-config delete")
 
 	// Get expected configmap.
-	var currentGrafanaAgentConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentGrafanaAgentConfig)
+	var currentEventsLoggerConfig v1.ConfigMap
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("grafana-agent-config not found, stop here")
@@ -106,8 +106,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Delete configmap.
-	logger.Info("grafana-agent-config deleting", "namespace", currentGrafanaAgentConfig.GetNamespace(), "name", currentGrafanaAgentConfig.GetName())
-	err = r.Client.Delete(ctx, &currentGrafanaAgentConfig)
+	logger.Info("grafana-agent-config deleting", "namespace", currentEventsLoggerConfig.GetNamespace(), "name", currentEventsLoggerConfig.GetName())
+	err = r.Client.Delete(ctx, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means

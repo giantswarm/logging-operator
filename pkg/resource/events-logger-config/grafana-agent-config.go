@@ -76,15 +76,13 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		Installation       string
 		InsecureSkipVerify string
 		SecretName         string
-		ScrapedNamespaces  []string
-		IsWorkloadCluster  bool
+		ScrapedNamespaces  string
 	}{
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		SecretName:         fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentExtraSecretName()),
-		ScrapedNamespaces:  defaultWorkloadClusterNamespaces,
-		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
+		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultWorkloadClusterNamespaces),
 	}
 
 	err := grafanaAgentConfigTemplate.Execute(&values, data)

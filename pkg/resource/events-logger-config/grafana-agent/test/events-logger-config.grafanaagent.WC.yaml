@@ -13,10 +13,7 @@ grafana-agent:
         }
         
         loki.source.kubernetes_events "local" {
-        	namespaces = [
-        		"kube-system",
-        		"giantswarm",
-        	]
+        	namespaces = ["kube-system", "giantswarm"]
         	forward_to = [loki.write.default.receiver]
         }
         
