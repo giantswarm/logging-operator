@@ -35,7 +35,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 	// Enforce promtail as logging agent when observability-bundle version < 1.6.0 because this needs alloy 0.4.0.
 	if observabilityBundleVersion.LT(semver.MustParse("1.6.0")) && lc.GetLoggingAgent() == common.LoggingAgentAlloy {
 		logger := log.FromContext(ctx)
-		logger.Info("Logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
+		logger.Info("Alloy logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
 		lc.SetLoggingAgent(common.LoggingAgentPromtail)
 	}
 
@@ -62,7 +62,7 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 	// Enforce grafana-agent as events logger when observability-bundle version < 1.9.0 because this needs alloy 0.7.0.
 	if observabilityBundleVersion.LT(semver.MustParse("1.9.0")) && lc.GetKubeEventsLogger() == common.EventsLoggerAlloy {
 		logger := log.FromContext(ctx)
-		logger.Info("Events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
+		logger.Info("Alloy events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
 		lc.SetKubeEventsLogger(common.EventsLoggerGrafanaAgent)
 	}
 

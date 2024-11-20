@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
@@ -83,16 +84,9 @@ func ReadProxyIngressURL(ctx context.Context, lc loggedcluster.Interface, client
 }
 
 func FormatScrapedNamespaces(lc loggedcluster.Interface, namespaces []string) string {
-	scrapedNamespaces := "[]"
-
 	if IsWorkloadCluster(lc) {
-		for i, ns := range namespaces {
-			if i == len(namespaces)-1 {
-				scrapedNamespaces += fmt.Sprintf("\"%s\"", ns)
-			}
-			scrapedNamespaces += fmt.Sprintf("\"%s\", ", ns)
-		}
+		return fmt.Sprintf("[\"%s\"]", strings.Join(namespaces, "\", \""))
 	}
 
-	return scrapedNamespaces
+	return "[]"
 }

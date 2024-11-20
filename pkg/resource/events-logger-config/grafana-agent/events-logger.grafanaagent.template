@@ -9,7 +9,7 @@ loki.source.kubernetes_events "local" {
 }
 
 remote.kubernetes.secret "credentials" {
-	namespace = "{{ .SecretNamespace }}"
+	namespace = "kube-system"
 	name = "{{ .SecretName }}"
 }
 
