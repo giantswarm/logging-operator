@@ -21,7 +21,7 @@ grafana-agent:
         }
         
         remote.kubernetes.secret "credentials" {
-        	namespace = ""
+        	namespace = "kube-system"
         	name = "test-cluster-grafana-agent-secret"
         }
         

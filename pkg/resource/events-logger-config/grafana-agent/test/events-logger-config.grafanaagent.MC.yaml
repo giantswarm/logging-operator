@@ -18,7 +18,7 @@ grafana-agent:
         }
         
         remote.kubernetes.secret "credentials" {
-        	namespace = ""
+        	namespace = "kube-system"
         	name = "test-installation-grafana-agent-secret"
         }
         
