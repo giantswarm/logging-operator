@@ -12,12 +12,12 @@ alloy:
     configMap:
       create: true
       content: |-
-{{ .AlloyConfig | indent 8 }}
-{{- if .SupportPodLogs }}
+        {{- .AlloyConfig | nindent 8 }}
+    {{- if .SupportPodLogs }}
     clustering:
       enabled: true
       name: alloy-logs
-{{- end }}
+    {{- end }}
     extraEnv:
     - name: NODENAME
       valueFrom:

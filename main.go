@@ -42,8 +42,8 @@ import (
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
-	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-config"
-	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/grafana-agent-secret"
+	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
+	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
@@ -172,11 +172,13 @@ func main() {
 	}
 
 	eventsLoggerConfig := eventsloggerconfig.Reconciler{
-		Client: mgr.GetClient(),
+		Client:                           mgr.GetClient(),
+		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
 	loggedcluster.O.LoggingAgent = loggingAgent
+	loggedcluster.O.KubeEventsLogger = eventsLogger
 	loggedcluster.O.InstallationName = installationName
 	loggedcluster.O.InsecureCA = insecureCA
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
