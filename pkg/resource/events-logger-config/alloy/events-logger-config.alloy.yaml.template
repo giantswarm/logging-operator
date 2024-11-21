@@ -26,3 +26,5 @@ alloy:
   controller:
     type: deployment
     replicas: 1
+  crds:
+    create: false
