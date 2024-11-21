@@ -7,7 +7,6 @@ grafana-agent:
   agent:
     configMap:
       content: |-
-        
         logging {
         	level  = "info"
         	format = "logfmt"
