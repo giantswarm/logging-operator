@@ -72,8 +72,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("events-logger-config delete")
 
 	// Get expected configmap.
-	var currentAlloyEventsConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentAlloyEventsConfig)
+	var currentEventsLoggerConfig v1.ConfigMap
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-config not found, stop here")
@@ -83,8 +83,8 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Delete configmap.
-	logger.Info("events-logger-config deleting", "namespace", currentAlloyEventsConfig.GetNamespace(), "name", currentAlloyEventsConfig.GetName())
-	err = r.Client.Delete(ctx, &currentAlloyEventsConfig)
+	logger.Info("events-logger-config deleting", "namespace", currentEventsLoggerConfig.GetNamespace(), "name", currentEventsLoggerConfig.GetName())
+	err = r.Client.Delete(ctx, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means
