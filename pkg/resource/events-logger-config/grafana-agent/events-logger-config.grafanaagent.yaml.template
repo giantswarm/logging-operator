@@ -7,7 +7,7 @@ grafana-agent:
   agent:
     configMap:
       content: |-
-        {{ .GrafanaAgentInnerConfig | nindent 8 }}
+        {{- .GrafanaAgentInnerConfig | nindent 8 }}
     extraArgs:
     - --disable-reporting
   controller:
