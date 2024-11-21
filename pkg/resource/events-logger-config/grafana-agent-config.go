@@ -60,14 +60,12 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultNamespac
 		Installation       string
 		InsecureSkipVerify string
 		SecretName         string
-		SecretNamespace    string
 		ScrapedNamespaces  string
 	}{
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
-		SecretNamespace:    lc.GetAppsNamespace(),
 		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultNamespaces),
 	}
 
