@@ -44,6 +44,11 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	// If the observability-bundle version is too old, we don't need to do anything.
+	if observabilityBundleVersion.LT(semver.MustParse("0.9.0")) {
+		return ctrl.Result{}, nil
+	}
+
 	// Get desired configmap to enable logging agents and events loggers.
 	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(ctx, lc, observabilityBundleVersion)
 	if err != nil {
@@ -103,6 +108,11 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	observabilityBundleVersion, err := semver.Parse(currentApp.Spec.Version)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// If the observability-bundle version is too old, we don't need to do anything.
+	if observabilityBundleVersion.LT(semver.MustParse("0.9.0")) {
+		return ctrl.Result{}, nil
 	}
 
 	// Get expected configmap.
