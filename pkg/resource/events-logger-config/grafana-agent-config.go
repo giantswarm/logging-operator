@@ -25,15 +25,15 @@ var (
 
 func init() {
 	grafanaAgentTemplate = template.Must(template.New("events-logger.grafanaagent").Funcs(sprig.FuncMap()).Parse(grafanaAgent))
-	grafanaAgentConfigTemplate = template.Must(template.New("events-logger.grafanaagent.yaml").Funcs(sprig.FuncMap()).Parse(grafanaAgentConfig))
+	grafanaAgentConfigTemplate = template.Must(template.New("events-logger-config.grafanaagent.yaml").Funcs(sprig.FuncMap()).Parse(grafanaAgentConfig))
 }
 
-// GenerateGrafanaAgentConfig returns a configmap for
+// generateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
+func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
-	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, defaultNamespaces)
+	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, defaultWorkloadClusterNamespaces)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultNamespaces []
 	return values.String(), nil
 }
 
-func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
+func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -66,7 +66,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultNamespac
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
-		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultNamespaces),
+		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultWorkloadClusterNamespaces),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)
