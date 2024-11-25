@@ -64,18 +64,13 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 		return nil, errors.WithStack(err)
 	}
 
-	tenant := clusterName
-	if lc.IsCAPI() {
-		tenant = common.DefaultWriteTenant
-	}
-
 	values := values{
 		Promtail: promtail{
 			Config: promtailConfig{
 				Clients: []promtailConfigClient{
 					{
 						URL:      fmt.Sprintf(common.LokiURLFormat, lokiURL),
-						TenantID: tenant,
+						TenantID: lc.GetTenant(),
 						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,
 							Password: writePassword,
