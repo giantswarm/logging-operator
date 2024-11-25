@@ -59,30 +59,33 @@ func GenerateObservabilityBundleConfigMap(ctx context.Context, lc loggedcluster.
 		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
 	}
 
-	// Enforce grafana-agent as events logger when observability-bundle version < 1.9.0 because this needs alloy 0.7.0.
-	if observabilityBundleVersion.LT(semver.MustParse("1.9.0")) && lc.GetKubeEventsLogger() == common.EventsLoggerAlloy {
-		logger := log.FromContext(ctx)
-		logger.Info("Alloy events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
-		lc.SetKubeEventsLogger(common.EventsLoggerGrafanaAgent)
-	}
+	// If observability-bundle version >= 0.9.0, events loggers can be enabled.
+	if observabilityBundleVersion.GT(semver.MustParse("0.9.0")) {
+		// Enforce grafana-agent as events logger when observability-bundle version < 1.9.0 because this needs alloy 0.7.0.
+		if observabilityBundleVersion.LT(semver.MustParse("1.9.0")) && lc.GetKubeEventsLogger() == common.EventsLoggerAlloy {
+			logger := log.FromContext(ctx)
+			logger.Info("Alloy events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
+			lc.SetKubeEventsLogger(common.EventsLoggerGrafanaAgent)
+		}
 
-	switch lc.GetKubeEventsLogger() {
-	case common.EventsLoggerGrafanaAgent:
-		appsToEnable["grafanaAgent"] = app{
-			Enabled: true,
+		switch lc.GetKubeEventsLogger() {
+		case common.EventsLoggerGrafanaAgent:
+			appsToEnable["grafanaAgent"] = app{
+				Enabled: true,
+			}
+			appsToEnable["alloyEvents"] = app{
+				Enabled: false,
+			}
+		case common.EventsLoggerAlloy:
+			appsToEnable["grafanaAgent"] = app{
+				Enabled: false,
+			}
+			appsToEnable["alloyEvents"] = app{
+				Enabled: true,
+			}
+		default:
+			return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", lc.GetKubeEventsLogger())
 		}
-		appsToEnable["alloyEvents"] = app{
-			Enabled: false,
-		}
-	case common.EventsLoggerAlloy:
-		appsToEnable["grafanaAgent"] = app{
-			Enabled: false,
-		}
-		appsToEnable["alloyEvents"] = app{
-			Enabled: true,
-		}
-	default:
-		return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", lc.GetKubeEventsLogger())
 	}
 
 	values := Values{
