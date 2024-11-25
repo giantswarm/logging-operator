@@ -64,7 +64,10 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 		return nil, errors.WithStack(err)
 	}
 
-	installationName := lc.GetInstallationName()
+	tenant := clusterName
+	if lc.IsCAPI() {
+		tenant = common.DefaultWriteTenant
+	}
 
 	values := values{
 		Promtail: promtail{
@@ -72,7 +75,7 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 				Clients: []promtailConfigClient{
 					{
 						URL:      fmt.Sprintf(common.LokiURLFormat, lokiURL),
-						TenantID: common.DefaultWriteTenant,
+						TenantID: tenant,
 						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,
 							Password: writePassword,
@@ -81,7 +84,7 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 							MaxPeriod: common.MaxBackoffPeriod,
 						},
 						ExternalLabels: promtailConfigClientExternalLabels{
-							Installation: installationName,
+							Installation: lc.GetInstallationName(),
 							ClusterID:    lc.GetClusterName(),
 						},
 						TLSConfig: promtailConfigClientTLSConfig{
