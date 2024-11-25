@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix logging-config unit tests
 
+### Removed
+
+- Remove Loki datasource generation on CAPI.
+
 ## [0.15.2] - 2024-11-13
 
 ### Added

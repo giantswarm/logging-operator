@@ -28,6 +28,10 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafanadatasource create")
 
+	if lc.IsCAPI() {
+		return r.ReconcileDelete(ctx, lc)
+	}
+
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
@@ -76,7 +80,35 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 // ReconcileDelete - Not much to do here when a cluster is deleted
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("grafanadatasource delete")
+	logger.Info("delete grafana datasource")
+
+	datasourceSecret := v1.Secret{
+		ObjectMeta: datasourceSecretMeta(lc),
+	}
+
+	// Get expected secret.
+	err := r.Client.Get(ctx, types.NamespacedName{Name: datasourceSecret.GetName(), Namespace: datasourceSecret.GetNamespace()}, &datasourceSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("grafana datasource secret not found, stop here")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	// Delete secret.
+	logger.Info("deleting grafana datasource secret", "namespace", datasourceSecret.GetNamespace(), "name", datasourceSecret.GetName())
+	err = r.Client.Delete(ctx, &datasourceSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			// Do no throw error in case it was not found, as this means
+			// it was already deleted.
+			logger.Info("grafana datasource secret already deleted")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	logger.Info("grafana datasource secret deleted")
 
 	return ctrl.Result{}, nil
 }
