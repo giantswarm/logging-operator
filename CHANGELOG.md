@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add kubernetes events logging in Alloy.
 - Add support for Private CAs in alloy logs.
 - Add KubeEventsLogger option and related methods in loggedCLuster package.
 - Add `events-logger` flag in the operator.
 - Add toggle for `events-logger` in observability-bundle configmap.
+- Add tests for `alloy-events` in events-logger-config.
 
 ### Changed
 

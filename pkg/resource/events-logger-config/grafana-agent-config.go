@@ -7,14 +7,10 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-)
-
-const (
-	grafanaAgentConfigName = "grafana-agent-config"
+	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 )
 
 var (
@@ -30,18 +26,6 @@ var (
 func init() {
 	grafanaAgentTemplate = template.Must(template.New("events-logger.grafanaagent").Funcs(sprig.FuncMap()).Parse(grafanaAgent))
 	grafanaAgentConfigTemplate = template.Must(template.New("events-logger-config.grafanaagent.yaml").Funcs(sprig.FuncMap()).Parse(grafanaAgentConfig))
-}
-
-// configMeta returns metadata for the grafana-agent-config
-func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
-	metadata := metav1.ObjectMeta{
-		Name:      getGrafanaAgentConfigName(lc),
-		Namespace: lc.GetAppsNamespace(),
-		Labels:    map[string]string{},
-	}
-
-	common.AddCommonLabels(metadata.Labels)
-	return metadata
 }
 
 // generateGrafanaAgentConfig returns a configmap for
@@ -60,7 +44,7 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultWorkloadClust
 		GrafanaAgentInnerConfig: grafanaAgentInnerConfig,
 	}
 
-	err = grafanaAgentTemplate.Execute(&values, data)
+	err = grafanaAgentConfigTemplate.Execute(&values, data)
 	if err != nil {
 		return "", err
 	}
@@ -81,18 +65,14 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
-		SecretName:         fmt.Sprintf("%s-%s", lc.GetClusterName(), common.GrafanaAgentExtraSecretName()),
+		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
 		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultWorkloadClusterNamespaces),
 	}
 
-	err := grafanaAgentConfigTemplate.Execute(&values, data)
+	err := grafanaAgentTemplate.Execute(&values, data)
 	if err != nil {
 		return "", err
 	}
 
 	return values.String(), nil
-}
-
-func getGrafanaAgentConfigName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentConfigName)
 }

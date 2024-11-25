@@ -167,13 +167,13 @@ func main() {
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
-	eventsLoggerSecret := eventsloggersecret.Reconciler{
-		Client: mgr.GetClient(),
-	}
-
 	eventsLoggerConfig := eventsloggerconfig.Reconciler{
 		Client:                           mgr.GetClient(),
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
+	}
+
+	eventsLoggerSecret := eventsloggersecret.Reconciler{
+		Client: mgr.GetClient(),
 	}
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
