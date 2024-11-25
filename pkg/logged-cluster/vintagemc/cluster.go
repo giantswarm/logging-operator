@@ -66,6 +66,14 @@ func (o Object) GetObject() client.Object {
 	return o.Object
 }
 
+func (o Object) GetTenant() string {
+	return o.GetClusterName()
+}
+
+func (o Object) IsCAPI() bool {
+	return false
+}
+
 // On vintage MC, there's no support for extraconfig so we should use standard user values
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-user-values"

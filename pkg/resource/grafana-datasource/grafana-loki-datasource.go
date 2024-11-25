@@ -45,7 +45,7 @@ type secureJsonData struct {
 }
 
 // DatasourceSecretMeta returns metadata for the observability bundle extra values configmap.
-func datasourceSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func datasourceSecretMeta() metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      datasourceSecretName,
 		Namespace: datasourceSecretNamespace,
@@ -96,7 +96,7 @@ func GenerateDatasourceSecret(lc loggedcluster.Interface, credentialsSecret *v1.
 	}
 
 	secret := v1.Secret{
-		ObjectMeta: datasourceSecretMeta(lc),
+		ObjectMeta: datasourceSecretMeta(),
 		Data: map[string][]byte{
 			datasourceFileName: []byte(v),
 		},
