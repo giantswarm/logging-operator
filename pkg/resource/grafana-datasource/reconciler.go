@@ -77,7 +77,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	return ctrl.Result{}, nil
 }
 
-// ReconcileDelete - Not much to do here when a cluster is deleted
+// ReconcileDelete - Delete the datasource
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("delete grafana datasource")
@@ -86,19 +86,9 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 		ObjectMeta: datasourceSecretMeta(lc),
 	}
 
-	// Get expected secret.
-	err := r.Client.Get(ctx, types.NamespacedName{Name: datasourceSecret.GetName(), Namespace: datasourceSecret.GetNamespace()}, &datasourceSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana datasource secret not found, stop here")
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	// Delete secret.
 	logger.Info("deleting grafana datasource secret", "namespace", datasourceSecret.GetNamespace(), "name", datasourceSecret.GetName())
-	err = r.Client.Delete(ctx, &datasourceSecret)
+	err := r.Client.Delete(ctx, &datasourceSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means
