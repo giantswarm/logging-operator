@@ -13,10 +13,6 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) GetTenant() string {
-	return o.GetClusterName()
-}
-
 func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
 }
@@ -68,6 +64,14 @@ func (o Object) GetEnableLoggingFlag() bool {
 
 func (o Object) GetObject() client.Object {
 	return o.Object
+}
+
+func (o Object) GetTenant() string {
+	return o.GetClusterName()
+}
+
+func (o Object) IsCAPI() bool {
+	return false
 }
 
 // On vintage MC, there's no support for extraconfig so we should use standard user values

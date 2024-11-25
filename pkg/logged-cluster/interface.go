@@ -21,6 +21,7 @@ type Interface interface {
 	GetEnableLoggingFlag() bool
 	GetClusterName() string
 	GetInstallationName() string
+	IsCAPI() bool
 	AppConfigName(app string) string
 	ObservabilityBundleConfigLabelName(config string) string
 	GetObject() client.Object

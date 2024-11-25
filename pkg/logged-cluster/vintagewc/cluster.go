@@ -44,10 +44,6 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
-func (o Object) GetTenant() string {
-	return o.GetClusterName()
-}
-
 func (o Object) GetLoggingAgent() string {
 	return o.Options.LoggingAgent
 }
@@ -98,6 +94,14 @@ func (o Object) GetEnableLoggingFlag() bool {
 
 func (o Object) GetObject() client.Object {
 	return o.Object
+}
+
+func (o Object) GetTenant() string {
+	return o.GetClusterName()
+}
+
+func (o Object) IsCAPI() bool {
+	return false
 }
 
 // on vintage WC, use extraconfig
