@@ -27,7 +27,7 @@ type userCredentials struct {
 }
 
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
-func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func LoggingCredentialsSecretMeta() metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      LoggingCredentialsName,
 		Namespace: LoggingCredentialsNamespace,
@@ -61,7 +61,7 @@ func genPassword() (string, error) {
 // the observabilitybundle application to enable logging.
 func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secret {
 	secret := v1.Secret{
-		ObjectMeta: LoggingCredentialsSecretMeta(lc),
+		ObjectMeta: LoggingCredentialsSecretMeta(),
 		Data:       map[string][]byte{},
 	}
 

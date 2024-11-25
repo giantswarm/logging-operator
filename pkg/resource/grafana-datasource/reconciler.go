@@ -35,7 +35,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
+	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta().Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta().Namespace},
 		&loggingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
@@ -84,7 +84,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("delete grafana datasource")
 
 	datasourceSecret := v1.Secret{
-		ObjectMeta: datasourceSecretMeta(lc),
+		ObjectMeta: datasourceSecretMeta(),
 	}
 
 	// Delete secret.
