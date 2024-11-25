@@ -19,7 +19,7 @@ grafana-agent:
         
         remote.kubernetes.secret "credentials" {
         	namespace = "kube-system"
-        	name = "test-cluster-events-logger-secret"
+        	name = "test-cluster-grafana-agent-secret"
         }
         
         loki.write "default" {

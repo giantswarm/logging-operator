@@ -54,6 +54,7 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				},
 				Options: loggedcluster.Options{
 					InstallationName: tc.installationName,
+					KubeEventsLogger: "grafana-agent",
 				},
 			}
 
