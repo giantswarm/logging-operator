@@ -44,17 +44,12 @@ func GenerateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 		return v1.Secret{}, errors.WithStack(err)
 	}
 
-	tenant := clusterName
-	if lc.IsCAPI() {
-		tenant = common.DefaultWriteTenant
-	}
-
 	values := values{
 		ExtraSecret: extraSecret{
 			Name: fmt.Sprintf("%s-%s", clusterName, common.GrafanaAgentExtraSecretName()),
 			Data: map[string]string{
 				"logging-url":       fmt.Sprintf(common.LokiURLFormat, lokiURL),
-				"logging-tenant-id": tenant,
+				"logging-tenant-id": lc.GetTenant(),
 				"logging-username":  writeUser,
 				"logging-password":  writePassword,
 			},

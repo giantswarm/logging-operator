@@ -44,8 +44,8 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
-func (o Object) IsCAPI() bool {
-	return false
+func (o Object) GetTenant() string {
+	return o.GetClusterName()
 }
 
 func (o Object) GetLoggingAgent() string {

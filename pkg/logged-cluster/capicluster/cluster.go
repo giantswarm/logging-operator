@@ -86,8 +86,8 @@ func (o Object) GetObject() client.Object {
 	return o.Object
 }
 
-func (o Object) IsCAPI() bool {
-	return true
+func (o Object) GetTenant() string {
+	return common.DefaultWriteTenant
 }
 
 // On capi clusters, use an extraconfig
