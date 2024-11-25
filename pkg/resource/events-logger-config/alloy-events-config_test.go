@@ -2,7 +2,6 @@ package eventsloggerconfig
 
 import (
 	_ "embed"
-	"flag"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,10 +13,6 @@ import (
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
-)
-
-var (
-	isUpdate = flag.Bool("update", false, "update .golden files")
 )
 
 func TestGenerateAlloyEventsConfig(t *testing.T) {
@@ -66,7 +61,7 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 			if string(golden) != config {
 				t.Logf("Generated config differs from %s, diff:\n%s", tc.goldenFile, cmp.Diff(string(golden), config))
 				t.Fail()
-				if *isUpdate {
+				if *update {
 					//nolint:gosec
 					if err := os.WriteFile(tc.goldenFile, []byte(config), 0644); err != nil {
 						t.Fatalf("Failed to update golden file: %v", err)
