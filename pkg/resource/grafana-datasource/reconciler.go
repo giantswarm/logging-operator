@@ -28,6 +28,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("grafanadatasource create")
 
+	// We delete the datasource only in CAPI as the datasource is now managed by the observability-operator
 	if lc.IsCAPI() {
 		return r.ReconcileDelete(ctx, lc)
 	}
