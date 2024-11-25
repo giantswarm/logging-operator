@@ -44,10 +44,6 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
-func (o Object) GetTenant() string {
-	return o.GetClusterName()
-}
-
 func (o Object) GetLoggingAgent() string {
 	return o.Options.LoggingAgent
 }

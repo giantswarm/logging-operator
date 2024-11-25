@@ -13,10 +13,6 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
-func (o Object) GetTenant() string {
-	return o.GetClusterName()
-}
-
 func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
 }
