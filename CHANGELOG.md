@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.16.0] - 2024-11-26
 
+## [0.16.0] - 2024-11-26
+
 ### Added
 
 - Add kubernetes events logging in Alloy.
