@@ -3,10 +3,7 @@ package eventsloggersecret
 import (
 	"context"
 	"reflect"
-	"time"
 
-	"github.com/blang/semver"
-	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -22,49 +19,20 @@ import (
 )
 
 // Reconciler implements a reconciler.Interface to handle
-// grafana-agent secret: extra secret which stores logging write credentials
+// Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
 type Reconciler struct {
 	client.Client
 }
 
-// ReconcileCreate ensures grafana-agent secret is created with the right credentials
+// ReconcileCreate ensures events-logger-secret is created with the right credentials
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("grafana-agent-secret create")
-
-	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-secret - observability bundle app not found, requeueing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// The grafana agent was added only for bundle version 0.9.0 and above (cf. https://github.com/giantswarm/observability-bundle/compare/v0.8.9...v0.9.0)
-	if observabilityBundleVersion.LT(semver.MustParse("0.9.0")) {
-		return ctrl.Result{}, nil
-	}
-
-	// Check existence of grafana-agent app
-	var currentApp appv1.App
-	appMeta := common.ObservabilityBundleAppMeta(lc)
-	err = r.Client.Get(ctx, types.NamespacedName{Name: lc.AppConfigName("grafana-agent"), Namespace: appMeta.GetNamespace()}, &currentApp)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-secret - app not found, requeuing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
+	logger.Info("events-logger-secret create")
 
 	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
-		&loggingCredentialsSecret)
+	var eventsLoggerCredentialsSecret v1.Secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
+		&eventsLoggerCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -76,20 +44,20 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	desiredGrafanaAgentSecret, err := GenerateGrafanaAgentSecret(lc, &loggingCredentialsSecret, lokiURL)
+	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(lc, &eventsLoggerCredentialsSecret, lokiURL)
 	if err != nil {
-		logger.Info("grafana-agent-secret - failed generating auth config!", "error", err)
+		logger.Error(err, "failed generating events logger secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Check if secret already exists.
-	logger.Info("grafana-agent-secret - getting", "namespace", desiredGrafanaAgentSecret.GetNamespace(), "name", desiredGrafanaAgentSecret.GetName())
-	var currentGrafanaAgentSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredGrafanaAgentSecret.GetName(), Namespace: desiredGrafanaAgentSecret.GetNamespace()}, &currentGrafanaAgentSecret)
+	logger.Info("events-logger-secret - getting", "namespace", desiredEventsLoggerSecret.GetNamespace(), "name", desiredEventsLoggerSecret.GetName())
+	var currentEventsLoggerSecret v1.Secret
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredEventsLoggerSecret.GetName(), Namespace: desiredEventsLoggerSecret.GetNamespace()}, &currentEventsLoggerSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-secret not found, creating")
-			err = r.Client.Create(ctx, &desiredGrafanaAgentSecret)
+			logger.Info("events-logger-secret not found, creating")
+			err = r.Client.Create(ctx, &desiredEventsLoggerSecret)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
@@ -98,50 +66,50 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		}
 	}
 
-	if !needUpdate(currentGrafanaAgentSecret, desiredGrafanaAgentSecret) {
-		logger.Info("grafana-agent-secret up to date")
+	if !needUpdate(currentEventsLoggerSecret, desiredEventsLoggerSecret) {
+		logger.Info("events-logger-secret up to date")
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("grafana-agent-secret - updating")
-	err = r.Client.Update(ctx, &desiredGrafanaAgentSecret)
+	logger.Info("updating events-logger-secret")
+	err = r.Client.Update(ctx, &desiredEventsLoggerSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info("grafana-agent-secret - done")
+	logger.Info("updated events-logger-secret")
 	return ctrl.Result{}, nil
 }
 
-// ReconcileDelete ensure grafana-agent-secret is deleted for the given cluster.
+// ReconcileDelete - Not much to do here when a cluster is deleted
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("grafana-agent-secret delete")
+	logger.Info("events-logger-secret delete")
 
 	// Get expected secret.
-	var currentGrafanaAgentSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getGrafanaAgentSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentGrafanaAgentSecret)
+	var currentEventsLoggerSecret v1.Secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: GetEventsLoggerSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("grafana-agent-secret not found, stop here")
+			logger.Info("events-logger-secret not found, stop here")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Delete secret.
-	logger.Info("grafana-agent-secret deleting", "namespace", currentGrafanaAgentSecret.GetNamespace(), "name", currentGrafanaAgentSecret.GetName())
-	err = r.Client.Delete(ctx, &currentGrafanaAgentSecret)
+	logger.Info("events-logger-secret deleting", "namespace", currentEventsLoggerSecret.GetNamespace(), "name", currentEventsLoggerSecret.GetName())
+	err = r.Client.Delete(ctx, &currentEventsLoggerSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means
 			// it was already deleted.
-			logger.Info("grafana-agent-secret already deleted")
+			logger.Info("events-logger-secret already deleted")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
 	}
-	logger.Info("grafana-agent-secret deleted")
+	logger.Info("events-logger-secret deleted")
 
 	return ctrl.Result{}, nil
 }

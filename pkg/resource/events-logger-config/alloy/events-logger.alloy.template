@@ -1,0 +1,32 @@
+loki.source.kubernetes_events "local" {
+	namespaces = {{ .ScrapedNamespaces }}
+	forward_to = [loki.write.default.receiver]
+}
+
+// Loki target configuration
+loki.write "default" {
+	endpoint {
+		url                = env("{{ .LokiURLEnvVarName }}")
+		max_backoff_period = "{{ .MaxBackoffPeriod }}"
+		tenant_id          = env("{{ .TenantIDEnvVarName }}")
+
+		basic_auth {
+			username = env("{{ .BasicAuthUsernameEnvVarName }}")
+			password = env("{{ .BasicAuthPasswordEnvVarName }}")
+		}
+
+		tls_config {
+			insecure_skip_verify = {{ .InsecureSkipVerify }}
+		}
+	}
+	external_labels = {
+		cluster_id   = "{{ .ClusterID }}",
+		installation = "{{ .Installation }}",
+		scrape_job = "kubernetes-events",
+	}
+}
+
+logging {
+	level  = "info"
+	format = "logfmt"
+}

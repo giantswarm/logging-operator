@@ -42,6 +42,10 @@ const (
 	AlloyLogAgentAppName      = "alloy-logs"
 	AlloyLogAgentAppNamespace = "kube-system"
 
+	// Alloy app name and namespace when using Alloy as events logger.
+	AlloyEventsLoggerAppName      = "alloy-events"
+	AlloyEventsLoggerAppNamespace = "kube-system"
+
 	MaxBackoffPeriod = "10m"
 	LokiURLFormat    = "https://%s/loki/api/v1/push"
 )

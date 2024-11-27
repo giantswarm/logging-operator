@@ -2,7 +2,6 @@ package eventsloggerconfig
 
 import (
 	_ "embed"
-	"flag"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,11 +15,7 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
 
-var (
-	update = flag.Bool("update", false, "update .golden files")
-)
-
-func TestGenerateGrafanaAgentConfig(t *testing.T) {
+func TestGenerateAlloyEventsConfig(t *testing.T) {
 	testCases := []struct {
 		goldenFile        string
 		defaultNamespaces []string
@@ -28,12 +23,12 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 		clusterName       string
 	}{
 		{
-			goldenFile:       "grafana-agent/test/events-logger-config.grafanaagent.MC.yaml",
+			goldenFile:       "alloy/test/events-logger-config.alloy.MC.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-installation",
 		},
 		{
-			goldenFile:       "grafana-agent/test/events-logger-config.grafanaagent.WC.yaml",
+			goldenFile:       "alloy/test/events-logger-config.alloy.WC.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-cluster",
 		},
@@ -54,13 +49,13 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				},
 				Options: loggedcluster.Options{
 					InstallationName: tc.installationName,
-					KubeEventsLogger: "grafana-agent",
+					KubeEventsLogger: "alloy",
 				},
 			}
 
-			config, err := generateGrafanaAgentConfig(loggedCluster, []string{"kube-system", "giantswarm"})
+			config, err := generateAlloyEventsConfig(loggedCluster, []string{"kube-system", "giantswarm"})
 			if err != nil {
-				t.Fatalf("Failed to generate grafana-agent config: %v", err)
+				t.Fatalf("Failed to generate alloy config: %v", err)
 			}
 
 			if string(golden) != config {
