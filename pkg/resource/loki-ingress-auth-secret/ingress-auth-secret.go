@@ -51,8 +51,8 @@ func listWriteUsers(credentialsSecret *v1.Secret) []string {
 }
 
 // generateLokiIngressAuthSecret returns a secret for the loki ingress auth
-func generateLokiIngressAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (map[string][]byte, error) {
-	users := make(map[string][]byte)
+func generateLokiIngressAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (map[string]string, error) {
+	users := make(map[string]string)
 	// Loop on write users
 	for _, writeUser := range listWriteUsers(credentialsSecret) {
 		writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, writeUser)
@@ -63,7 +63,7 @@ func generateLokiIngressAuthSecret(lc loggedcluster.Interface, credentialsSecret
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		users[writeUser] = password
+		users[writeUser] = string(password)
 	}
 
 	return users, nil

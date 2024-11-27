@@ -83,10 +83,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("deleting multi-tenant-proxy auth secret")
 
-	secret := v1.Secret{
-		ObjectMeta: loggingcredentials.LoggingCredentialsSecretMeta(),
-	}
-
+	secret := secret()
 	// Delete secret.
 	err := r.Client.Delete(ctx, &secret)
 	if err != nil {

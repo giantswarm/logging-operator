@@ -64,7 +64,7 @@ func (r *Reconciler) createOrUpdateSecret(ctx context.Context, lc loggedcluster.
 			logger.Error(err, "failed to generate loki ingress auth secret")
 			return errors.WithStack(err)
 		}
-		secret.Data = data
+		secret.StringData = data
 
 		return nil
 	})
