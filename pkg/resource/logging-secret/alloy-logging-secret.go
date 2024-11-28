@@ -15,13 +15,6 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
-const (
-	AlloyLokiURLEnvVarName           = "LOKI_URL"
-	AlloyTenantIDEnvVarName          = "TENANT_ID"
-	AlloyBasicAuthUsernameEnvVarName = "BASIC_AUTH_USERNAME"
-	AlloyBasicAuthPasswordEnvVarName = "BASIC_AUTH_PASSWORD" // #nosec G101
-)
-
 var (
 	//go:embed alloy/logging-secret.yaml.template
 	alloySecret         string
@@ -44,10 +37,10 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 		ExtraSecretEnv map[string]string
 	}{
 		ExtraSecretEnv: map[string]string{
-			AlloyLokiURLEnvVarName:           fmt.Sprintf(common.LokiURLFormat, lokiURL),
-			AlloyTenantIDEnvVarName:          lc.GetTenant(),
-			AlloyBasicAuthUsernameEnvVarName: clusterName,
-			AlloyBasicAuthPasswordEnvVarName: writePassword,
+			"logging-url":       fmt.Sprintf(common.LokiURLFormat, lokiURL),
+			"logging-tenant-id": lc.GetTenant(),
+			"logging-username":  clusterName,
+			"logging-password":  writePassword,
 		},
 	}
 

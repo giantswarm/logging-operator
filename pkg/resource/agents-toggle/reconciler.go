@@ -124,9 +124,9 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 			// Do no throw error in case it was not found, as this means
 			// it was already deleted.
 			logger.Info("agents toggle already deleted")
-		} else if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+			return ctrl.Result{}, nil
 		}
+		return ctrl.Result{}, errors.WithStack(err)
 	} else {
 		logger.Info("agents toggle deleted")
 	}

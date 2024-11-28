@@ -10,7 +10,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
 
 var (
@@ -45,14 +44,12 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		AlloyConfig                      string
 		DefaultWorkloadClusterNamespaces []string
 		IsWorkloadCluster                bool
-		SecretName                       string
 		SupportPodLogs                   bool
 		SupportVPA                       bool
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
-		SecretName:                       common.AlloyLogAgentAppName,
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
@@ -73,28 +70,22 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 	clusterName := lc.GetClusterName()
 
 	data := struct {
-		ClusterID                   string
-		Installation                string
-		MaxBackoffPeriod            string
-		IsWorkloadCluster           bool
-		LokiURLEnvVarName           string
-		TenantIDEnvVarName          string
-		BasicAuthUsernameEnvVarName string
-		BasicAuthPasswordEnvVarName string
-		SupportPodLogs              bool
-		InsecureSkipVerify          bool
+		ClusterID          string
+		Installation       string
+		MaxBackoffPeriod   string
+		IsWorkloadCluster  bool
+		SupportPodLogs     bool
+		InsecureSkipVerify bool
+		SecretName         string
 	}{
-		ClusterID:                   clusterName,
-		Installation:                lc.GetInstallationName(),
-		MaxBackoffPeriod:            common.MaxBackoffPeriod,
-		IsWorkloadCluster:           common.IsWorkloadCluster(lc),
-		LokiURLEnvVarName:           loggingsecret.AlloyLokiURLEnvVarName,
-		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
-		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
-		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
+		ClusterID:         clusterName,
+		Installation:      lc.GetInstallationName(),
+		MaxBackoffPeriod:  common.MaxBackoffPeriod,
+		IsWorkloadCluster: common.IsWorkloadCluster(lc),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
 		InsecureSkipVerify: lc.IsInsecureCA(),
+		SecretName:         common.AlloyLogAgentAppName,
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)
