@@ -89,6 +89,9 @@ func ReadProxyIngressURL(ctx context.Context, lc loggedcluster.Interface, client
 	}
 
 	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
+	if len(lokiIngress.Spec.Rules) <= 0 {
+		return "", fmt.Errorf("Loki ingress Host not found")
+	}
 	return lokiIngress.Spec.Rules[0].Host, nil
 }
 
