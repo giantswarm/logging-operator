@@ -51,6 +51,11 @@ const (
 
 	MaxBackoffPeriod = "10m"
 	LokiURLFormat    = "https://%s/loki/api/v1/push"
+
+	LoggingURL      = "logging-url"
+	LoggingTenantID = "logging-tenant-id"
+	LoggingUsername = "logging-username"
+	LoggingPassword = "logging-password"
 )
 
 func GrafanaAgentExtraSecretName() string {
