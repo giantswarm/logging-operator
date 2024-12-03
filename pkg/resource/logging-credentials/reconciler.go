@@ -25,13 +25,13 @@ type Reconciler struct {
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	logger.Info("loggingcredentials checking secret", "namespace", LoggingCredentialsSecretMeta(lc).Namespace, "name", LoggingCredentialsSecretMeta(lc).Name)
+	logger.Info("loggingcredentials checking secret", "namespace", LoggingCredentialsSecretMeta().Namespace, "name", LoggingCredentialsSecretMeta().Name)
 
 	// Start with some empty secret
 	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)
 
 	// Retrieve existing secret if it exists
-	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace}, loggingCredentialsSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta().Name, Namespace: LoggingCredentialsSecretMeta().Namespace}, loggingCredentialsSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingcredentials secret not found, initializing one")
@@ -47,9 +47,9 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Check if metadata has been updated
-	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta(lc).Labels) {
+	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta().Labels) {
 		logger.Info("loggingCredentials - metatada update required")
-		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta(lc)
+		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta()
 		secretUpdated = true
 	}
 
@@ -77,13 +77,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	logger.Info("loggingcredentials secret delete", "namespace", LoggingCredentialsSecretMeta(lc).Namespace, "name", LoggingCredentialsSecretMeta(lc).Name)
+	logger.Info("loggingcredentials secret delete", "namespace", LoggingCredentialsSecretMeta().Namespace, "name", LoggingCredentialsSecretMeta().Name)
 
 	// Start with some empty secret
 	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)
 
 	// Retrieve existing secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta(lc).Name, Namespace: LoggingCredentialsSecretMeta(lc).Namespace}, loggingCredentialsSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta().Name, Namespace: LoggingCredentialsSecretMeta().Namespace}, loggingCredentialsSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingcredentials secret not found, initializing one")
@@ -97,9 +97,9 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	secretUpdated := RemoveLoggingCredentials(lc, loggingCredentialsSecret)
 
 	// Check if metadata has been updated
-	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta(lc).Labels) {
+	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta().Labels) {
 		logger.Info("loggingCredentials - metatada update required")
-		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta(lc)
+		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta()
 		secretUpdated = true
 	}
 
