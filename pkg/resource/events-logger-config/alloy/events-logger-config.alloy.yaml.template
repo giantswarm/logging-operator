@@ -9,9 +9,6 @@ alloy:
       create: true
       content: |-
         {{- .AlloyConfig | nindent 8 }}
-    envFrom:
-    - secretRef:
-        name: {{ .SecretName }}
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
