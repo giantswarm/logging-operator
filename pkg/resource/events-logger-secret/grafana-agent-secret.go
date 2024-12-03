@@ -35,10 +35,10 @@ func generateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 		ExtraSecret: extraSecret{
 			Name: fmt.Sprintf("%s-%s", clusterName, common.GrafanaAgentExtraSecretName()),
 			Data: map[string]string{
-				common.LoggingURL:     fmt.Sprintf(common.LokiURLFormat, lokiURL),
+				common.LoggingURL:      fmt.Sprintf(common.LokiURLFormat, lokiURL),
 				common.LoggingTenantID: lc.GetTenant(),
-				common.LoggingUsername:  writeUser,
-				common.LoggingPassword:  writePassword,
+				common.LoggingUsername: writeUser,
+				common.LoggingPassword: writePassword,
 			},
 		},
 	}

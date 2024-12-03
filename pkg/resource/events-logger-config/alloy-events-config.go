@@ -59,6 +59,10 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		MaxBackoffPeriod   string
 		ScrapedNamespaces  string
 		SecretName         string
+		LoggingURLKey      string
+		LoggingTenantIDKey string
+		LoggingUsernameKey string
+		LoggingPasswordKey string
 	}{
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
@@ -66,6 +70,10 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		MaxBackoffPeriod:   common.MaxBackoffPeriod,
 		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultNamespaces),
 		SecretName:         common.AlloyEventsLoggerAppName,
+		LoggingURLKey:      common.LoggingURL,
+		LoggingTenantIDKey: common.LoggingTenantID,
+		LoggingUsernameKey: common.LoggingUsername,
+		LoggingPasswordKey: common.LoggingPassword,
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)

@@ -77,6 +77,10 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		SupportPodLogs     bool
 		InsecureSkipVerify bool
 		SecretName         string
+		LoggingURLKey      string
+		LoggingTenantIDKey string
+		LoggingUsernameKey string
+		LoggingPasswordKey string
 	}{
 		ClusterID:         clusterName,
 		Installation:      lc.GetInstallationName(),
@@ -86,6 +90,10 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
 		InsecureSkipVerify: lc.IsInsecureCA(),
 		SecretName:         common.AlloyLogAgentAppName,
+		LoggingURLKey:      common.LoggingURL,
+		LoggingTenantIDKey: common.LoggingTenantID,
+		LoggingUsernameKey: clusterName,
+		LoggingPasswordKey: common.LoggingPassword,
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)

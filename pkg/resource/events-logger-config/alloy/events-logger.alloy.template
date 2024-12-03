@@ -16,13 +16,13 @@ remote.kubernetes.secret "credentials" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
+		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {
-			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
-			password = remote.kubernetes.secret.credentials.data["logging-password"]
+			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
+			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
 
 		tls_config {
