@@ -16,6 +16,8 @@ import (
 const (
 	// ReadUser is the global user for reading logs
 	ReadUser = "read"
+	// DefaultWriteTenant is the default tenant for writing logs
+	DefaultWriteTenant = "giantswarm"
 	// Grafana Multi Tenant Proxy Ingress
 	proxyIngressNamespace = "monitoring"
 	proxyIngressName      = "grafana-multi-tenant-proxy"

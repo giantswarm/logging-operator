@@ -13,6 +13,10 @@ type Object struct {
 	Options loggedcluster.Options
 }
 
+func (o Object) IsCAPI() bool {
+	return false
+}
+
 func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
 }

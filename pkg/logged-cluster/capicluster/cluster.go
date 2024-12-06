@@ -86,6 +86,10 @@ func (o Object) GetObject() client.Object {
 	return o.Object
 }
 
+func (o Object) IsCAPI() bool {
+	return true
+}
+
 // On capi clusters, use an extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"
