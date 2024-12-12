@@ -2,22 +2,19 @@ package agentstoggle
 
 import (
 	"context"
-	"reflect"
 	"time"
 
-	"github.com/blang/semver"
-	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -44,38 +41,25 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Get desired configmap to enable logging agents and events loggers.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(ctx, lc, observabilityBundleVersion)
+	desiredConfigMap := v1.ConfigMap{
+		ObjectMeta: common.ObservabilityBundleConfigMapMeta(lc),
+	}
+
+	_, err = controllerutil.CreateOrUpdate(ctx, r.Client, &desiredConfigMap, func() error {
+		config, err := generateObservabilityBundleConfig(ctx, lc, observabilityBundleVersion)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		desiredConfigMap.Data = map[string]string{"values": config}
+		return nil
+	})
 	if err != nil {
+		logger.Error(err, "failed to toggle logging agents")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Check if configmap is already installed.
-	logger.Info("agents toggle checking", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
-	var currentConfigMap v1.ConfigMap
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredConfigMap.GetName(), Namespace: desiredConfigMap.GetNamespace()}, &currentConfigMap)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			// Install configmap.
-			logger.Info("agents toggle not found, creating")
-			err = r.Client.Create(ctx, &desiredConfigMap)
-		}
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	if needUpdate(currentConfigMap, desiredConfigMap) {
-		logger.Info("agents toggle updating")
-		// Update configmap
-		// Configmap is installed and need to be updated.
-		err := r.Client.Update(ctx, &desiredConfigMap)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	} else {
-		logger.Info("agents toggle up to date")
-	}
+	logger.Info("agents toggle up to date")
 
 	return ctrl.Result{}, nil
 }
@@ -83,58 +67,18 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 // ReconcileDelete ensure logging agents and events loggers are disabled for the given cluster.
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("agents toggle delete")
+	logger.Info("delete agents toggle config")
 
-	// Get observability bundle app metadata.
-	appMeta := common.ObservabilityBundleAppMeta(lc)
-	// Retrieve the app.
-	var currentApp appv1.App
-	err := r.Client.Get(ctx, types.NamespacedName{Name: appMeta.GetName(), Namespace: appMeta.GetNamespace()}, &currentApp)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("agents-toggle - observability bundle app not found, skipping deletion")
-			// If the app is not found we ignore the error and return, as this means the app was already deleted.
-			return ctrl.Result{}, nil
-		}
+	desiredConfigMap := v1.ConfigMap{
+		ObjectMeta: common.ObservabilityBundleConfigMapMeta(lc),
+	}
+
+	logger.Info("deleting agents toggle config")
+	err := r.Client.Delete(ctx, &desiredConfigMap)
+	if client.IgnoreNotFound(err) != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
-
-	observabilityBundleVersion, err := semver.Parse(currentApp.Spec.Version)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// If the observability-bundle version is too old, we don't need to do anything.
-	if observabilityBundleVersion.LT(semver.MustParse("0.9.0")) {
-		return ctrl.Result{}, nil
-	}
-
-	// Get expected configmap.
-	desiredConfigMap, err := GenerateObservabilityBundleConfigMap(ctx, lc, observabilityBundleVersion)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// Delete configmap.
-	logger.Info("agents toggle deleting", "namespace", desiredConfigMap.GetNamespace(), "name", desiredConfigMap.GetName())
-	err = r.Client.Delete(ctx, &desiredConfigMap)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			// Do no throw error in case it was not found, as this means
-			// it was already deleted.
-			logger.Info("agents toggle already deleted")
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	} else {
-		logger.Info("agents toggle deleted")
-	}
+	logger.Info("agents toggle config deleted")
 
 	return ctrl.Result{}, nil
-}
-
-// needUpdate return true if current.Data and desired.Data do not match.
-func needUpdate(current, desired v1.ConfigMap) bool {
-	return !reflect.DeepEqual(current.Data, desired.Data) || !reflect.DeepEqual(current.ObjectMeta.Labels, desired.ObjectMeta.Labels)
 }
