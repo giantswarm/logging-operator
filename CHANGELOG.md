@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use `giantswarm` tenant by default instead of cluster name.
 
+### Removed
+
+- Remove Loki datasource generation on CAPI.
+
 ## [0.16.0] - 2024-11-26
 
 ### Added
@@ -30,10 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix logging-config unit tests
-
-### Removed
-
-- Remove Loki datasource generation on CAPI.
 
 ## [0.15.2] - 2024-11-13
 
