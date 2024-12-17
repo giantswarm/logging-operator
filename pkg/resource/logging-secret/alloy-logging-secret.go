@@ -40,17 +40,12 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 		return nil, err
 	}
 
-	tenant := clusterName
-	if lc.IsCAPI() {
-		tenant = common.DefaultWriteTenant
-	}
-
 	templateData := struct {
 		ExtraSecretEnv map[string]string
 	}{
 		ExtraSecretEnv: map[string]string{
 			AlloyLokiURLEnvVarName:           fmt.Sprintf(common.LokiURLFormat, lokiURL),
-			AlloyTenantIDEnvVarName:          tenant,
+			AlloyTenantIDEnvVarName:          lc.GetTenant(),
 			AlloyBasicAuthUsernameEnvVarName: clusterName,
 			AlloyBasicAuthPasswordEnvVarName: writePassword,
 		},
