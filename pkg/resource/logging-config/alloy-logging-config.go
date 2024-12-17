@@ -92,7 +92,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		SecretName:         common.AlloyLogAgentAppName,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,
-		LoggingUsernameKey: clusterName,
+		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
 	}
 

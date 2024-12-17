@@ -270,7 +270,7 @@ alloy:
         		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         
         		basic_auth {
-        			username = nonsensitive(remote.kubernetes.secret.credentials.data["test-installation"])
+        			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         			password = remote.kubernetes.secret.credentials.data["logging-password"]
         		}
         
