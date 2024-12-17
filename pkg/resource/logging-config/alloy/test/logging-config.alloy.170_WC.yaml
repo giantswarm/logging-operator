@@ -103,6 +103,20 @@ alloy:
         			"stream",
         		]
         	}
+        	// This is the only place where we need to set it because we put "giantswarm" as a default.
+        	// c.f. https://github.com/grafana/alloy/blob/31b697c95ecdf7d43fa7790e31cc0f231d39fe8d/internal/component/common/loki/client/client.go#L458C18-L458C29
+        	stage.labels {
+        		"tenant" = __giantswarm_tenant_id__
+        	}
+        	// We drop lines that do not have a tenant
+        	stage.drop {
+        		source = "tenant"
+        		value  = ""
+        	}
+        
+        	stage.tenant {
+        		label = "tenant"
+        	}
         }
         
         // journald logs from /run/log/journal
@@ -352,3 +366,7 @@ podLogs:
         operator: In
         values:
         - test-selector
+    relabelings:
+    - action: replace
+      targetLabel: "__giantswarm_tenant_id__"
+      replacement: "giantswarm"
