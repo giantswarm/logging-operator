@@ -107,11 +107,3 @@ func FormatScrapedNamespaces(lc loggedcluster.Interface, namespaces []string) st
 
 	return "[]"
 }
-
-func FormatScrapedNamespaces(lc loggedcluster.Interface, namespaces []string) string {
-	if IsWorkloadCluster(lc) {
-		return fmt.Sprintf("[\"%s\"]", strings.Join(namespaces, "\", \""))
-	}
-
-	return "[]"
-}
