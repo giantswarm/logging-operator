@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for customer log tenancy via pod logs.
+
 ### Changed
 
 - Use `giantswarm` tenant by default instead of cluster name.
@@ -15,8 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Remove Loki datasource generation on CAPI.
-
-## [0.16.0] - 2024-11-26
 
 ## [0.16.0] - 2024-11-26
 
@@ -33,7 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Disable grafana agent usage data reporting.
 - Move Grafana-Agent config to a template instead of go structs.
-- Use `giantswarm` tenant by default instead of cluster name.
 
 ### Fixed
 
