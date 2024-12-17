@@ -21,6 +21,9 @@ const (
 	// Grafana Multi Tenant Proxy Ingress
 	proxyIngressNamespace = "monitoring"
 	proxyIngressName      = "grafana-multi-tenant-proxy"
+	// Loki Gateway Ingress
+	lokiGatewayIngressNamespace = "loki"
+	lokiGatewayIngressName      = "loki-gateway"
 	// grafana-agent secret name
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
@@ -48,6 +51,11 @@ const (
 
 	MaxBackoffPeriod = "10m"
 	LokiURLFormat    = "https://%s/loki/api/v1/push"
+
+	LoggingURL      = "logging-url"
+	LoggingTenantID = "logging-tenant-id"
+	LoggingUsername = "logging-username"
+	LoggingPassword = "logging-password"
 )
 
 func GrafanaAgentExtraSecretName() string {
@@ -72,17 +80,24 @@ func IsWorkloadCluster(lc loggedcluster.Interface) bool {
 
 // Read Proxy URL from ingress
 func ReadProxyIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
-	var proxyIngress netv1.Ingress
+	var lokiIngress netv1.Ingress
 
-	err := client.Get(ctx, types.NamespacedName{Name: proxyIngressName, Namespace: proxyIngressNamespace}, &proxyIngress)
-	if err != nil {
+	var objectKey types.NamespacedName
+	if lc.IsCAPI() {
+		objectKey = types.NamespacedName{Name: lokiGatewayIngressName, Namespace: lokiGatewayIngressNamespace}
+	} else {
+		objectKey = types.NamespacedName{Name: proxyIngressName, Namespace: proxyIngressNamespace}
+	}
+
+	if err := client.Get(ctx, objectKey, &lokiIngress); err != nil {
 		return "", errors.WithStack(err)
 	}
 
 	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
-	ingressURL := proxyIngress.Spec.Rules[0].Host
-
-	return ingressURL, nil
+	if len(lokiIngress.Spec.Rules) <= 0 {
+		return "", fmt.Errorf("Loki ingress Host not found")
+	}
+	return lokiIngress.Spec.Rules[0].Host, nil
 }
 
 func FormatScrapedNamespaces(lc loggedcluster.Interface, namespaces []string) string {

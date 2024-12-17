@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Use `giantswarm` tenant by default instead of cluster name.
+- Replace multi-tenant-proxy with ingress auth map on CAPI.
 
 ### Removed
 

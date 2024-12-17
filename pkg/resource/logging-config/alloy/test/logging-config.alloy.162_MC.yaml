@@ -12,6 +12,11 @@ alloy:
     configMap:
       create: true
       content: |-
+        remote.kubernetes.secret "credentials" {
+        	namespace = "kube-system"
+        	name = "alloy-logs"
+        }
+        
         // Kubernetes pods logs
         discovery.kubernetes "kubernetes_pods" {
         	role = "pod"
@@ -280,13 +285,13 @@ alloy:
         // Loki target configuration
         loki.write "default" {
         	endpoint {
-        		url                = env("LOKI_URL")
+        		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
         		max_backoff_period = "10m"
-        		tenant_id          = env("TENANT_ID")
+        		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         
         		basic_auth {
-        			username = env("BASIC_AUTH_USERNAME")
-        			password = env("BASIC_AUTH_PASSWORD")
+        			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
+        			password = remote.kubernetes.secret.credentials.data["logging-password"]
         		}
         
         		tls_config {
@@ -309,9 +314,6 @@ alloy:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
-    envFrom:
-    - secretRef:
-        name: alloy-logs
     mounts:
       varlog: true
       dockercontainers: true

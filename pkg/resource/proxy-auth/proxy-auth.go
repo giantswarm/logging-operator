@@ -24,7 +24,7 @@ const (
 )
 
 // ProxyConfigSecretMeta returns metadata for the grafana-multi-tenant-proxy secret
-func ProxyAuthSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func proxyAuthSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      proxyauthSecretName,
 		Namespace: proxyauthSecretNamespace,
@@ -67,12 +67,17 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 			return v1.Secret{}, errors.WithStack(err)
 		}
 
+		tenant := writeUser
+		if lc.IsCAPI() {
+			tenant = lc.GetTenant()
+		}
+
 		authCfg.Users = append(authCfg.Users, config.User{
 			Username: writeUser,
 			Password: writePassword,
 			// we set the default tenant even though it may be given by the sender
 			// depending of grafana-multi-teant-proxy config
-			OrgID: writeUser,
+			OrgID: tenant,
 		})
 
 		// Add write user to allowed tenants for read user
@@ -96,13 +101,15 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 	if err != nil {
 		return v1.Secret{}, errors.WithStack(err)
 	}
-
-	secret := v1.Secret{
-		ObjectMeta: ProxyAuthSecretMeta(lc),
-		Data: map[string][]byte{
-			"authn.yaml": []byte(v),
-		},
-	}
+	secret := secret()
+	secret.Data["authn.yaml"] = []byte(v)
 
 	return secret, nil
+}
+
+func secret() v1.Secret {
+	return v1.Secret{
+		ObjectMeta: proxyAuthSecretMeta(nil),
+		Data:       map[string][]byte{},
+	}
 }
