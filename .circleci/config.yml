@@ -142,3 +142,17 @@ workflows:
             ignore: /.*/
           tags:
             only: /^v.*/
+
+    - architect/push-to-app-collection:
+        context: architect
+        name: proxmox-app-collection
+        app_name: logging-operator
+        app_namespace: monitoring
+        app_collection_repo: proxmox-app-collection
+        requires:
+        - push-logging-operator-to-app-catalog
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
