@@ -83,6 +83,10 @@ podLogs:
         {{- range .DefaultWorkloadClusterNamespaces }}
         - {{ . }}
         {{- end }}
+    relabelings:
+    - action: replace
+      targetLabel: "__giantswarm_tenant_id__"
+      replacement: "giantswarm"
 {{- end }}
 {{- else }}
 podLogs:
@@ -91,5 +95,9 @@ podLogs:
   spec:
     selector: {}
     namespaceSelector: {}
+    relabelings:
+    - action: replace
+      targetLabel: "__giantswarm_tenant_id__"
+      replacement: "giantswarm"
 {{- end }}
 {{- end }}

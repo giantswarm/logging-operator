@@ -89,7 +89,7 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
-{{- if not .SupportPodLogs }}
+  {{- if not .SupportPodLogs }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
@@ -112,7 +112,7 @@ discovery.relabel "kubernetes_pods" {
 		action        = "keep"
 	}
 	{{- end }}
-{{- end }}
+  {{- end }}
 }
 
 loki.process "kubernetes_pods" {
@@ -133,6 +133,18 @@ loki.process "kubernetes_pods" {
 			"stream",
 		]
 	}
+	{{- if .SupportPodLogs }}
+
+	// We drop lines that do not have a tenant
+	stage.drop {
+		source = "__giantswarm_tenant_id__"
+		value  = ""
+	}
+
+	stage.tenant {
+		label = "__giantswarm_tenant_id__"
+	}
+	{{- end }}
 }
 
 // journald logs from /run/log/journal

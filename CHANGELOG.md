@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for customer log tenancy via pod logs.
+
 ### Changed
 
 - Use `giantswarm` tenant by default instead of cluster name.
