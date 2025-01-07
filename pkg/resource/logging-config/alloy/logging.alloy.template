@@ -1,3 +1,8 @@
+remote.kubernetes.secret "credentials" {
+	namespace = "kube-system"
+	name = "{{ .SecretName }}"
+}
+
 // Kubernetes pods logs
 {{- if .SupportPodLogs }}
 loki.source.podlogs "kubernetes_pods" {
@@ -290,13 +295,13 @@ loki.source.file "kubernetes_audit" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		url                = env("{{ .LokiURLEnvVarName }}")
+		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = env("{{ .TenantIDEnvVarName }}")
+		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {
-			username = env("{{ .BasicAuthUsernameEnvVarName }}")
-			password = env("{{ .BasicAuthPasswordEnvVarName }}")
+			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
+			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
 
 		tls_config {

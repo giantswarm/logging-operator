@@ -1,18 +1,28 @@
+logging {
+	level  = "info"
+	format = "logfmt"
+}
+
 loki.source.kubernetes_events "local" {
 	namespaces = {{ .ScrapedNamespaces }}
 	forward_to = [loki.write.default.receiver]
 }
 
+remote.kubernetes.secret "credentials" {
+	namespace = "kube-system"
+	name = "{{ .SecretName }}"
+}
+
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		url                = env("{{ .LokiURLEnvVarName }}")
+		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = env("{{ .TenantIDEnvVarName }}")
+		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {
-			username = env("{{ .BasicAuthUsernameEnvVarName }}")
-			password = env("{{ .BasicAuthPasswordEnvVarName }}")
+			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
+			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
 
 		tls_config {
@@ -24,9 +34,4 @@ loki.write "default" {
 		installation = "{{ .Installation }}",
 		scrape_job = "kubernetes-events",
 	}
-}
-
-logging {
-	level  = "info"
-	format = "logfmt"
 }

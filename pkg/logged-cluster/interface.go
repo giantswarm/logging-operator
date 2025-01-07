@@ -24,6 +24,7 @@ type Interface interface {
 	AppConfigName(app string) string
 	ObservabilityBundleConfigLabelName(config string) string
 	GetObject() client.Object
+	GetTenant() string
 	IsCAPI() bool
 	GetObservabilityBundleConfigMap() string
 	UnwireLogging(currentApp appv1.App) *appv1.App

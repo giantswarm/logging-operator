@@ -27,7 +27,7 @@ type userCredentials struct {
 }
 
 // LoggingCredentialsSecretMeta returns metadata for the logging-operator credentials secret.
-func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func LoggingCredentialsSecretMeta() metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      LoggingCredentialsName,
 		Namespace: LoggingCredentialsNamespace,
@@ -39,7 +39,7 @@ func LoggingCredentialsSecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta 
 }
 
 // Generate a random 20-characters password
-func genPassword() (string, error) {
+func generatePassword() (string, error) {
 	const length = 20
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -61,7 +61,7 @@ func genPassword() (string, error) {
 // the observabilitybundle application to enable logging.
 func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secret {
 	secret := v1.Secret{
-		ObjectMeta: LoggingCredentialsSecretMeta(lc),
+		ObjectMeta: LoggingCredentialsSecretMeta(),
 		Data:       map[string][]byte{},
 	}
 
@@ -81,21 +81,18 @@ func GetPassword(lc loggedcluster.Interface, credentialsSecret *v1.Secret, usern
 		return "", errors.New(fmt.Sprintf("Invalid user %s", username))
 	}
 
-	password := userYaml.Password
-
-	return string(password), nil
+	return string(userYaml.Password), nil
 }
 
 // AddLoggingCredentials - Add credentials to LoggingCredentials secret if needed
 func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) (bool, error) {
-
 	var secretUpdated bool = false
 
 	// Always check credentials for "readuser"
 	if _, ok := loggingCredentials.Data[common.ReadUser]; !ok {
 		readUser := userCredentials{}
 
-		password, err := genPassword()
+		password, err := generatePassword()
 		if err != nil {
 			return false, errors.New("Failed generating read password")
 		}
@@ -116,7 +113,7 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 	if _, ok := loggingCredentials.Data[clusterName]; !ok {
 		clusterUser := userCredentials{}
 
-		password, err := genPassword()
+		password, err := generatePassword()
 		if err != nil {
 			return false, errors.New("Failed generating write password")
 		}

@@ -31,7 +31,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta(lc).Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta(lc).Namespace},
+	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta().Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta().Namespace},
 		&loggingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
@@ -53,7 +53,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	// Check if secret already exists.
 	logger.Info("logging-secret - getting", "namespace", desiredLoggingSecret.GetNamespace(), "name", desiredLoggingSecret.GetName())
 	var currentLoggingSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLoggingSecret.GetName(), Namespace: desiredLoggingSecret.GetNamespace()}, &currentLoggingSecret)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLoggingSecret.Name, Namespace: desiredLoggingSecret.Namespace}, &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-secret not found, creating")
