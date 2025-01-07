@@ -70,6 +70,7 @@ func GenerateProxyAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.S
 		tenant := writeUser
 		if lc.IsCAPI() {
 			tenant = lc.GetTenant()
+			tenant = common.DefaultWriteTenant
 		}
 
 		authCfg.Users = append(authCfg.Users, config.User{
