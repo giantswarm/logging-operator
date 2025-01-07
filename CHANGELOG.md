@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2025-01-07
+
+### Changed
+
+- Replace multi-tenant-proxy with ingress auth map on CAPI.
+
 ## [0.17.0] - 2025-01-07
 
 ### Changed
@@ -407,7 +413,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/giantswarm/logging-operator/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/giantswarm/logging-operator/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/giantswarm/logging-operator/compare/v0.15.2...v0.16.0
 [0.15.2]: https://github.com/giantswarm/logging-operator/compare/v0.15.1...v0.15.2
