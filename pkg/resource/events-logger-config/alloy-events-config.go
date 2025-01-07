@@ -10,7 +10,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
 
 var (
@@ -38,10 +37,8 @@ func generateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []s
 
 	data := struct {
 		AlloyConfig string
-		SecretName  string
 	}{
 		AlloyConfig: alloyConfig,
-		SecretName:  common.AlloyEventsLoggerAppName,
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
@@ -56,25 +53,27 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 	var values bytes.Buffer
 
 	data := struct {
-		ClusterID                   string
-		Installation                string
-		InsecureSkipVerify          string
-		MaxBackoffPeriod            string
-		LokiURLEnvVarName           string
-		TenantIDEnvVarName          string
-		BasicAuthUsernameEnvVarName string
-		BasicAuthPasswordEnvVarName string
-		ScrapedNamespaces           string
+		ClusterID          string
+		Installation       string
+		InsecureSkipVerify string
+		MaxBackoffPeriod   string
+		ScrapedNamespaces  string
+		SecretName         string
+		LoggingURLKey      string
+		LoggingTenantIDKey string
+		LoggingUsernameKey string
+		LoggingPasswordKey string
 	}{
-		ClusterID:                   lc.GetClusterName(),
-		Installation:                lc.GetInstallationName(),
-		InsecureSkipVerify:          fmt.Sprintf("%t", lc.IsInsecureCA()),
-		MaxBackoffPeriod:            common.MaxBackoffPeriod,
-		LokiURLEnvVarName:           loggingsecret.AlloyLokiURLEnvVarName,
-		TenantIDEnvVarName:          loggingsecret.AlloyTenantIDEnvVarName,
-		BasicAuthUsernameEnvVarName: loggingsecret.AlloyBasicAuthUsernameEnvVarName,
-		BasicAuthPasswordEnvVarName: loggingsecret.AlloyBasicAuthPasswordEnvVarName,
-		ScrapedNamespaces:           common.FormatScrapedNamespaces(lc, defaultNamespaces),
+		ClusterID:          lc.GetClusterName(),
+		Installation:       lc.GetInstallationName(),
+		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
+		MaxBackoffPeriod:   common.MaxBackoffPeriod,
+		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultNamespaces),
+		SecretName:         common.AlloyEventsLoggerAppName,
+		LoggingURLKey:      common.LoggingURL,
+		LoggingTenantIDKey: common.LoggingTenantID,
+		LoggingUsernameKey: common.LoggingUsername,
+		LoggingPasswordKey: common.LoggingPassword,
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)

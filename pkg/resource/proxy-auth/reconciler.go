@@ -25,8 +25,13 @@ type Reconciler struct {
 
 // ReconcileCreate ensures grafana-multi-tenant-proxy auth map is created with the right credentials
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+	// If we are on CAPI, we don't need to create the proxyauth secret as we are not using the multi-tenant-proxy
+	if lc.IsCAPI() {
+		return r.ReconcileDelete(ctx, lc)
+	}
+
 	logger := log.FromContext(ctx)
-	logger.Info("proxyauth create")
+	logger.Info("creating multi-tenant-proxy auth secret")
 
 	// Retrieve secret containing credentials
 	var proxyAuthSecret v1.Secret
@@ -39,17 +44,16 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	// Get desired secret
 	desiredProxyAuthSecret, err := GenerateProxyAuthSecret(lc, &proxyAuthSecret)
 	if err != nil {
-		logger.Info("proxyAuth - failed generating auth config!", "error", err)
+		logger.Error(err, "failed to generate multi-tenant-proxy auth secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Check if auth config already exists.
-	logger.Info("proxyAuth - getting", "namespace", desiredProxyAuthSecret.GetNamespace(), "name", desiredProxyAuthSecret.GetName())
 	var currentProxyAuthSecret v1.Secret
 	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredProxyAuthSecret.GetName(), Namespace: desiredProxyAuthSecret.GetNamespace()}, &currentProxyAuthSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("proxyAuth not found, creating")
+			logger.Info("multi-tenant-proxy auth secret not found, creating")
 			err = r.Client.Create(ctx, &desiredProxyAuthSecret)
 			if err != nil {
 				return ctrl.Result{}, errors.WithStack(err)
@@ -60,24 +64,38 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	if !needUpdate(currentProxyAuthSecret, desiredProxyAuthSecret) {
-		logger.Info("proxyauth up to date")
+		logger.Info("multi-tenant-proxy auth secret is up to date")
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("proxyauth - updating")
+	logger.Info("updating multi-tenant-proxy auth secret")
 	err = r.Client.Update(ctx, &desiredProxyAuthSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	logger.Info("proxyauth - done")
+	logger.Info("updated multi-tenant-proxy auth secret")
 	return ctrl.Result{}, nil
 }
 
-// ReconcileDelete - Not much to do here when a cluster is deleted
+// ReconcileDelete - Delete the multi tenant proxy secret
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("proxyAuth delete")
+	logger.Info("deleting multi-tenant-proxy auth secret")
+
+	secret := secret()
+	// Delete secret.
+	err := r.Client.Delete(ctx, &secret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			// Do no throw error in case it was not found, as this means
+			// it was already deleted.
+			logger.Info("multi-tenant-proxy auth secret already deleted")
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	logger.Info("deleted multi-tenant-proxy auth secret")
 
 	return ctrl.Result{}, nil
 }
