@@ -103,6 +103,11 @@ alloy:
         		target_label  = "__path__"
         		replacement   = "/var/log/pods/*$1/*.log"
         	}
+        
+        	rule {
+        		target_label = "__tenant_id__"
+        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
         }
         
         loki.process "kubernetes_pods" {
@@ -284,6 +289,11 @@ alloy:
         			namespace = "",
         		}
         	}
+        
+        	stage.tenant {
+        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
+        
         }
         
         loki.source.file "kubernetes_audit" {

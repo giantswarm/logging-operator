@@ -105,6 +105,11 @@ discovery.relabel "kubernetes_pods" {
 		replacement   = "/var/log/pods/*$1/*.log"
 	}
 
+	rule {
+		target_label = "__tenant_id__"
+		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+	}
+
 	{{- if .IsWorkloadCluster }}
 	rule {
 		source_labels = ["__meta_kubernetes_namespace"]
@@ -294,6 +299,11 @@ loki.process "kubernetes_audit" {
 			namespace = "",
 		}
 	}
+
+	stage.tenant {
+		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+	}
+
 }
 
 loki.source.file "kubernetes_audit" {

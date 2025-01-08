@@ -264,6 +264,11 @@ alloy:
         			namespace = "",
         		}
         	}
+        
+        	stage.tenant {
+        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
+        
         }
         
         loki.source.file "kubernetes_audit" {
