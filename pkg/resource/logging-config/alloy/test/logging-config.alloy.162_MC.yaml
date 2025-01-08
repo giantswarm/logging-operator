@@ -145,6 +145,11 @@ alloy:
         	targets = []
         
         	rule {
+        		target_label = "__tenant_id__"
+        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
+        
+        	rule {
         		source_labels = ["__journal__systemd_unit"]
         		target_label  = "__tmp_systemd_unit"
         	}
@@ -195,6 +200,11 @@ alloy:
         
         discovery.relabel "systemd_journal_var" {
         	targets = []
+        
+        	rule {
+        		target_label = "__tenant_id__"
+        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
         
         	rule {
         		source_labels = ["__journal__systemd_unit"]
@@ -287,7 +297,6 @@ alloy:
         	endpoint {
         		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
         		max_backoff_period = "10m"
-        		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         
         		basic_auth {
         			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])

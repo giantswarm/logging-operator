@@ -155,6 +155,11 @@ discovery.relabel "systemd_journal_run" {
 	targets = []
 
 	rule {
+		target_label = "__tenant_id__"
+		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+	}
+
+	rule {
 		source_labels = ["__journal__systemd_unit"]
 		target_label  = "__tmp_systemd_unit"
 	}
@@ -205,6 +210,11 @@ loki.process "systemd_journal_var" {
 
 discovery.relabel "systemd_journal_var" {
 	targets = []
+
+	rule {
+		target_label = "__tenant_id__"
+		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+	}
 
 	rule {
 		source_labels = ["__journal__systemd_unit"]
@@ -297,7 +307,6 @@ loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
