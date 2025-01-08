@@ -103,15 +103,10 @@ alloy:
         			"stream",
         		]
         	}
-        
         	// We drop lines that do not have a tenant
         	stage.drop {
-        		source = "__giantswarm_tenant_id__"
+        		source = "__tenant_id__"
         		value  = ""
-        	}
-        
-        	stage.tenant {
-        		label = "__giantswarm_tenant_id__"
         	}
         }
         

@@ -85,7 +85,7 @@ podLogs:
         {{- end }}
     relabelings:
     - action: replace
-      targetLabel: "__giantswarm_tenant_id__"
+      targetLabel: "__tenant_id__"
       replacement: "giantswarm"
 {{- end }}
 {{- else }}
@@ -97,7 +97,7 @@ podLogs:
     namespaceSelector: {}
     relabelings:
     - action: replace
-      targetLabel: "__giantswarm_tenant_id__"
+      targetLabel: "__tenant_id__"
       replacement: "giantswarm"
 {{- end }}
 {{- end }}

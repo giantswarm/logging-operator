@@ -103,15 +103,10 @@ alloy:
         			"stream",
         		]
         	}
-        
         	// We drop lines that do not have a tenant
         	stage.drop {
-        		source = "__giantswarm_tenant_id__"
+        		source = "__tenant_id__"
         		value  = ""
-        	}
-        
-        	stage.tenant {
-        		label = "__giantswarm_tenant_id__"
         	}
         }
         
@@ -355,5 +350,5 @@ podLogs:
     namespaceSelector: {}
     relabelings:
     - action: replace
-      targetLabel: "__giantswarm_tenant_id__"
+      targetLabel: "__tenant_id__"
       replacement: "giantswarm"
