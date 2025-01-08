@@ -133,14 +133,6 @@ loki.process "kubernetes_pods" {
 			"stream",
 		]
 	}
-
-	{{- if .SupportPodLogs }}
-	// We drop lines that do not have a tenant
-	stage.drop {
-		source = "__tenant_id__"
-		value  = ""
-	}
-	{{- end }}
 }
 
 // journald logs from /run/log/journal

@@ -103,11 +103,6 @@ alloy:
         			"stream",
         		]
         	}
-        	// We drop lines that do not have a tenant
-        	stage.drop {
-        		source = "__tenant_id__"
-        		value  = ""
-        	}
         }
         
         // journald logs from /run/log/journal
