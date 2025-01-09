@@ -119,15 +119,14 @@ alloy:
         		source = "SYSLOG_IDENTIFIER"
         		value  = "audit"
         	}
+        
+        	stage.tenant {
+        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
         }
         
         discovery.relabel "systemd_journal_run" {
         	targets = []
-        
-        	rule {
-        		target_label = "__tenant_id__"
-        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        	}
         
         	rule {
         		source_labels = ["__journal__systemd_unit"]
@@ -176,15 +175,14 @@ alloy:
         		source = "SYSLOG_IDENTIFIER"
         		value  = "audit"
         	}
+        
+        	stage.tenant {
+        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        	}
         }
         
         discovery.relabel "systemd_journal_var" {
         	targets = []
-        
-        	rule {
-        		target_label = "__tenant_id__"
-        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        	}
         
         	rule {
         		source_labels = ["__journal__systemd_unit"]
@@ -301,6 +299,10 @@ alloy:
         logging {
         	level  = "warn"
         	format = "logfmt"
+        }
+        
+        livedebugging {
+        	enabled = true
         }
         
     clustering:

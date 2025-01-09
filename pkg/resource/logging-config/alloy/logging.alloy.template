@@ -149,15 +149,14 @@ loki.process "systemd_journal_run" {
 		source = "SYSLOG_IDENTIFIER"
 		value  = "audit"
 	}
+
+	stage.tenant {
+		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+	}
 }
 
 discovery.relabel "systemd_journal_run" {
 	targets = []
-
-	rule {
-		target_label = "__tenant_id__"
-		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
-	}
 
 	rule {
 		source_labels = ["__journal__systemd_unit"]
@@ -206,15 +205,14 @@ loki.process "systemd_journal_var" {
 		source = "SYSLOG_IDENTIFIER"
 		value  = "audit"
 	}
+
+	stage.tenant {
+		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+	}
 }
 
 discovery.relabel "systemd_journal_var" {
 	targets = []
-
-	rule {
-		target_label = "__tenant_id__"
-		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
-	}
 
 	rule {
 		source_labels = ["__journal__systemd_unit"]
@@ -331,4 +329,8 @@ loki.write "default" {
 logging {
 	level  = "warn"
 	format = "logfmt"
+}
+
+livedebugging {
+	enabled = true
 }
