@@ -324,7 +324,7 @@ alloy:
         }
         
         logging {
-        	level  = "warn"
+        	level  = "debug"
         	format = "logfmt"
         }
         
