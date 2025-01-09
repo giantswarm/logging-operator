@@ -90,7 +90,7 @@ alloy:
         
         	// We drop the label to not have it ingested in loki
         	rule {
-        		source_labels = ["giantswarm_observability_tenant"]
+        		regex = "giantswarm_observability_tenant"
         		action = "labeldrop"
         	}
         
