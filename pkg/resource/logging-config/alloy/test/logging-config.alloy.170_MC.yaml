@@ -83,10 +83,6 @@ alloy:
         		source_labels = ["__meta_kubernetes_pod_container_name"]
         		target_label  = "container"
         	}
-        	rule {
-        		target_label = "__tenant_id__"
-        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        	}
         }
         
         loki.process "kubernetes_pods" {
