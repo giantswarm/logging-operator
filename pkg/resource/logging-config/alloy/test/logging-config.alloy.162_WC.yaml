@@ -145,10 +145,6 @@ alloy:
         		source = "SYSLOG_IDENTIFIER"
         		value  = "audit"
         	}
-        
-        	stage.tenant {
-        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        	}
         }
         
         discovery.relabel "systemd_journal_run" {
@@ -200,10 +196,6 @@ alloy:
         	stage.drop {
         		source = "SYSLOG_IDENTIFIER"
         		value  = "audit"
-        	}
-        
-        	stage.tenant {
-        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         	}
         }
         
@@ -287,10 +279,6 @@ alloy:
         		values = {
         			namespace = "",
         		}
-        	}
-        
-        	stage.tenant {
-        		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         	}
         }
         

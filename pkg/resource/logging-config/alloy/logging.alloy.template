@@ -163,9 +163,11 @@ loki.process "systemd_journal_run" {
 		value  = "audit"
 	}
 
+	{{- if .SupportPodLogs }}
 	stage.tenant {
 		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 	}
+	{{- end }}
 }
 
 discovery.relabel "systemd_journal_run" {
@@ -219,9 +221,11 @@ loki.process "systemd_journal_var" {
 		value  = "audit"
 	}
 
+	{{- if .SupportPodLogs }}
 	stage.tenant {
 		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 	}
+	{{- end }}
 }
 
 discovery.relabel "systemd_journal_var" {
@@ -305,10 +309,11 @@ loki.process "kubernetes_audit" {
 			namespace = "",
 		}
 	}
-
+	{{- if .SupportPodLogs }}
 	stage.tenant {
 		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 	}
+	{{- end }}
 }
 
 loki.source.file "kubernetes_audit" {
@@ -322,7 +327,9 @@ loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
+		{{- if not .SupportPodLogs }}
 		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+		{{- end }}
 
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
