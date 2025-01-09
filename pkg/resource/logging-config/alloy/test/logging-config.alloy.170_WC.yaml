@@ -366,3 +366,17 @@ podLogs:
     - action: replace
       targetLabel: "giantswarm_observability_tenant"
       replacement: "giantswarm"
+- name: customers-logs
+  namespace: kube-system
+  spec:
+    selector: {}
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - test-selector
+    relabelings:
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_pod_label_observability_giantswarm_io_tenant"]
+      targetLabel: "giantswarm_observability_tenant"
