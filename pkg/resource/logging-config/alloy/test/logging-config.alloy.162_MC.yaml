@@ -322,10 +322,6 @@ alloy:
         	format = "logfmt"
         }
         
-        livedebugging {
-        	enabled = true
-        }
-        
     extraEnv:
     - name: NODENAME
       valueFrom:

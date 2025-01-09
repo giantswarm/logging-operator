@@ -310,10 +310,6 @@ alloy:
         	format = "logfmt"
         }
         
-        livedebugging {
-        	enabled = true
-        }
-        
     clustering:
       enabled: true
       name: alloy-logs
