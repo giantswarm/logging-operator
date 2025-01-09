@@ -89,12 +89,14 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
+	{{- if .SupportPodLogs }}
 	rule {
 		target_label = "__tenant_id__"
 		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 	}
+	{{- end }}
 
-  {{- if not .SupportPodLogs }}
+	{{- if not .SupportPodLogs }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
@@ -303,7 +305,6 @@ loki.process "kubernetes_audit" {
 	stage.tenant {
 		value = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 	}
-
 }
 
 loki.source.file "kubernetes_audit" {

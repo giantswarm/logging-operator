@@ -89,11 +89,6 @@ alloy:
         		source_labels = ["__meta_kubernetes_pod_container_name"]
         		target_label  = "container"
         	}
-        
-        	rule {
-        		target_label = "__tenant_id__"
-        		replacement  = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        	}
         	rule {
         		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
         		separator     = "/"
@@ -298,7 +293,6 @@ alloy:
         	stage.tenant {
         		value = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         	}
-        
         }
         
         loki.source.file "kubernetes_audit" {
