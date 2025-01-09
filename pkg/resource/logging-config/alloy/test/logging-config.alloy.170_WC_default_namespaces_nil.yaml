@@ -69,12 +69,6 @@ alloy:
         	}
         
         	rule {
-        		source_labels = ["namespace", "app"]
-        		separator     = "/"
-        		target_label  = "job"
-        	}
-        
-        	rule {
         		source_labels = ["__meta_kubernetes_pod_name"]
         		target_label  = "pod"
         	}
@@ -82,6 +76,10 @@ alloy:
         	rule {
         		source_labels = ["__meta_kubernetes_pod_container_name"]
         		target_label  = "container"
+        	}
+        	rule {
+        		source_labels = ["giantswarm_observability_tenant"]
+        		target_label  = "__tenant_id__"
         	}
         }
         

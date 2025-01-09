@@ -74,12 +74,6 @@ discovery.relabel "kubernetes_pods" {
 	}
 
 	rule {
-		source_labels = ["namespace", "app"]
-		separator     = "/"
-		target_label  = "job"
-	}
-
-	rule {
 		source_labels = ["__meta_kubernetes_pod_name"]
 		target_label  = "pod"
 	}
@@ -89,7 +83,18 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
-	{{- if not .SupportPodLogs }}
+	{{- if .SupportPodLogs }}
+	rule {
+		source_labels = ["giantswarm_observability_tenant"]
+		target_label  = "__tenant_id__"
+	}
+	{{- else }}
+	rule {
+		source_labels = ["namespace", "app"]
+		separator     = "/"
+		target_label  = "job"
+	}
+
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
