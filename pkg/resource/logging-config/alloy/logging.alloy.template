@@ -112,7 +112,7 @@ discovery.relabel "kubernetes_pods" {
 		action        = "keep"
 	}
 	{{- end }}
-  {{- end }}
+	{{- end }}
 }
 
 loki.process "kubernetes_pods" {
