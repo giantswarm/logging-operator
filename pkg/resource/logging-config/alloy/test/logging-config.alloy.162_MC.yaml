@@ -83,12 +83,12 @@ alloy:
         		source_labels = ["__meta_kubernetes_pod_container_name"]
         		target_label  = "container"
         	}
+        
         	rule {
         		source_labels = ["namespace", "app"]
         		separator     = "/"
         		target_label  = "job"
         	}
-        
         	rule {
         		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
         		separator     = "/"
@@ -123,6 +123,7 @@ alloy:
         			"stream",
         		]
         	}
+        
         }
         
         // journald logs from /run/log/journal
@@ -299,7 +300,7 @@ alloy:
         	endpoint {
         		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
         		max_backoff_period = "10m"
-        		tenant_id          = "anonymous"
+        		tenant_id          = "giantswarm"
         
         		basic_auth {
         			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])

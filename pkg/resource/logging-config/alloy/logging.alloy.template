@@ -83,18 +83,18 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "container"
 	}
 
-	{{- if .SupportPodLogs }}
-	rule {
-		source_labels = ["giantswarm_observability_tenant"]
-		target_label  = "__tenant_id__"
-	}
-	{{- else }}
 	rule {
 		source_labels = ["namespace", "app"]
 		separator     = "/"
 		target_label  = "job"
 	}
 
+	{{- if .SupportPodLogs }}
+	rule {
+		source_labels = ["giantswarm_observability_tenant"]
+		target_label  = "__tenant_id__"
+	}
+	{{- else }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
@@ -138,6 +138,14 @@ loki.process "kubernetes_pods" {
 			"stream",
 		]
 	}
+
+	{{- if .SupportPodLogs }}
+	stage.drop {
+		source = "__tenant_id__"
+		value  = ""
+	}
+	{{- end }}
+
 }
 
 // journald logs from /run/log/journal
@@ -314,7 +322,7 @@ loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = "anonymous"
+		tenant_id          = "giantswarm"
 
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
