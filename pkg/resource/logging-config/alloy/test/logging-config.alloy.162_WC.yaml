@@ -128,7 +128,6 @@ alloy:
         			"stream",
         		]
         	}
-        
         }
         
         // journald logs from /run/log/journal

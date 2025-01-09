@@ -87,6 +87,12 @@ alloy:
         		source_labels = ["giantswarm_observability_tenant"]
         		target_label  = "__tenant_id__"
         	}
+        	// We drop any log lines that do not content a tenant id label
+        	rule {
+        		source_labels = ["__meta_kubernetes_pod_container_name", "__tenant_id__"]
+        		regex = "(.+);"
+        		action = "drop"
+        	}
         }
         
         loki.process "kubernetes_pods" {
@@ -107,11 +113,6 @@ alloy:
         			"stream",
         		]
         	}
-        	stage.drop {
-        		source = "__tenant_id__"
-        		value  = ""
-        	}
-        
         }
         
         // journald logs from /run/log/journal
