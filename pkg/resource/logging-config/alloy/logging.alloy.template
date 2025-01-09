@@ -79,14 +79,14 @@ discovery.relabel "kubernetes_pods" {
 	}
 
 	rule {
-		source_labels = ["__meta_kubernetes_pod_container_name"]
-		target_label  = "container"
-	}
-
-	rule {
 		source_labels = ["namespace", "app"]
 		separator     = "/"
 		target_label  = "job"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
 	}
 
 	{{- if .SupportPodLogs }}
@@ -322,7 +322,7 @@ loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = "giantswarm"
+		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])

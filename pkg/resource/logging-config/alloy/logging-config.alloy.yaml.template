@@ -86,7 +86,7 @@ podLogs:
     relabelings:
     - action: replace
       targetLabel: "giantswarm_observability_tenant"
-      replacement: "giantswarm"
+      replacement: {{ .DefaultWriteTenant }}
 - name: customers-logs
   namespace: kube-system
   spec:
@@ -114,6 +114,6 @@ podLogs:
     relabelings:
     - action: replace
       targetLabel: "giantswarm_observability_tenant"
-      replacement: "giantswarm"
+      replacement: {{ .DefaultWriteTenant }}
 {{- end }}
 {{- end }}
