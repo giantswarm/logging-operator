@@ -318,6 +318,7 @@ loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
+		tenant_id          = "anonymous"
 
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
@@ -335,6 +336,6 @@ loki.write "default" {
 }
 
 logging {
-	level  = "debug"
+	level  = "warn"
 	format = "logfmt"
 }
