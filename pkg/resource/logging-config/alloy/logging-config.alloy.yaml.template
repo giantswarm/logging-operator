@@ -74,7 +74,10 @@ podLogs:
 - name: default-namespaces
   namespace: kube-system
   spec:
-    selector: {}
+    selector:
+      matchExpressions:
+      - key: observability.giantswarm.io/tenant
+        operator: Exists
     namespaceSelector:
       matchExpressions:
       - key: kubernetes.io/metadata.name
@@ -83,6 +86,26 @@ podLogs:
         {{- range .DefaultWorkloadClusterNamespaces }}
         - {{ . }}
         {{- end }}
+    relabelings:
+    - action: replace
+      targetLabel: "giantswarm_observability_tenant"
+      replacement: {{ .DefaultWriteTenant }}
+- name: customers-logs
+  namespace: kube-system
+  spec:
+    selector: {}
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        {{- range .DefaultWorkloadClusterNamespaces }}
+        - {{ . }}
+        {{- end }}
+    relabelings:
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_pod_label_observability_giantswarm_io_tenant"]
+      targetLabel: "giantswarm_observability_tenant"
 {{- end }}
 {{- else }}
 podLogs:
@@ -91,5 +114,9 @@ podLogs:
   spec:
     selector: {}
     namespaceSelector: {}
+    relabelings:
+    - action: replace
+      targetLabel: "giantswarm_observability_tenant"
+      replacement: {{ .DefaultWriteTenant }}
 {{- end }}
 {{- end }}
