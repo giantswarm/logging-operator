@@ -74,10 +74,7 @@ podLogs:
 - name: default-namespaces
   namespace: kube-system
   spec:
-    selector:
-      matchExpressions:
-      - key: observability.giantswarm.io/tenant
-        operator: Exists
+    selector: {}
     namespaceSelector:
       matchExpressions:
       - key: kubernetes.io/metadata.name
@@ -93,7 +90,10 @@ podLogs:
 - name: customers-logs
   namespace: kube-system
   spec:
-    selector: {}
+    selector:
+      matchExpressions:
+      - key: observability.giantswarm.io/tenant
+        operator: Exists
     namespaceSelector:
       matchExpressions:
       - key: kubernetes.io/metadata.name

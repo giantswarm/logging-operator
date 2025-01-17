@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix invalid workload cluster pod logs selectors.
+
 ## [0.20.0] - 2025-01-14
 
 ### Added
