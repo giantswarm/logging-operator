@@ -22,9 +22,8 @@ alloy:
         	namespaces = ["kube-system", "giantswarm"]
         	forward_to = [loki.write.default.receiver]
         }
-        
         loki.source.kubernetes_events "default" {
-        	namespaces = [default]
+        	namespaces = ["default"]
         	forward_to = [loki.process.default.receiver]
         }
         
@@ -32,12 +31,11 @@ alloy:
         loki.process "default" {
         	forward_to = [loki.write.default.receiver]
         
-          stage.match {
-              selector = `{kind=~"Node|ClusterPolicy"}`
-              action = "keep"
-          }
+        	stage.match {
+        		selector = "{instance=\"loki.source.kubernetes_events.default\"} !~ \".*kind=(Node|ClusterPolicy).*\""
+        		action = "drop"
+        	}
         }
-        
         
         // Loki target configuration
         loki.write "default" {

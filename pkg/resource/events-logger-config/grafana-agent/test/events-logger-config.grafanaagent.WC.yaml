@@ -21,9 +21,8 @@ grafana-agent:
         	namespace = "kube-system"
         	name = "test-cluster-grafana-agent-secret"
         }
-        
         loki.source.kubernetes_events "default" {
-        	namespaces = [default]
+        	namespaces = ["default"]
         	forward_to = [loki.process.default.receiver]
         }
         
@@ -31,10 +30,10 @@ grafana-agent:
         loki.process "default" {
         	forward_to = [loki.write.default.receiver]
         
-          stage.match {
-              selector = `{kind=~"Node|ClusterPolicy"}`
-              action = "keep"
-          }
+        	stage.match {
+        		selector = "{instance=\"loki.source.kubernetes_events.default\"} !~ \".*kind=(Node|ClusterPolicy).*\""
+        		action = "drop"
+        	}
         }
         
         loki.write "default" {

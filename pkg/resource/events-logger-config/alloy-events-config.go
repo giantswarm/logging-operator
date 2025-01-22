@@ -63,6 +63,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
 		LoggingPasswordKey string
+		IsWorkloadCluster  bool
 	}{
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
@@ -74,6 +75,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
+		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)
