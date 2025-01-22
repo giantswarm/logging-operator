@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Collect cluster wide events (Nodes, ClusterPolicy) in the default namespace.
+
 ### Fixed
 
 - Fix invalid workload cluster pod logs selectors.

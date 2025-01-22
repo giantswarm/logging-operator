@@ -3,15 +3,31 @@ logging {
 	format = "logfmt"
 }
 
+remote.kubernetes.secret "credentials" {
+	namespace = "kube-system"
+	name = "{{ .SecretName }}"
+}
+
 loki.source.kubernetes_events "local" {
 	namespaces = {{ .ScrapedNamespaces }}
 	forward_to = [loki.write.default.receiver]
 }
 
-remote.kubernetes.secret "credentials" {
-	namespace = "kube-system"
-	name = "{{ .SecretName }}"
+loki.source.kubernetes_events "default" {
+	namespaces = [default]
+	forward_to = [loki.process.default.receiver]
 }
+
+// filter out events that are not related to giantswarm managed components
+loki.process "default" {
+	forward_to = [loki.write.default.receiver]
+
+  stage.match {
+      selector = `{kind=~"Node|ClusterPolicy"}`
+      action = "keep"
+  }
+}
+
 
 // Loki target configuration
 loki.write "default" {

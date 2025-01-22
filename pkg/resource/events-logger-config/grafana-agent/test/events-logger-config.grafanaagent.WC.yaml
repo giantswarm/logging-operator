@@ -22,6 +22,21 @@ grafana-agent:
         	name = "test-cluster-grafana-agent-secret"
         }
         
+        loki.source.kubernetes_events "default" {
+        	namespaces = [default]
+        	forward_to = [loki.process.default.receiver]
+        }
+        
+        // filter out events that are not related to giantswarm managed components
+        loki.process "default" {
+        	forward_to = [loki.write.default.receiver]
+        
+          stage.match {
+              selector = `{kind=~"Node|ClusterPolicy"}`
+              action = "keep"
+          }
+        }
+        
         loki.write "default" {
         	endpoint {
         		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
