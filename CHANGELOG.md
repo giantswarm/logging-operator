@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix the `job` label in logs, by removing the associated relabeling rule.
+
 ## [0.20.1] - 2025-01-30
 
 ### Fixed
