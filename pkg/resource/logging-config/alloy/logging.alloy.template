@@ -68,6 +68,7 @@ discovery.relabel "kubernetes_pods" {
 		target_label  = "node"
 	}
 
+	{{- if .SupportPodLogs }}
 	rule {
 		source_labels = ["instance"]
 		regex         = "(.+)/.+"
@@ -85,6 +86,22 @@ discovery.relabel "kubernetes_pods" {
 		regex         = ".+/.+:(.+)"
 		target_label  = "container"
 	}
+	{{- else }}
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
+	}
+	{{- end }}
 
 	{{- if .SupportPodLogs }}
 	rule {
