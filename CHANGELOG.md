@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.1] - 2025-01-30
+
 ### Fixed
 
 - Fix invalid workload cluster pod logs selectors.
@@ -429,7 +431,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.20.1...HEAD
+[0.20.1]: https://github.com/giantswarm/logging-operator/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/giantswarm/logging-operator/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/giantswarm/logging-operator/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/giantswarm/logging-operator/compare/v0.17.0...v0.18.0
