@@ -13,14 +13,14 @@ alloy:
         	format = "logfmt"
         }
         
-        loki.source.kubernetes_events "local" {
-        	namespaces = []
-        	forward_to = [loki.write.default.receiver]
-        }
-        
         remote.kubernetes.secret "credentials" {
         	namespace = "kube-system"
         	name = "alloy-events"
+        }
+        
+        loki.source.kubernetes_events "local" {
+        	namespaces = []
+        	forward_to = [loki.write.default.receiver]
         }
         
         // Loki target configuration
