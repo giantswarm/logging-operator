@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add namespace, pod, and container log label on logs coming from PodLogs
+
 ### Fixed
 
 - Fix the `job` label in logs, by removing the associated relabeling rule.
