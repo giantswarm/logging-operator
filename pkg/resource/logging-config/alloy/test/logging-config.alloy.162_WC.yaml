@@ -68,16 +68,9 @@ alloy:
         		source_labels = ["__meta_kubernetes_pod_node_name"]
         		target_label  = "node"
         	}
-        
         	rule {
         		source_labels = ["__meta_kubernetes_namespace"]
         		target_label  = "namespace"
-        	}
-        
-        	rule {
-        		source_labels = ["namespace", "app"]
-        		separator     = "/"
-        		target_label  = "job"
         	}
         
         	rule {
