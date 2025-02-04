@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Collect cluster wide events (Nodes, ClusterPolicy) in the default namespace.
+- Collect cluster wide events for Nodes in the default namespace.
 
 ## [0.21.0] - 2025-02-03
 

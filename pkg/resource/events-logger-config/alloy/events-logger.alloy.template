@@ -24,7 +24,7 @@ loki.process "default" {
 	forward_to = [loki.write.default.receiver]
 
 	stage.match {
-		selector = "{instance=\"loki.source.kubernetes_events.default\"} !~ \".*kind=(Node|ClusterPolicy).*\""
+		selector = "{instance=\"loki.source.kubernetes_events.default\"} !~ \".*kind=Node.*\""
 		action = "drop"
 	}
 }
