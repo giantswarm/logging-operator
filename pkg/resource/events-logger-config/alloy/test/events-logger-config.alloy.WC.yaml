@@ -22,17 +22,17 @@ alloy:
         	namespaces = ["kube-system", "giantswarm"]
         	forward_to = [loki.write.default.receiver]
         }
-        loki.source.kubernetes_events "default" {
+        loki.source.kubernetes_events "default_namespace_events" {
         	namespaces = ["default"]
-        	forward_to = [loki.process.default.receiver]
+        	forward_to = [loki.process.default_namespace_events.receiver]
         }
         
         // filter out events that are not related to giantswarm managed components
-        loki.process "default" {
+        loki.process "default_namespace_events" {
         	forward_to = [loki.write.default.receiver]
         
         	stage.match {
-        		selector = "{instance=\"loki.source.kubernetes_events.default\"} !~ \".*kind=Node.*\""
+        		selector = "{instance=\"loki.source.kubernetes_events.default_namespace_events\"} !~ \".*kind=Node.*\""
         		action = "drop"
         	}
         }
