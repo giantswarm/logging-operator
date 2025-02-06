@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Collect cluster wide events for Nodes in the default namespace.
+
 ## [0.21.0] - 2025-02-03
 
 ### Added
@@ -18,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix the `job` label in logs, by removing the associated relabeling rule.
 
 ## [0.20.1] - 2025-01-30
+
 
 ### Fixed
 

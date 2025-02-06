@@ -65,6 +65,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
 		LoggingPasswordKey string
+		IsWorkloadCluster  bool
 	}{
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
@@ -75,6 +76,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
+		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)

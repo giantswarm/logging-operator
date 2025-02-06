@@ -13,14 +13,28 @@ alloy:
         	format = "logfmt"
         }
         
+        remote.kubernetes.secret "credentials" {
+        	namespace = "kube-system"
+        	name = "alloy-events"
+        }
+        
         loki.source.kubernetes_events "local" {
         	namespaces = ["kube-system", "giantswarm"]
         	forward_to = [loki.write.default.receiver]
         }
+        loki.source.kubernetes_events "default_namespace_events" {
+        	namespaces = ["default"]
+        	forward_to = [loki.process.default_namespace_events.receiver]
+        }
         
-        remote.kubernetes.secret "credentials" {
-        	namespace = "kube-system"
-        	name = "alloy-events"
+        // filter out events that are not related to giantswarm managed components
+        loki.process "default_namespace_events" {
+        	forward_to = [loki.write.default.receiver]
+        
+        	stage.match {
+        		selector = "{instance=\"loki.source.kubernetes_events.default_namespace_events\"} !~ \".*kind=Node.*\""
+        		action = "drop"
+        	}
         }
         
         // Loki target configuration
