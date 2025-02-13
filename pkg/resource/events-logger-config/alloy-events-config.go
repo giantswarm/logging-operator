@@ -27,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
+func generateAlloyEventsConfig(lc loggedcluster.Interface) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, defaultNamespaces)
+	alloyConfig, err := generateAlloyConfig(lc)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func generateAlloyEventsConfig(lc loggedcluster.Interface, defaultNamespaces []s
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string) (string, error) {
+func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -69,7 +69,6 @@ func generateAlloyConfig(lc loggedcluster.Interface, defaultNamespaces []string)
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		MaxBackoffPeriod:   common.MaxBackoffPeriod,
-		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultNamespaces),
 		SecretName:         common.AlloyEventsLoggerAppName,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,

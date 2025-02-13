@@ -58,7 +58,7 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				},
 			}
 
-			config, err := generateGrafanaAgentConfig(loggedCluster, []string{"kube-system", "giantswarm"})
+			config, err := generateGrafanaAgentConfig(loggedCluster)
 			if err != nil {
 				t.Fatalf("Failed to generate grafana-agent config: %v", err)
 			}

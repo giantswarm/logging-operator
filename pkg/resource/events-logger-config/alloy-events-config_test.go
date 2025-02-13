@@ -53,7 +53,7 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 				},
 			}
 
-			config, err := generateAlloyEventsConfig(loggedCluster, []string{"kube-system", "giantswarm"})
+			config, err := generateAlloyEventsConfig(loggedCluster)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}
