@@ -19,7 +19,7 @@ alloy:
         }
         
         loki.source.kubernetes_events "local" {
-        	namespaces = "[]"
+        	namespaces = []
         	forward_to = [loki.write.default.receiver]
         }
         
