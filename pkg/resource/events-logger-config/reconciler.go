@@ -20,7 +20,6 @@ import (
 // EventsLogger config: extra events-logger config defining what we want to retrieve.
 type Reconciler struct {
 	client.Client
-	DefaultWorkloadClusterNamespaces []string
 }
 
 // ReconcileCreate ensures events-logger config is created with the right credentials
@@ -29,7 +28,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("events-logger-config create")
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc, r.DefaultWorkloadClusterNamespaces)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

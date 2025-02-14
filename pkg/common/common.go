@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
@@ -98,12 +97,4 @@ func ReadProxyIngressURL(ctx context.Context, lc loggedcluster.Interface, client
 		return "", fmt.Errorf("Loki ingress Host not found")
 	}
 	return lokiIngress.Spec.Rules[0].Host, nil
-}
-
-func FormatScrapedNamespaces(lc loggedcluster.Interface, namespaces []string) string {
-	if IsWorkloadCluster(lc) {
-		return fmt.Sprintf("[\"%s\"]", strings.Join(namespaces, "\", \""))
-	}
-
-	return "[]"
 }
