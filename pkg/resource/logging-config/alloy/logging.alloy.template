@@ -106,6 +106,7 @@ discovery.relabel "kubernetes_pods" {
 	{{- if .SupportPodLogs }}
 	rule {
 		source_labels = ["giantswarm_observability_tenant"]
+		regex         = "({{ join "|" .Tenants }})"
 		target_label  = "__tenant_id__"
 	}
 

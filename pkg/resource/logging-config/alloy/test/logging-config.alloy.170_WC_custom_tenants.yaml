@@ -81,7 +81,7 @@ alloy:
         	}
         	rule {
         		source_labels = ["giantswarm_observability_tenant"]
-        		regex         = "(giantswarm)"
+        		regex         = "(test-tenant-a|test-tenant-b|giantswarm)"
         		target_label  = "__tenant_id__"
         	}
         
@@ -351,35 +351,3 @@ alloy:
 verticalPodAutoscaler:
   # -- Creates a VerticalPodAutoscaler for the daemonset
   enabled: true
-podLogs:
-- name: default-namespaces
-  namespace: kube-system
-  spec:
-    selector: {}
-    namespaceSelector:
-      matchExpressions:
-      - key: kubernetes.io/metadata.name
-        operator: In
-        values:
-        - test-selector
-    relabelings:
-    - action: replace
-      targetLabel: "giantswarm_observability_tenant"
-      replacement: giantswarm
-- name: customers-logs
-  namespace: kube-system
-  spec:
-    selector:
-      matchExpressions:
-      - key: observability.giantswarm.io/tenant
-        operator: Exists
-    namespaceSelector:
-      matchExpressions:
-      - key: kubernetes.io/metadata.name
-        operator: NotIn
-        values:
-        - test-selector
-    relabelings:
-    - action: replace
-      sourceLabels: ["__meta_kubernetes_pod_label_observability_giantswarm_io_tenant"]
-      targetLabel: "giantswarm_observability_tenant"

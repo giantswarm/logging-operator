@@ -81,6 +81,7 @@ alloy:
         	}
         	rule {
         		source_labels = ["giantswarm_observability_tenant"]
+        		regex         = "(giantswarm)"
         		target_label  = "__tenant_id__"
         	}
         
