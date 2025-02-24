@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `grafana-organization-reconciler` to update the logging-config based on changes made to the Grafana Organization CRs (especially changes in the tenants).
+- Add `grafana-organization-reconciler` to be used for tenant governance.
 
 ## [0.22.0] - 2025-02-12
 
