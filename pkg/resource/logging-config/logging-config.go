@@ -3,6 +3,7 @@ package loggingconfig
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,7 +78,9 @@ func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error)
 
 	for _, organization := range grafanaOrganizations.Items {
 		for _, tenant := range organization.Spec.Tenants {
-			tenants = append(tenants, string(tenant))
+			if !slices.Contains(tenants, string(tenant)) {
+				tenants = append(tenants, string(tenant))
+			}
 		}
 	}
 
