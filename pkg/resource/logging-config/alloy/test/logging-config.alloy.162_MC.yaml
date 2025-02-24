@@ -103,6 +103,13 @@ alloy:
         
         	stage.cri { }
         
+        	// Drop log lines that do not contain a tenant id
+        	stage.drop {
+        		drop_counter_reason = "no_tenant_id"
+        		source              = "__tenant_id__"
+        		expression          = "^$"
+        	}
+        
         	stage.structured_metadata {
         		values = {
         			"filename" = "",
