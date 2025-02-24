@@ -1,16 +1,19 @@
 package loggingconfig
 
 import (
+	"context"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/observability-operator/api/v1alpha1"
 )
 
 const (
@@ -60,4 +63,22 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 
 func getLoggingConfigName(lc loggedcluster.Interface) string {
 	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingConfigName)
+}
+
+func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error) {
+	tenantList := make([]string, 0)
+	var grafaOrgList v1alpha1.GrafanaOrganizationList
+
+	err := k8sClient.List(ctx, &grafaOrgList)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, grafanaOrg := range grafaOrgList.Items {
+		for _, tenant := range grafanaOrg.Spec.Tenants {
+			tenantList = append(tenantList, string(tenant))
+		}
+	}
+
+	return tenantList, nil
 }
