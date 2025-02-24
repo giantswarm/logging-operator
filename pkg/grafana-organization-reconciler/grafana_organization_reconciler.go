@@ -3,8 +3,6 @@ package grafanaorganizationreconciler
 import (
 	"context"
 
-	"github.com/giantswarm/logging-operator/pkg/key"
-	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -13,6 +11,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/key"
+	"github.com/giantswarm/logging-operator/pkg/reconciler"
 )
 
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
