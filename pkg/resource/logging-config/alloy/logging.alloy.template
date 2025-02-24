@@ -149,12 +149,14 @@ loki.process "kubernetes_pods" {
 
 	stage.cri { }
 
+	{{- if .SupportPodLogs }}
 	// Drop log lines that do not contain a tenant id
 	stage.drop {
 		drop_counter_reason = "no_tenant_id"
 		source              = "__tenant_id__"
 		expression          = "^$"
 	}
+	{{- end }}
 
 	stage.structured_metadata {
 		values = {

@@ -98,7 +98,6 @@ alloy:
         	forward_to = [loki.write.default.receiver]
         
         	stage.cri { }
-        
         	// Drop log lines that do not contain a tenant id
         	stage.drop {
         		drop_counter_reason = "no_tenant_id"
