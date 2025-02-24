@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add support for tenant filtering in Alloy config
+- Add `grafana-organization-reconciler` to be used for tenant governance.
 
 ## [0.22.0] - 2025-02-12
 
