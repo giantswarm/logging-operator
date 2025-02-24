@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `grafana-organization-reconciler` to be used for tenant governance.
 
+### Fixed
+
+- Added a `namespace_selector` to alloy logs config to work around a bug in Alloy 1.5.0 where clustering may not work.
+
 ## [0.22.0] - 2025-02-12
 
 ### Changed
