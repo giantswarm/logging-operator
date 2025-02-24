@@ -11,9 +11,10 @@ import (
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
 
+	"github.com/giantswarm/observability-operator/api/v1alpha1"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/observability-operator/api/v1alpha1"
 )
 
 const (
