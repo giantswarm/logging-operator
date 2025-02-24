@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// LoggingReconciler reconciles logging for any supported object
+// GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
@@ -27,14 +27,13 @@ func (l *GrafanaOrganizationReconciler) Reconcile(ctx context.Context) (result c
 	return result, errors.WithStack(err)
 }
 
-// reconcileCreate handles creation/update logic by calling ReconcileCreate method on all l.Reconcilers.
 func (l *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	if !controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
-		logger.Info("adding finalizer", "finalizer", key.Finalizer)
+		logger.Info("adding finalizer to Grafana Organization", "finalizer", key.Finalizer)
 
-		// We use a patch rather than an update to avoid conflicts when multiple controllers are adding their finalizer to the ClusterCR
+		// We use a patch rather than an update to avoid conflicts when multiple controllers are adding their finalizer to the GrafanaOrganization
 		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
 		patchHelper, err := patch.NewHelper(&grafanaOrganization, l.Client)
 		if err != nil {
@@ -51,16 +50,15 @@ func (l *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 	return ctrl.Result{}, nil
 }
 
-// reconcileDelete handles deletion logic by calling reconcileDelete method on all l.Reconcilers.
 func (l *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	if controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
 		// We get the latest state of the object to avoid race conditions.
 		// Finalizer handling needs to come last.
-		logger.Info("removing finalizer", "finalizer", key.Finalizer)
+		logger.Info("removing finalizer from Grafana Organization", "finalizer", key.Finalizer)
 
-		// We use a patch rather than an update to avoid conflicts when multiple controllers are removing their finalizer from the ClusterCR
+		// We use a patch rather than an update to avoid conflicts when multiple controllers are removing their finalizer from the GrafanaOrganization
 		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
 		patchHelper, err := patch.NewHelper(&grafanaOrganization, l.Client)
 		if err != nil {
