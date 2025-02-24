@@ -70,16 +70,16 @@ func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error)
 	tenants := make([]string, 0)
 	var grafanaOrganizations v1alpha1.GrafanaOrganizationList
 
-	err := k8sClient.List(ctx, &grafaOrgList)
+	err := k8sClient.List(ctx, &grafanaOrganizations)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, organization := range grafaOrgList.Items {
-		for _, tenant := range grafanaOrg.Spec.Tenants {
-			tenantList = append(tenantList, string(tenant))
+	for _, organization := range grafanaOrganizations.Items {
+		for _, tenant := range organization.Spec.Tenants {
+			tenants = append(tenants, string(tenant))
 		}
 	}
 
-	return tenantList, nil
+	return tenants, nil
 }
