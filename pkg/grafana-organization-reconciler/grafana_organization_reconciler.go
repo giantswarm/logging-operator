@@ -23,13 +23,28 @@ type GrafanaOrganizationReconciler struct {
 	Reconcilers []reconciler.Interface
 }
 
-func (l *GrafanaOrganizationReconciler) Reconcile(ctx context.Context) (result ctrl.Result, err error) {
-	//TODO : Implement the reconcile logic
+func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	logger := log.FromContext(ctx)
 
-	return result, errors.WithStack(err)
+	logger.Info("Started reconciling Grafana Organization")
+	defer logger.Info("Finished reconciling Grafana Organization")
+
+	grafanaOrganization := &v1alpha1.GrafanaOrganization{}
+	err = g.Client.Get(ctx, req.NamespacedName, grafanaOrganization)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
+	}
+
+	// Handle deleted grafana organizations
+	if !grafanaOrganization.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization)
+	}
+
+	// Handle non-deleted grafana organizations
+	return g.reconcileCreate(ctx, *grafanaOrganization)
 }
 
-func (l *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) (ctrl.Result, error) {
+func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	if !controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -37,7 +52,7 @@ func (l *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 
 		// We use a patch rather than an update to avoid conflicts when multiple controllers are adding their finalizer to the GrafanaOrganization
 		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
-		patchHelper, err := patch.NewHelper(&grafanaOrganization, l.Client)
+		patchHelper, err := patch.NewHelper(&grafanaOrganization, g.Client)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -52,7 +67,7 @@ func (l *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 	return ctrl.Result{}, nil
 }
 
-func (l *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) (ctrl.Result, error) {
+func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) error {
 	logger := log.FromContext(ctx)
 
 	if controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -62,17 +77,17 @@ func (l *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, gra
 
 		// We use a patch rather than an update to avoid conflicts when multiple controllers are removing their finalizer from the GrafanaOrganization
 		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
-		patchHelper, err := patch.NewHelper(&grafanaOrganization, l.Client)
+		patchHelper, err := patch.NewHelper(&grafanaOrganization, g.Client)
 		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+			return errors.WithStack(err)
 		}
 		controllerutil.RemoveFinalizer(&grafanaOrganization, key.Finalizer)
 		if err := patchHelper.Patch(ctx, &grafanaOrganization); err != nil {
 			logger.Error(err, "failed to remove finalizer from grafana organization, requeuing", "finalizer", key.Finalizer)
-			return ctrl.Result{}, errors.WithStack(err)
+			return errors.WithStack(err)
 		}
 		logger.Info("successfully removed finalizer from grafana organization", "finalizer", key.Finalizer)
 	}
 
-	return ctrl.Result{}, nil
+	return nil
 }
