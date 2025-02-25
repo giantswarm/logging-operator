@@ -3,6 +3,7 @@ package loggingconfig
 import (
 	"bytes"
 	_ "embed"
+	"slices"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -32,10 +33,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (string, error) {
+func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion)
+	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion, tenants)
 	if err != nil {
 		return "", err
 	}
@@ -66,10 +67,15 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (string, error) {
+func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string) (string, error) {
 	var values bytes.Buffer
 
 	clusterName := lc.GetClusterName()
+
+	// Ensure default tenant is included in the list of tenants
+	if !slices.Contains(tenants, lc.GetTenant()) {
+		tenants = append(tenants, lc.GetTenant())
+	}
 
 	data := struct {
 		ClusterID          string
@@ -83,6 +89,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
 		LoggingPasswordKey string
+		Tenants            []string
 	}{
 		ClusterID:         clusterName,
 		Installation:      lc.GetInstallationName(),
@@ -96,6 +103,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
+		Tenants:            tenants,
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)

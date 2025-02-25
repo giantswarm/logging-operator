@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Collect all cluster events from workload clusters.
 
+### Added
+
+- Add tenant filtering in Alloy config
+
+### Fixed
+
+- Fix non-working log lines dropping on missing tenant id
+
+## [0.23.0] - 2025-02-25
+
+### Added
+
+- Add `grafana-organization-reconciler` to be used for tenant governance.
+
+### Fixed
+
+- Added a `namespace_selector` to alloy logs config to work around a bug in Alloy 1.5.0 where clustering may not work.
+
 ## [0.22.0] - 2025-02-12
 
 ### Changed
@@ -452,7 +470,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/giantswarm/logging-operator/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/giantswarm/logging-operator/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/giantswarm/logging-operator/compare/v0.20.1...v0.21.0
 [0.20.1]: https://github.com/giantswarm/logging-operator/compare/v0.20.0...v0.20.1

@@ -90,7 +90,7 @@ alloy:
         	// Log lines are dropped later in the loki.process stage.drop step.
         	rule {
         		source_labels = ["giantswarm_observability_tenant"]
-        		regex         = "^(giantswarm)$"
+        		regex         = "^(test-tenant-a|test-tenant-b|giantswarm)$"
         		target_label  = "__tenant_id__"
         	}
         

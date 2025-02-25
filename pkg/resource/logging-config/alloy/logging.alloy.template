@@ -7,7 +7,14 @@ remote.kubernetes.secret "credentials" {
 {{- if .SupportPodLogs }}
 loki.source.podlogs "kubernetes_pods" {
 	forward_to      = [loki.relabel.kubernetes_pods.receiver]
-
+	// namespace_selector is a workaround for broken cluster mode in alloy 1.5.0
+	namespace_selector {
+		match_expression {
+			key = "nonexisting"
+			operator = "NotIn"
+			values = ["nonexistant"]
+		}
+	}
 	clustering {
 		enabled = true
 	}
@@ -104,8 +111,11 @@ discovery.relabel "kubernetes_pods" {
 	{{- end }}
 
 	{{- if .SupportPodLogs }}
+	// Keep only log lines with tenants specified in the regex.
+	// Log lines are dropped later in the loki.process stage.drop step.
 	rule {
 		source_labels = ["giantswarm_observability_tenant"]
+		regex         = "^({{ join "|" .Tenants }})$"
 		target_label  = "__tenant_id__"
 	}
 
@@ -115,12 +125,6 @@ discovery.relabel "kubernetes_pods" {
 		action = "labeldrop"
 	}
 
-	// We drop any log lines that do not contain a tenant_id label
-	rule {
-		source_labels = ["__meta_kubernetes_pod_container_name", "__tenant_id__"]
-		regex = "(.+);"
-		action = "drop"
-	}
 	{{- else }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
@@ -151,6 +155,15 @@ loki.process "kubernetes_pods" {
 	forward_to = [loki.write.default.receiver]
 
 	stage.cri { }
+
+	{{- if .SupportPodLogs }}
+	// Drop log lines that do not contain a tenant id
+	stage.drop {
+		drop_counter_reason = "no_tenant_id"
+		source              = "__tenant_id__"
+		expression          = "^$"
+	}
+	{{- end }}
 
 	stage.structured_metadata {
 		values = {
