@@ -28,6 +28,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 		defaultNamespaces          []string
 		installationName           string
 		clusterName                string
+		tenants                    []string
 	}{
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.162_MC.yaml",
@@ -69,6 +70,14 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 		},
+		{
+			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_custom_tenants.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          []string{""},
+			installationName:           "test-installation",
+			clusterName:                "test-cluster",
+			tenants:                    []string{"test-tenant-a", "test-tenant-b"},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -93,7 +102,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				},
 			}
 
-			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultNamespaces)
+			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

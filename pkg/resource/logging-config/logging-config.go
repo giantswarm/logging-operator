@@ -1,13 +1,18 @@
 package loggingconfig
 
 import (
+	"context"
 	"fmt"
+	"slices"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/blang/semver"
 	"github.com/pkg/errors"
+
+	"github.com/giantswarm/observability-operator/api/v1alpha1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -17,7 +22,7 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces []string) (v1.ConfigMap, error) {
+func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
@@ -28,7 +33,7 @@ func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersio
 			return v1.ConfigMap{}, err
 		}
 	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces)
+		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces, tenants)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
@@ -60,4 +65,24 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 
 func getLoggingConfigName(lc loggedcluster.Interface) string {
 	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingConfigName)
+}
+
+func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error) {
+	tenants := make([]string, 0)
+	var grafanaOrganizations v1alpha1.GrafanaOrganizationList
+
+	err := k8sClient.List(ctx, &grafanaOrganizations)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, organization := range grafanaOrganizations.Items {
+		for _, tenant := range organization.Spec.Tenants {
+			if !slices.Contains(tenants, string(tenant)) {
+				tenants = append(tenants, string(tenant))
+			}
+		}
+	}
+
+	return tenants, nil
 }

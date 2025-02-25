@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add tenant filtering in Alloy config
+
+### Fixed
+
+- Fix non-working log lines dropping on missing tenant id
+
 ## [0.23.0] - 2025-02-25
 
 ### Added

@@ -86,8 +86,11 @@ alloy:
         		regex         = ".+/.+:(.+)"
         		target_label  = "container"
         	}
+        	// Keep only log lines with tenants specified in the regex.
+        	// Log lines are dropped later in the loki.process stage.drop step.
         	rule {
         		source_labels = ["giantswarm_observability_tenant"]
+        		regex         = "^(giantswarm)$"
         		target_label  = "__tenant_id__"
         	}
         
@@ -96,19 +99,18 @@ alloy:
         		regex = "giantswarm_observability_tenant"
         		action = "labeldrop"
         	}
-        
-        	// We drop any log lines that do not contain a tenant_id label
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_container_name", "__tenant_id__"]
-        		regex = "(.+);"
-        		action = "drop"
-        	}
         }
         
         loki.process "kubernetes_pods" {
         	forward_to = [loki.write.default.receiver]
         
         	stage.cri { }
+        	// Drop log lines that do not contain a tenant id
+        	stage.drop {
+        		drop_counter_reason = "no_tenant_id"
+        		source              = "__tenant_id__"
+        		expression          = "^$"
+        	}
         
         	stage.structured_metadata {
         		values = {

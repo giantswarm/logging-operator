@@ -41,8 +41,14 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	// Get list of tenants
+	tenants, err := listTenants(r.Client, ctx)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces)
+	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
