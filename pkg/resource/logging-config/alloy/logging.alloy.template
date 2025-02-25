@@ -7,7 +7,14 @@ remote.kubernetes.secret "credentials" {
 {{- if .SupportPodLogs }}
 loki.source.podlogs "kubernetes_pods" {
 	forward_to      = [loki.relabel.kubernetes_pods.receiver]
-
+	// namespace_selector is a workaround for broken cluster mode in alloy 1.5.0
+	namespace_selector {
+		match_expression {
+			key = "nonexisting"
+			operator = "NotIn"
+			values = ["nonexistant"]
+		}
+	}
 	clustering {
 		enabled = true
 	}
