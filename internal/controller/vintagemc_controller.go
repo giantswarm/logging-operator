@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/giantswarm/logging-operator/internal/controller/predicates"
-	grafanaorganizationreconciler "github.com/giantswarm/logging-operator/pkg/grafana-organization-reconciler"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/vintagemc"
 	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
@@ -42,9 +41,8 @@ import (
 // VintageMCReconciler reconciles a Service object
 type VintageMCReconciler struct {
 	client.Client
-	Scheme                        *runtime.Scheme
-	LoggingReconciler             loggingreconciler.LoggingReconciler
-	GrafanaOrganizationReconciler grafanaorganizationreconciler.GrafanaOrganizationReconciler
+	Scheme            *runtime.Scheme
+	LoggingReconciler loggingreconciler.LoggingReconciler
 }
 
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
