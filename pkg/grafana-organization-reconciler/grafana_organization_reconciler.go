@@ -13,17 +13,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
-	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 )
 
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	Reconcilers []reconciler.Interface
+	Scheme                  *runtime.Scheme
+	LoggingConfigReconciler loggingconfig.Reconciler
 }
 
-func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.Request, lc loggedcluster.Interface) (result ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("Started reconciling Grafana Organization")
@@ -37,14 +38,14 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	// Handle deleted grafana organizations
 	if !grafanaOrganization.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization)
+		return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, lc)
 	}
 
 	// Handle non-deleted grafana organizations
-	return g.reconcileCreate(ctx, *grafanaOrganization)
+	return g.reconcileCreate(ctx, *grafanaOrganization, lc)
 }
 
-func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) (ctrl.Result, error) {
+func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	if !controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -64,10 +65,15 @@ func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 		logger.Info("successfully added finalizer to grafana organization", "finalizer", key.Finalizer)
 	}
 
-	return ctrl.Result{}, nil
+	result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, lc)
+	if err != nil {
+		return result, errors.WithStack(err)
+	}
+
+	return result, nil
 }
 
-func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization) error {
+func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization, lc loggedcluster.Interface) error {
 	logger := log.FromContext(ctx)
 
 	if controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -87,6 +93,11 @@ func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, gra
 			return errors.WithStack(err)
 		}
 		logger.Info("successfully removed finalizer from grafana organization", "finalizer", key.Finalizer)
+	}
+
+	_, err := g.LoggingConfigReconciler.ReconcileDelete(ctx, lc)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
 	return nil
