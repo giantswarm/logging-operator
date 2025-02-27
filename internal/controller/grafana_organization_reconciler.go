@@ -23,7 +23,6 @@ import (
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -53,8 +52,14 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 	logger.Info("Started reconciling Grafana Organization")
 	defer logger.Info("Finished reconciling Grafana Organization")
 
-	cluster := &capi.Cluster{}
-	err = g.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, cluster)
+	grafanaOrganization := &grafanaorganization.GrafanaOrganization{}
+	err = g.Client.Get(ctx, req.NamespacedName, grafanaOrganization)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
+	}
+
+	clusters := &capi.ClusterList{}
+	err = g.Client.List(ctx, clusters)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
@@ -62,24 +67,22 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	loggedCluster := &capicluster.Object{
-		Object:  cluster,
-		Options: loggedcluster.O,
+	for _, cluster := range clusters.Items {
+		loggedCluster := &capicluster.Object{
+			Object:  &cluster,
+			Options: loggedcluster.O,
+		}
+
+		// Handle deleted grafana organizations
+		if !grafanaOrganization.DeletionTimestamp.IsZero() {
+			return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, loggedCluster)
+		} else {
+			// Handle non-deleted grafana organizations
+			return g.reconcileCreate(ctx, *grafanaOrganization, loggedCluster)
+		}
 	}
 
-	grafanaOrganization := &grafanaorganization.GrafanaOrganization{}
-	err = g.Client.Get(ctx, req.NamespacedName, grafanaOrganization)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
-	}
-
-	// Handle deleted grafana organizations
-	if !grafanaOrganization.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, loggedCluster)
-	}
-
-	// Handle non-deleted grafana organizations
-	return g.reconcileCreate(ctx, *grafanaOrganization, loggedCluster)
+	return ctrl.Result{}, nil
 }
 
 func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) (ctrl.Result, error) {
