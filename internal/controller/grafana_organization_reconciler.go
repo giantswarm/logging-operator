@@ -73,6 +73,8 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 			Options: loggedcluster.O,
 		}
 
+		logger.Info("logged cluster", "name", loggedCluster)
+
 		// Handle deleted grafana organizations
 		if !grafanaOrganization.DeletionTimestamp.IsZero() {
 			return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, loggedCluster)
