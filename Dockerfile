@@ -1,5 +1,6 @@
-FROM gsoci.azurecr.io/giantswarm/alpine:3.20.3-giantswarm
-
+# Use distroless as minimal base image to package the logging-operator binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 
 ADD logging-operator logging-operator
