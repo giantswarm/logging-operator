@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add tenant filtering in Alloy config
 
+### Changed
+
+- Use smaller dockerfile to reduce build time as ABS already generates the go binary.
+
 ### Fixed
 
 - Fix non-working log lines dropping on missing tenant id
