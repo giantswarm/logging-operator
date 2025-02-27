@@ -1,11 +1,14 @@
-package grafanaorganizationreconciler
+package controller
 
 import (
 	"context"
 
-	"github.com/giantswarm/observability-operator/api/v1alpha1"
+	grafanaorganization "github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -14,6 +17,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 )
 
@@ -24,13 +28,27 @@ type GrafanaOrganizationReconciler struct {
 	LoggingConfigReconciler loggingconfig.Reconciler
 }
 
-func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.Request, lc loggedcluster.Interface) (result ctrl.Result, err error) {
+func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("Started reconciling Grafana Organization")
 	defer logger.Info("Finished reconciling Grafana Organization")
 
-	grafanaOrganization := &v1alpha1.GrafanaOrganization{}
+	cluster := &capi.Cluster{}
+	err = g.Client.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, cluster)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	loggedCluster := &capicluster.Object{
+		Object:  cluster,
+		Options: loggedcluster.O,
+	}
+
+	grafanaOrganization := &grafanaorganization.GrafanaOrganization{}
 	err = g.Client.Get(ctx, req.NamespacedName, grafanaOrganization)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
@@ -38,14 +56,14 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	// Handle deleted grafana organizations
 	if !grafanaOrganization.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, lc)
+		return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, loggedCluster)
 	}
 
 	// Handle non-deleted grafana organizations
-	return g.reconcileCreate(ctx, *grafanaOrganization, lc)
+	return g.reconcileCreate(ctx, *grafanaOrganization, loggedCluster)
 }
 
-func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	if !controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -73,7 +91,7 @@ func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 	return result, nil
 }
 
-func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization v1alpha1.GrafanaOrganization, lc loggedcluster.Interface) error {
+func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) error {
 	logger := log.FromContext(ctx)
 
 	if controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -101,4 +119,11 @@ func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, gra
 	}
 
 	return nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (g *GrafanaOrganizationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&grafanaorganization.GrafanaOrganization{}).
+		Complete(g)
 }
