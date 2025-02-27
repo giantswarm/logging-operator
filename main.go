@@ -175,8 +175,7 @@ func main() {
 	}
 
 	eventsLoggerConfig := eventsloggerconfig.Reconciler{
-		Client:                           mgr.GetClient(),
-		DefaultWorkloadClusterNamespaces: defaultNamespaces,
+		Client: mgr.GetClient(),
 	}
 
 	eventsLoggerSecret := eventsloggersecret.Reconciler{
