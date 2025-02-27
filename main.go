@@ -239,6 +239,16 @@ func main() {
 			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 			os.Exit(1)
 		}
+
+		// The GrafanaOrganizationREconciler is only used in CAPI mode
+		if err = (&controller.GrafanaOrganizationReconciler{
+			Client:                  mgr.GetClient(),
+			Scheme:                  mgr.GetScheme(),
+			LoggingConfigReconciler: loggingConfig,
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 
