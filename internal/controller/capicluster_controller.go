@@ -20,6 +20,7 @@ import (
 	"context"
 
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
+	grafanaorganization "github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -96,6 +97,18 @@ func (r *CapiClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				}
 			}),
 			builder.WithPredicates(predicates.ObservabilityBundleAppVersionChangedPredicate{}),
+		).
+		// This ensures we run the reconcile loop whenever there is a change in the grafana organization CRs.
+		Watches(
+			&grafanaorganization.GrafanaOrganization{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      object.GetLabels()["giantswarm.io/cluster"],
+						Namespace: object.GetNamespace(),
+					}},
+				}
+			}),
 		).
 		Complete(r)
 }
