@@ -24,13 +24,10 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
@@ -73,20 +70,25 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 			Options: loggedcluster.O,
 		}
 
-		// Handle deleted grafana organizations
+		/* // Handle deleted grafana organizations
 		if !grafanaOrganization.DeletionTimestamp.IsZero() {
 			logger.Info("Grafana organization is getting deleted", "name", grafanaOrganization.Name)
 			return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, loggedCluster)
 		} else {
 			// Handle non-deleted grafana organizations
 			return g.reconcileCreate(ctx, *grafanaOrganization, loggedCluster)
+		} */
+
+		result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
+		if err != nil {
+			return result, errors.WithStack(err)
 		}
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) (ctrl.Result, error) {
+/* func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	if !controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
@@ -148,7 +150,7 @@ func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, gra
 	}
 
 	return nil
-}
+} */
 
 // SetupWithManager sets up the controller with the Manager.
 func (g *GrafanaOrganizationReconciler) SetupWithManager(mgr ctrl.Manager) error {
