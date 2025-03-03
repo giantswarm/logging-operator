@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add tenant filtering in Alloy config
-- Add logic into `grafana-organization-reconciler`.
+- Add logic into `grafana-organization-reconciler` for updating the logging-config's list of tenants whenever a change occurs to the Grafana Organization CRs.
 
 ### Changed
 
