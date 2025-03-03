@@ -116,6 +116,13 @@ func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) error {
 	logger := log.FromContext(ctx)
 
+	// We don't want to delete the logging-config, just update it
+	_, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, lc)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	// Remove finalizer once the logging config has been updated
 	if controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
 		// We get the latest state of the object to avoid race conditions.
 		// Finalizer handling needs to come last.
@@ -133,11 +140,6 @@ func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, gra
 			return errors.WithStack(err)
 		}
 		logger.Info("successfully removed finalizer from grafana organization", "finalizer", key.Finalizer)
-	}
-
-	_, err := g.LoggingConfigReconciler.ReconcileDelete(ctx, lc)
-	if err != nil {
-		return errors.WithStack(err)
 	}
 
 	return nil
