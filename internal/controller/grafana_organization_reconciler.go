@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
@@ -57,12 +58,6 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 	logger.Info("Started reconciling Grafana Organization")
 	defer logger.Info("Finished reconciling Grafana Organization")
 
-	grafanaOrganization := &grafanaorganization.GrafanaOrganization{}
-	err = g.Client.Get(ctx, req.NamespacedName, grafanaOrganization)
-	if client.IgnoreNotFound(err) != nil { // Only handle errors that are not notFound ones
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	clusters := &capi.ClusterList{}
 	err = g.Client.List(ctx, clusters)
 	if err != nil {
@@ -78,10 +73,12 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 			Options: loggedcluster.O,
 		}
 
-		// Reconcile logging config for each cluster
-		result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
-		if err != nil {
-			return result, errors.WithStack(err)
+		if common.IsLoggingEnabled(loggedCluster) {
+			// Reconcile logging config for each cluster
+			result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
+			if err != nil {
+				return result, errors.WithStack(err)
+			}
 		}
 	}
 
