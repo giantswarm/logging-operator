@@ -51,8 +51,8 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	grafanaOrganization := &grafanaorganization.GrafanaOrganization{}
 	err = g.Client.Get(ctx, req.NamespacedName, grafanaOrganization)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(client.IgnoreNotFound(err))
+	if client.IgnoreNotFound(err) != nil {
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	clusters := &capi.ClusterList{}
