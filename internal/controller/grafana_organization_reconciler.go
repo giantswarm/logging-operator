@@ -75,6 +75,7 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 		// Handle deleted grafana organizations
 		if !grafanaOrganization.DeletionTimestamp.IsZero() {
+			logger.Info("Grafana organization is getting deleted", "name", grafanaOrganization.Name)
 			return ctrl.Result{}, g.reconcileDelete(ctx, *grafanaOrganization, loggedCluster)
 		} else {
 			// Handle non-deleted grafana organizations
@@ -116,6 +117,8 @@ func (g *GrafanaOrganizationReconciler) reconcileCreate(ctx context.Context, gra
 func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, grafanaOrganization grafanaorganization.GrafanaOrganization, lc loggedcluster.Interface) error {
 	logger := log.FromContext(ctx)
 
+	logger.Info("Entering reconcileDelete method")
+
 	// Remove finalizer so that the grafana organization can be deleted
 	if controllerutil.ContainsFinalizer(&grafanaOrganization, key.Finalizer) {
 		// We get the latest state of the object to avoid race conditions.
@@ -135,6 +138,8 @@ func (g *GrafanaOrganizationReconciler) reconcileDelete(ctx context.Context, gra
 		}
 		logger.Info("successfully removed finalizer from grafana organization", "finalizer", key.Finalizer)
 	}
+
+	logger.Info("Updating logging-config for Grafana Organization")
 
 	// We don't want to delete the logging-config, just update it
 	_, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, lc)
