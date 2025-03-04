@@ -30,10 +30,10 @@ func init() {
 
 // generateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
+func generateGrafanaAgentConfig(lc loggedcluster.Interface) (string, error) {
 	var values bytes.Buffer
 
-	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, defaultWorkloadClusterNamespaces)
+	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultWorkloadClust
 	return values.String(), nil
 }
 
-func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
+func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -60,23 +60,19 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		Installation       string
 		InsecureSkipVerify string
 		SecretName         string
-		ScrapedNamespaces  string
 		LoggingURLKey      string
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
 		LoggingPasswordKey string
-		IsWorkloadCluster  bool
 	}{
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
-		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultWorkloadClusterNamespaces),
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)
