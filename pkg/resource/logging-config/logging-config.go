@@ -77,6 +77,10 @@ func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error)
 	}
 
 	for _, organization := range grafanaOrganizations.Items {
+		if !organization.DeletionTimestamp.IsZero() {
+			continue
+		}
+
 		for _, tenant := range organization.Spec.Tenants {
 			if !slices.Contains(tenants, string(tenant)) {
 				tenants = append(tenants, string(tenant))
