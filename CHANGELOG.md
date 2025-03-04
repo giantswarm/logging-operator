@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add tenant filtering in Alloy config
+- Implement `grafana-organization` controller to update tenant IDs filter on GrafanaOrganization changes.
+
+### Changed
+
+- Use smaller dockerfile to reduce build time as ABS already generates the go binary.
 
 ### Fixed
 
