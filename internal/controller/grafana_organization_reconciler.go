@@ -31,6 +31,7 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
+	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 )
 
@@ -38,6 +39,7 @@ import (
 type GrafanaOrganizationReconciler struct {
 	client.Client
 	Scheme                  *runtime.Scheme
+	AgentsToggleReconciler  agentstoggle.Reconciler
 	LoggingConfigReconciler loggingconfig.Reconciler
 }
 
@@ -75,7 +77,13 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 		if common.IsLoggingEnabled(loggedCluster) {
 			// Reconcile logging config for each cluster
-			result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
+
+			result, err := g.AgentsToggleReconciler.ReconcileCreate(ctx, loggedCluster)
+			if err != nil {
+				return result, errors.WithStack(err)
+			}
+
+			result, err = g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
 			if err != nil {
 				return result, errors.WithStack(err)
 			}
