@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Make sure we use the correct agent in the grafana org reconciler to avoid creating the alloy config for promtail agents.
+
 ## [0.24.1] - 2025-03-06
 
 ### Fixed

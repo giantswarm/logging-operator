@@ -245,6 +245,7 @@ func main() {
 			Client:                  mgr.GetClient(),
 			Scheme:                  mgr.GetScheme(),
 			LoggingConfigReconciler: loggingConfig,
+			AgentsToggleReconciler:  agentsToggle,
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
 			os.Exit(1)
