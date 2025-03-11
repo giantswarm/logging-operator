@@ -9,23 +9,27 @@ remote.kubernetes.secret "credentials" {
 }
 
 loki.source.kubernetes_events "local" {
-	namespaces = {{ .ScrapedNamespaces }}
+	{{- if and .IsWorkloadCluster .IncludeNamespaces }}
+	namespaces = ["{{ join "\", \"" .IncludeNamespaces }}"]
+	{{- else }}
+	namespaces = []
+	{{- end }}
+
+	{{- if and .IsWorkloadCluster .ExcludeNamespaces }}
+	forward_to = [loki.process.default.receiver]
+	{{- else }}
 	forward_to = [loki.write.default.receiver]
+	{{- end }}
 }
 
-{{- if .IsWorkloadCluster }}
-loki.source.kubernetes_events "default_namespace_events" {
-	namespaces = ["default"]
-	forward_to = [loki.process.default_namespace_events.receiver]
-}
-
-// filter out events that are not related to giantswarm managed components
-loki.process "default_namespace_events" {
+{{- if and .IsWorkloadCluster .ExcludeNamespaces }}
+// exclude configured namespaces
+loki.process "default" {
 	forward_to = [loki.write.default.receiver]
 
-	stage.match {
-		selector = "{instance=\"loki.source.kubernetes_events.default_namespace_events\"} !~ \".*kind=Node.*\""
-		action = "drop"
+	stage.drop {
+		source = "namespace"
+		expression = {{ join "|" .ExcludeNamespaces | quote }}
 	}
 }
 {{- end }}

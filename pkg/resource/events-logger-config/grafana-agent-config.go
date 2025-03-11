@@ -30,10 +30,10 @@ func init() {
 
 // generateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
+func generateGrafanaAgentConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
-	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, defaultWorkloadClusterNamespaces)
+	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, includeNamespaces, excludeNamespaces)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, defaultWorkloadClust
 	return values.String(), nil
 }
 
-func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkloadClusterNamespaces []string) (string, error) {
+func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -60,7 +60,8 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		Installation       string
 		InsecureSkipVerify string
 		SecretName         string
-		ScrapedNamespaces  string
+		IncludeNamespaces  []string
+		ExcludeNamespaces  []string
 		LoggingURLKey      string
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
@@ -71,7 +72,8 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, defaultWorkload
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
-		ScrapedNamespaces:  common.FormatScrapedNamespaces(lc, defaultWorkloadClusterNamespaces),
+		IncludeNamespaces:  includeNamespaces,
+		ExcludeNamespaces:  excludeNamespaces,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,

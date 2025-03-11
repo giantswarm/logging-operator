@@ -86,6 +86,8 @@ func main() {
 	var enableLogging bool
 	var loggingAgent string
 	var eventsLogger string
+	var includeEventsFromNamespaces StringSliceVar
+	var excludeEventsFromNamespaces StringSliceVar
 	var installationName string
 	var insecureCA bool
 	var metricsAddr string
@@ -99,6 +101,8 @@ func main() {
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.StringVar(&loggingAgent, "logging-agent", common.LoggingAgentAlloy, fmt.Sprintf("select logging agent to use (%s or %s)", common.LoggingAgentPromtail, common.LoggingAgentAlloy))
 	flag.StringVar(&eventsLogger, "events-logger", common.EventsLoggerAlloy, fmt.Sprintf("select events logger to use (%s or %s)", common.EventsLoggerAlloy, common.EventsLoggerGrafanaAgent))
+	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
+	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -175,8 +179,9 @@ func main() {
 	}
 
 	eventsLoggerConfig := eventsloggerconfig.Reconciler{
-		Client:                           mgr.GetClient(),
-		DefaultWorkloadClusterNamespaces: defaultNamespaces,
+		Client:            mgr.GetClient(),
+		IncludeNamespaces: includeEventsFromNamespaces,
+		ExcludeNamespaces: excludeEventsFromNamespaces,
 	}
 
 	eventsLoggerSecret := eventsloggersecret.Reconciler{

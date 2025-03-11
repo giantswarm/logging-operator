@@ -12,14 +12,14 @@ grafana-agent:
         	format = "logfmt"
         }
         
-        loki.source.kubernetes_events "local" {
-        	namespaces = []
-        	forward_to = [loki.write.default.receiver]
-        }
-        
         remote.kubernetes.secret "credentials" {
         	namespace = "kube-system"
         	name = "test-installation-grafana-agent-secret"
+        }
+        
+        loki.source.kubernetes_events "local" {
+        	namespaces = []
+        	forward_to = [loki.write.default.receiver]
         }
         
         loki.write "default" {

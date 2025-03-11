@@ -26,6 +26,8 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 		defaultNamespaces []string
 		installationName  string
 		clusterName       string
+		includeNamespaces []string
+		excludeNamespaces []string
 	}{
 		{
 			goldenFile:       "grafana-agent/test/events-logger-config.grafanaagent.MC.yaml",
@@ -36,6 +38,18 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 			goldenFile:       "grafana-agent/test/events-logger-config.grafanaagent.WC.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-cluster",
+		},
+		{
+			goldenFile:        "grafana-agent/test/events-logger-config.grafanaagent.WC.include-namespaces.yaml",
+			installationName:  "test-installation",
+			clusterName:       "include-namespaces",
+			includeNamespaces: []string{"namespace1", "namespace2"},
+		},
+		{
+			goldenFile:        "grafana-agent/test/events-logger-config.grafanaagent.WC.exclude-namespaces.yaml",
+			installationName:  "test-installation",
+			clusterName:       "exclude-namespaces",
+			excludeNamespaces: []string{"namespace1", "namespace2"},
 		},
 	}
 
@@ -58,7 +72,7 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				},
 			}
 
-			config, err := generateGrafanaAgentConfig(loggedCluster, []string{"kube-system", "giantswarm"})
+			config, err := generateGrafanaAgentConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
 			if err != nil {
 				t.Fatalf("Failed to generate grafana-agent config: %v", err)
 			}

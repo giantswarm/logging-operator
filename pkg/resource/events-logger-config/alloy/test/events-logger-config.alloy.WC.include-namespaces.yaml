@@ -19,7 +19,7 @@ alloy:
         }
         
         loki.source.kubernetes_events "local" {
-        	namespaces = []
+        	namespaces = ["namespace1", "namespace2"]
         	forward_to = [loki.write.default.receiver]
         }
         
@@ -40,7 +40,7 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "test-cluster",
+        		cluster_id   = "include-namespaces",
         		installation = "test-installation",
         		scrape_job = "kubernetes-events",
         	}
