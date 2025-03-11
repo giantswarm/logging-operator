@@ -38,7 +38,7 @@
                 "excludeEventsFromNamespaces": {
                     "type": "array"
                 },
-                "includeEventsInNamespaces": {
+                "includeEventsFromNamespaces": {
                     "type": "array"
                 },
                 "loggingAgent": {

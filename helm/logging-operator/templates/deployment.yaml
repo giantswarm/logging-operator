@@ -44,8 +44,8 @@ spec:
           {{- if .Values.loggingOperator.excludeEventsFromNamespaces }}
           - -exclude-events-from-namespaces={{ .Values.loggingOperator.excludeEventsFromNamespaces | join "," }}
           {{- end }}
-          {{- if .Values.loggingOperator.includeEventsInNamespaces }}
-          - -include-events-in-namespaces={{ .Values.loggingOperator.includeEventsInNamespaces | join "," }}
+          {{- if .Values.loggingOperator.includeEventsFromNamespaces }}
+          - -include-events-from-namespaces={{ .Values.loggingOperator.includeEventsFromNamespaces | join "," }}
           {{- end }}
         livenessProbe:
           httpGet:

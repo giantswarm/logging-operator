@@ -40,7 +40,7 @@ networkPolicy:
 loggingOperator:
   defaultNamespaces: "kube-system,giantswarm"
   excludeEventsFromNamespaces: []
-  includeEventsInNamespaces: []
+  includeEventsFromNamespaces: []
   vintageMode: true
   loggingEnabled: true
   loggingAgent: alloy
