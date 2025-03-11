@@ -10,7 +10,7 @@ remote.kubernetes.secret "credentials" {
 
 loki.source.kubernetes_events "local" {
 	{{- if and .IsWorkloadCluster .IncludeNamespaces }}
-	namespaces = ["{{ join "\",\"" .IncludeNamespaces }}"]
+	namespaces = ["{{ join "\", \"" .IncludeNamespaces }}"]
 	{{- else }}
 	namespaces = []
 	{{- end }}

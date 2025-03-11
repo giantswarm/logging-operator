@@ -41,6 +41,12 @@ spec:
           - -logging-agent={{ .Values.loggingOperator.loggingAgent }}
           - -events-logger={{ .Values.loggingOperator.eventsLogger }}
           - -default-namespaces={{ .Values.loggingOperator.defaultNamespaces }}
+          {{- if .Values.loggingOperator.excludeEventsFromNamespaces }}
+          - -exclude-events-from-namespaces={{ .Values.loggingOperator.excludeEventsFromNamespaces | join "," }}
+          {{- end }}
+          {{- if .Values.loggingOperator.includeEventsInNamespaces }}
+          - -include-events-in-namespaces={{ .Values.loggingOperator.includeEventsInNamespaces | join "," }}
+          {{- end }}
         livenessProbe:
           httpGet:
             path: /healthz

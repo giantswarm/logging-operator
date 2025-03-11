@@ -18,7 +18,7 @@ grafana-agent:
         }
         
         loki.source.kubernetes_events "local" {
-        	namespaces = ["namespace1","namespace2"]
+        	namespaces = ["namespace1", "namespace2"]
         	forward_to = [loki.write.default.receiver]
         }
         
