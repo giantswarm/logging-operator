@@ -27,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(lc loggedcluster.Interface) (string, error) {
+func generateAlloyEventsConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc)
+	alloyConfig, err := generateAlloyConfig(lc, includeNamespaces, excludeNamespaces)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func generateAlloyEventsConfig(lc loggedcluster.Interface) (string, error) {
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
+func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -57,7 +57,8 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		Installation       string
 		InsecureSkipVerify string
 		MaxBackoffPeriod   string
-		ScrapedNamespaces  string
+		IncludeNamespaces  []string
+		ExcludeNamespaces  []string
 		SecretName         string
 		LoggingURLKey      string
 		LoggingTenantIDKey string
@@ -70,6 +71,8 @@ func generateAlloyConfig(lc loggedcluster.Interface) (string, error) {
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
 		MaxBackoffPeriod:   common.MaxBackoffPeriod,
 		SecretName:         common.AlloyEventsLoggerAppName,
+		IncludeNamespaces:  includeNamespaces,
+		ExcludeNamespaces:  excludeNamespaces,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,

@@ -9,9 +9,30 @@ remote.kubernetes.secret "credentials" {
 }
 
 loki.source.kubernetes_events "local" {
+	{{- if and .IsWorkloadCluster .IncludeNamespaces }}
+	namespaces = ["{{ join "\",\"" .IncludeNamespaces }}"]
+	{{- else }}
 	namespaces = []
+	{{- end }}
+
+	{{- if and .IsWorkloadCluster .ExcludeNamespaces }}
+	forward_to = [loki.process.default.receiver]
+	{{- else }}
 	forward_to = [loki.write.default.receiver]
+	{{- end }}
 }
+
+{{- if and .IsWorkloadCluster .ExcludeNamespaces }}
+// exclude configured namespaces
+loki.process "default" {
+	forward_to = [loki.write.default.receiver]
+
+	stage.drop {
+		source = "namespace"
+		expression = {{ join "|" .ExcludeNamespaces | quote }}
+	}
+}
+{{- end }}
 
 loki.write "default" {
 	endpoint {

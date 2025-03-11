@@ -21,6 +21,8 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 		defaultNamespaces []string
 		installationName  string
 		clusterName       string
+		includeNamespaces []string
+		excludeNamespaces []string
 	}{
 		{
 			goldenFile:       "alloy/test/events-logger-config.alloy.MC.yaml",
@@ -31,6 +33,18 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 			goldenFile:       "alloy/test/events-logger-config.alloy.WC.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-cluster",
+		},
+		{
+			goldenFile:        "alloy/test/events-logger-config.alloy.WC.include-namespaces.yaml",
+			installationName:  "test-installation",
+			clusterName:       "include-namespaces",
+			includeNamespaces: []string{"namespace1", "namespace2"},
+		},
+		{
+			goldenFile:        "alloy/test/events-logger-config.alloy.WC.exclude-namespaces.yaml",
+			installationName:  "test-installation",
+			clusterName:       "exclude-namespaces",
+			excludeNamespaces: []string{"namespace1", "namespace2"},
 		},
 	}
 
@@ -53,7 +67,7 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 				},
 			}
 
-			config, err := generateAlloyEventsConfig(loggedCluster)
+			config, err := generateAlloyEventsConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}
