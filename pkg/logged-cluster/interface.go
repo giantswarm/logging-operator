@@ -22,7 +22,6 @@ type Interface interface {
 	GetClusterName() string
 	GetInstallationName() string
 	AppConfigName(app string) string
-	ObservabilityBundleConfigLabelName(config string) string
 	GetObject() client.Object
 	GetTenant() string
 	IsCAPI() bool

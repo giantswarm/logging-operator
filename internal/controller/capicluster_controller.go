@@ -35,14 +35,14 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller/predicates"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
-	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
+	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
 )
 
 // CapiClusterReconciler reconciles a Cluster object
 type CapiClusterReconciler struct {
 	client.Client
-	Scheme            *runtime.Scheme
-	LoggingReconciler loggingreconciler.LoggingReconciler
+	Scheme     *runtime.Scheme
+	Reconciler logging.LoggingReconciler
 }
 
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters,verbs=get;list;watch
@@ -75,7 +75,7 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		Options: loggedcluster.O,
 	}
 
-	return r.LoggingReconciler.Reconcile(ctx, loggedCluster)
+	return r.Reconciler.Reconcile(ctx, loggedCluster)
 }
 
 // SetupWithManager sets up the controller with the Manager.

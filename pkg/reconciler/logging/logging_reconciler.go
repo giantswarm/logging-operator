@@ -1,4 +1,4 @@
-package loggingreconciler
+package logging
 
 import (
 	"context"

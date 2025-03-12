@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adds support to include and exclude event collection per namespace in workload clusters. If nothing is configured, the event collector will collect all events in the WC.
 
+### Removed
+
+- Clean up some legacy paths that are not useful anymore.
+
 ## [0.24.1] - 2025-03-06
 
 ### Fixed

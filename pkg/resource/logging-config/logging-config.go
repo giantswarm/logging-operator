@@ -28,7 +28,7 @@ func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersio
 
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(lc, observabilityBundleVersion)
+		values, err = GeneratePromtailLoggingConfig(lc)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
