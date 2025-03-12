@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
@@ -68,7 +69,9 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				},
 				Options: loggedcluster.Options{
 					InstallationName: tc.installationName,
-					KubeEventsLogger: "grafana-agent",
+				},
+				LoggingAgent: &loggedcluster.LoggingAgent{
+					KubeEventsLogger: common.EventsLoggerGrafanaAgent,
 				},
 			}
 

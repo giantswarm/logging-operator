@@ -189,8 +189,8 @@ func main() {
 	}
 
 	loggedcluster.O.EnableLoggingFlag = enableLogging
-	loggedcluster.O.LoggingAgent = loggingAgent
-	loggedcluster.O.KubeEventsLogger = eventsLogger
+	loggedcluster.O.DefaultLoggingAgent = loggingAgent
+	loggedcluster.O.DefaultKubeEventsLogger = eventsLogger
 	loggedcluster.O.InstallationName = installationName
 	loggedcluster.O.InsecureCA = insecureCA
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
@@ -247,9 +247,9 @@ func main() {
 
 		// The GrafanaOrganizationREconciler is only used in CAPI mode
 		if err = (&controller.GrafanaOrganizationReconciler{
-			Client:                  mgr.GetClient(),
-			Scheme:                  mgr.GetScheme(),
-			LoggingConfigReconciler: loggingConfig,
+			Client:     mgr.GetClient(),
+			Scheme:     mgr.GetScheme(),
+			Reconciler: loggingConfig,
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
 			os.Exit(1)

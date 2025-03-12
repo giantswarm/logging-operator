@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
@@ -63,7 +64,9 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 				},
 				Options: loggedcluster.Options{
 					InstallationName: tc.installationName,
-					KubeEventsLogger: "alloy",
+				},
+				LoggingAgent: &loggedcluster.LoggingAgent{
+					KubeEventsLogger: common.EventsLoggerAlloy,
 				},
 			}
 

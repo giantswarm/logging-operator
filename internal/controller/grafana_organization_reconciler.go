@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	grafanaorganization "github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -37,8 +38,8 @@ import (
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
 	client.Client
-	Scheme                  *runtime.Scheme
-	LoggingConfigReconciler loggingconfig.Reconciler
+	Scheme     *runtime.Scheme
+	Reconciler loggingconfig.Reconciler
 }
 
 //+kubebuilder:rbac:groups=observability.giantswarm.io,resources=grafanaorganizations,verbs=get;list;watch;update;patch
@@ -71,11 +72,27 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 		loggedCluster := &capicluster.Object{
 			Object:  &cluster,
 			Options: loggedcluster.O,
+			LoggingAgent: &loggedcluster.LoggingAgent{
+				LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
+				KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
+			},
 		}
 
 		if common.IsLoggingEnabled(loggedCluster) {
+
+			err = toggleAgents(ctx, g.Client, loggedCluster)
+			if err != nil {
+				// Handle case where the app is not found.
+				if apimachineryerrors.IsNotFound(err) {
+					logger.Info("observability bundle app not found, requeueing")
+					// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+					return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+				}
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+
 			// Reconcile logging config for each cluster
-			result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
+			result, err := g.Reconciler.ReconcileCreate(ctx, loggedCluster)
 			if err != nil {
 				return result, errors.WithStack(err)
 			}

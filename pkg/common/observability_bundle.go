@@ -42,7 +42,7 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 	return metadata
 }
 
-func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.Client, ctx context.Context) (version semver.Version, err error) {
+func GetObservabilityBundleAppVersion(ctx context.Context, client client.Client, lc loggedcluster.Interface) (version semver.Version, err error) {
 	// Get observability bundle app metadata.
 	appMeta := ObservabilityBundleAppMeta(lc)
 	// Retrieve the app.

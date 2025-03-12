@@ -3,18 +3,11 @@ package agentstoggle
 import (
 	"context"
 
-	"github.com/blang/semver"
 	"github.com/pkg/errors"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-)
-
-var (
-	supportAlloyEvents = semver.MustParse("1.9.0")
-	supportAlloyLogs   = semver.MustParse("1.6.0")
 )
 
 type values struct {
@@ -28,14 +21,14 @@ type app struct {
 
 // generateObservabilityBundleConfig returns a configmap for
 // the observabilitybundle application to enable logging agents and events-loggers.
-func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (string, error) {
+func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Interface) (string, error) {
 	appsToEnable := map[string]app{}
 
-	if err := toggleLogAgent(ctx, lc, observabilityBundleVersion, appsToEnable); err != nil {
+	if err := toggleLogAgent(ctx, lc, appsToEnable); err != nil {
 		return "", errors.WithStack(err)
 	}
 
-	if err := toggleKubeEventsLogger(ctx, lc, observabilityBundleVersion, appsToEnable); err != nil {
+	if err := toggleKubeEventsLogger(ctx, lc, appsToEnable); err != nil {
 		return "", errors.WithStack(err)
 	}
 
@@ -52,14 +45,7 @@ func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Int
 }
 
 // toggleLogAgent toggles the logging agent based on the observability bundle version.
-func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, observabilityBundleVersion semver.Version, appsToEnable map[string]app) error {
-	logger := log.FromContext(ctx)
-	// Enforce promtail as logging agent when observability-bundle version < 1.6.0 because this needs alloy 0.4.0.
-	if observabilityBundleVersion.LT(supportAlloyLogs) && lc.GetLoggingAgent() == common.LoggingAgentAlloy {
-		logger.Info("Alloy logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
-		lc.SetLoggingAgent(common.LoggingAgentPromtail)
-	}
-
+func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, appsToEnable map[string]app) error {
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
 		appsToEnable[common.PromtailObservabilityBundleAppName] = app{
@@ -84,15 +70,7 @@ func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, observabili
 }
 
 // toggleKubeEventsLogger toggles the kube-events-logger based on the observability bundle version.
-func toggleKubeEventsLogger(ctx context.Context, lc loggedcluster.Interface, observabilityBundleVersion semver.Version, appsToEnable map[string]app) error {
-	logger := log.FromContext(ctx)
-
-	// Enforce grafana-agent as events logger when observability-bundle version < 1.9.0 because this needs alloy 0.7.0.
-	if observabilityBundleVersion.LT(supportAlloyEvents) && lc.GetKubeEventsLogger() == common.EventsLoggerAlloy {
-		logger.Info("Alloy events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
-		lc.SetKubeEventsLogger(common.EventsLoggerGrafanaAgent)
-	}
-
+func toggleKubeEventsLogger(ctx context.Context, lc loggedcluster.Interface, appsToEnable map[string]app) error {
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
 		appsToEnable["grafanaAgent"] = app{

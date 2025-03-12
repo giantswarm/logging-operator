@@ -2,11 +2,9 @@ package agentstoggle
 
 import (
 	"context"
-	"time"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
@@ -30,23 +28,12 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("agents toggle create")
 
-	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("agents-toggle - observability bundle app not found, requeueing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	desiredConfigMap := v1.ConfigMap{
 		ObjectMeta: common.ObservabilityBundleConfigMapMeta(lc),
 	}
 
-	_, err = controllerutil.CreateOrUpdate(ctx, r.Client, &desiredConfigMap, func() error {
-		config, err := generateObservabilityBundleConfig(ctx, lc, observabilityBundleVersion)
+	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &desiredConfigMap, func() error {
+		config, err := generateObservabilityBundleConfig(ctx, lc)
 		if err != nil {
 			return errors.WithStack(err)
 		}

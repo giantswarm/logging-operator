@@ -35,7 +35,6 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	// Get observability bundle app metadata.
 	appMeta := common.ObservabilityBundleAppMeta(lc)
-
 	// Retrieve the app.
 	logger.Info("logging wiring checking app", "namespace", appMeta.GetNamespace(), "name", appMeta.GetName())
 	var currentApp appv1.App

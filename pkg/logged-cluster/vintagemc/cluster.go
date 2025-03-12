@@ -10,27 +10,12 @@ import (
 
 type Object struct {
 	client.Object
+	*loggedcluster.LoggingAgent
 	Options loggedcluster.Options
 }
 
 func (o Object) HasLoggingEnabled() bool {
 	return o.Options.EnableLoggingFlag
-}
-
-func (o Object) GetLoggingAgent() string {
-	return o.Options.LoggingAgent
-}
-
-func (o *Object) SetLoggingAgent(loggingAgent string) {
-	o.Options.LoggingAgent = loggingAgent
-}
-
-func (o *Object) GetKubeEventsLogger() string {
-	return o.Options.KubeEventsLogger
-}
-
-func (o *Object) SetKubeEventsLogger(kubeEventsLogger string) {
-	o.Options.KubeEventsLogger = kubeEventsLogger
 }
 
 func (o Object) IsInsecureCA() bool {
