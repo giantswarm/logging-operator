@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -80,16 +79,6 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
 			KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
 		},
-	}
-	err = toggleAgents(ctx, r.Client, loggedCluster)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("observability bundle app not found, requeueing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	return r.Reconciler.Reconcile(ctx, loggedCluster)

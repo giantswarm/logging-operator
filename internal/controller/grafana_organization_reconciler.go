@@ -79,8 +79,7 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 
 		if common.IsLoggingEnabled(loggedCluster) {
-
-			err = toggleAgents(ctx, g.Client, loggedCluster)
+			err = common.ToggleAgents(ctx, g.Client, loggedCluster)
 			if err != nil {
 				// Handle case where the app is not found.
 				if apimachineryerrors.IsNotFound(err) {
