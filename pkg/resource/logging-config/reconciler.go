@@ -30,7 +30,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config create")
 
-	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
+	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(ctx, r.Client, lc)
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {

@@ -2,8 +2,10 @@ package logging
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -56,6 +58,17 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 		logger.Info("successfully added finalizer to logged cluster", "finalizer", key.Finalizer)
 	}
 
+	err := common.ToggleAgents(ctx, l.Client, lc)
+	if err != nil {
+		// Handle case where the app is not found.
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("observability bundle app not found, requeueing")
+			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+		}
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Call all reconcilers ReconcileCreate methods.
 	for _, reconciler := range l.Reconcilers {
 		result, err := reconciler.ReconcileCreate(ctx, lc)
@@ -73,6 +86,12 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 	logger.Info("LOGGING disabled")
 
 	if controllerutil.ContainsFinalizer(lc, key.Finalizer) {
+		err := common.ToggleAgents(ctx, l.Client, lc)
+		if err != nil && !apimachineryerrors.IsNotFound(err) {
+			// Errors only if this is not a 404 because the apps are already deleted.
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+
 		// Call all reconcilers ReconcileDelete methods.
 		for _, reconciler := range l.Reconcilers {
 			result, err := reconciler.ReconcileDelete(ctx, lc)

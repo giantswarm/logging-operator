@@ -6,11 +6,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/blang/semver"
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+)
+
+var (
+	supportAlloyEvents = semver.MustParse("1.9.0")
+	supportAlloyLogs   = semver.MustParse("1.6.0")
 )
 
 const observabilityBundleAppName string = "observability-bundle"
@@ -42,7 +48,7 @@ func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectM
 	return metadata
 }
 
-func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.Client, ctx context.Context) (version semver.Version, err error) {
+func GetObservabilityBundleAppVersion(ctx context.Context, client client.Client, lc loggedcluster.Interface) (version semver.Version, err error) {
 	// Get observability bundle app metadata.
 	appMeta := ObservabilityBundleAppMeta(lc)
 	// Retrieve the app.
@@ -52,4 +58,27 @@ func GetObservabilityBundleAppVersion(lc loggedcluster.Interface, client client.
 		return version, err
 	}
 	return semver.Parse(currentApp.Spec.Version)
+}
+
+func ToggleAgents(ctx context.Context, client client.Client, lc loggedcluster.Interface) error {
+	logger := log.FromContext(ctx)
+
+	observabilityBundleVersion, err := GetObservabilityBundleAppVersion(ctx, client, lc)
+	if err != nil {
+		return err
+	}
+
+	// Enforce promtail as logging agent when observability-bundle version < 1.6.0 because this needs alloy 0.4.0.
+	if observabilityBundleVersion.LT(supportAlloyLogs) && lc.GetLoggingAgent() == LoggingAgentAlloy {
+		logger.Info("Alloy logging agent is not supported by observability bundle, using promtail instead.", "observability-bundle-version", observabilityBundleVersion, "logging-agent", lc.GetLoggingAgent())
+		lc.SetLoggingAgent(LoggingAgentPromtail)
+	}
+
+	// Enforce grafana-agent as events logger when observability-bundle version < 1.9.0 because this needs alloy 0.7.0.
+	if observabilityBundleVersion.LT(supportAlloyEvents) && lc.GetKubeEventsLogger() == EventsLoggerAlloy {
+		logger.Info("Alloy events logger is not supported by observability bundle, using grafana-agent instead.", "observability-bundle-version", observabilityBundleVersion, "events-logger", lc.GetKubeEventsLogger())
+		lc.SetKubeEventsLogger(EventsLoggerGrafanaAgent)
+	}
+
+	return nil
 }

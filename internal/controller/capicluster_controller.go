@@ -73,6 +73,10 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	loggedCluster := &capicluster.Object{
 		Object:  cluster,
 		Options: loggedcluster.O,
+		LoggingAgent: &loggedcluster.LoggingAgent{
+			LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
+			KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
+		},
 	}
 
 	return r.Reconciler.Reconcile(ctx, loggedCluster)

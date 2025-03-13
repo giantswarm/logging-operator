@@ -35,7 +35,7 @@ func generateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSe
 			return v1.Secret{}, err
 		}
 	default:
-		return v1.Secret{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
+		return v1.Secret{}, errors.Errorf("unsupported logging agent %q", lc.GetKubeEventsLogger())
 	}
 
 	secret := v1.Secret{
