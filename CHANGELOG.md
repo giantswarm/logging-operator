@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.1] - 2025-03-13
+
 ### Changed
 
 - Stop caching helm secrets in the operator to reduce resource usage.
@@ -497,7 +499,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.25.1...HEAD
+[0.25.1]: https://github.com/giantswarm/logging-operator/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/giantswarm/logging-operator/compare/v0.24.1...v0.25.0
 [0.24.1]: https://github.com/giantswarm/logging-operator/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/giantswarm/logging-operator/compare/v0.23.0...v0.24.0
