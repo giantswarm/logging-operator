@@ -80,7 +80,6 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
 		},
 	}
-
 	return r.Reconciler.Reconcile(ctx, loggedCluster)
 }
 

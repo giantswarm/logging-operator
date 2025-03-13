@@ -87,11 +87,8 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 
 	if controllerutil.ContainsFinalizer(lc, key.Finalizer) {
 		err := common.ToggleAgents(ctx, l.Client, lc)
-		if err != nil {
-			// Handle case where the app is not found.
-			if apimachineryerrors.IsNotFound(err) {
-				return ctrl.Result{}, nil
-			}
+		if err != nil && !apimachineryerrors.IsNotFound(err) {
+			// Errors only if this is not a 404 because the apps are already deleted.
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 
