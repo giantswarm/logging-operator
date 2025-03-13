@@ -66,10 +66,6 @@ func (o Object) AppConfigName(app string) string {
 	return fmt.Sprintf("%s-%s", o.GetName(), app)
 }
 
-func (o Object) ObservabilityBundleConfigLabelName(config string) string {
-	return config
-}
-
 func (o Object) GetClusterName() string {
 	return o.Object.GetName()
 }

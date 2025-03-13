@@ -40,8 +40,8 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
+	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
@@ -195,7 +195,7 @@ func main() {
 	loggedcluster.O.InsecureCA = insecureCA
 	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
 
-	loggingReconciler := loggingreconciler.LoggingReconciler{
+	loggingReconciler := logging.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Reconcilers: []reconciler.Interface{
@@ -216,18 +216,18 @@ func main() {
 		setupLog.Info("Vintage mode selected")
 
 		if err = (&controller.VintageMCReconciler{
-			Client:            mgr.GetClient(),
-			Scheme:            mgr.GetScheme(),
-			LoggingReconciler: loggingReconciler,
+			Client:     mgr.GetClient(),
+			Scheme:     mgr.GetScheme(),
+			Reconciler: loggingReconciler,
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create Vintage MC controller", "controller", "Service")
 			os.Exit(1)
 		}
 
 		if err = (&controller.VintageWCReconciler{
-			Client:            mgr.GetClient(),
-			Scheme:            mgr.GetScheme(),
-			LoggingReconciler: loggingReconciler,
+			Client:     mgr.GetClient(),
+			Scheme:     mgr.GetScheme(),
+			Reconciler: loggingReconciler,
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
 			os.Exit(1)
@@ -237,9 +237,9 @@ func main() {
 		setupLog.Info("CAPI mode selected")
 
 		if err = (&controller.CapiClusterReconciler{
-			Client:            mgr.GetClient(),
-			Scheme:            mgr.GetScheme(),
-			LoggingReconciler: loggingReconciler,
+			Client:     mgr.GetClient(),
+			Scheme:     mgr.GetScheme(),
+			Reconciler: loggingReconciler,
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 			os.Exit(1)

@@ -1,11 +1,9 @@
 package vintagewc
 
 import (
-	"fmt"
 	"strconv"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
-	"golang.org/x/mod/semver"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
@@ -22,13 +20,6 @@ func (o Object) HasLoggingEnabled() bool {
 
 	// If logging is disabled at the installation level, we return false
 	if !o.Options.EnableLoggingFlag {
-		return false
-	}
-	// Promtail only works starting with AWS version 19.1.0
-	clusterRelease := labels["release.giantswarm.io/version"]
-	// semver versions must be "vMAJOR[.MINOR[.PATCH[-PRERELEASE][+BUILD]]]"
-	clusterReleaseSemver := fmt.Sprintf("v%s", clusterRelease)
-	if semver.Compare(clusterReleaseSemver, "v19.1.0") == -1 {
 		return false
 	}
 
@@ -74,10 +65,6 @@ func (o Object) AppConfigName(app string) string {
 	} else {
 		return app
 	}
-}
-
-func (o Object) ObservabilityBundleConfigLabelName(config string) string {
-	return config
 }
 
 func (o Object) GetClusterName() string {

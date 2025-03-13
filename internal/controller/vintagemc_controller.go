@@ -35,14 +35,14 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller/predicates"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/vintagemc"
-	loggingreconciler "github.com/giantswarm/logging-operator/pkg/logging-reconciler"
+	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
 )
 
 // VintageMCReconciler reconciles a Service object
 type VintageMCReconciler struct {
 	client.Client
-	Scheme            *runtime.Scheme
-	LoggingReconciler loggingreconciler.LoggingReconciler
+	Scheme     *runtime.Scheme
+	Reconciler logging.LoggingReconciler
 }
 
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
@@ -76,7 +76,7 @@ func (r *VintageMCReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		Object:  service,
 		Options: loggedcluster.O,
 	}
-	return r.LoggingReconciler.Reconcile(ctx, loggedCluster)
+	return r.Reconciler.Reconcile(ctx, loggedCluster)
 }
 
 // SetupWithManager sets up the controller with the Manager.

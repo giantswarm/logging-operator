@@ -36,9 +36,8 @@ const (
 	EventsLoggerGrafanaAgent = "grafana-agent"
 
 	// App name keys in the observability bundle
-	AlloyObservabilityBundleAppName          = "alloyLogs"
-	PromtailObservabilityBundleAppName       = "promtail"
-	PromtailObservabilityBundleLegacyAppName = "promtail-app"
+	AlloyObservabilityBundleAppName    = "alloyLogs"
+	PromtailObservabilityBundleAppName = "promtail"
 
 	// Alloy app name and namespace when using Alloy as logging agent.
 	AlloyLogAgentAppName      = "alloy-logs"
