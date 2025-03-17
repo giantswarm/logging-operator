@@ -46,6 +46,14 @@ alloy:
         	}
         }
         
+    # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655#issuecomment-2729636063
+    resources:
+      limits:
+        cpu: 50m
+        memory: 256Mi
+      requests:
+        cpu: 25m
+        memory: 128Mi
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:

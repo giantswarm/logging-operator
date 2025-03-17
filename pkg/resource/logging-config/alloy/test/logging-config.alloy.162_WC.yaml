@@ -322,6 +322,14 @@ alloy:
       # This is needed to allow alloy to create files when using readOnlyRootFilesystem
       - name: alloy-tmp
         mountPath: /tmp/alloy
+    # We decided to configure the alloy-logs resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655#issuecomment-2729636063
+    resources:
+      limits:
+        cpu: 100m
+        memory: 300Mi
+      requests:
+        cpu: 25m
+        memory: 200Mi
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
