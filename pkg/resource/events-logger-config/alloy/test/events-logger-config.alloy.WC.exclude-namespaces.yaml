@@ -89,5 +89,3 @@ verticalPodAutoscaler:
       controlledResources:
       - memory
       controlledValues: "RequestsAndLimits"
-      maxAllowed:
-        memory: 512Mi
