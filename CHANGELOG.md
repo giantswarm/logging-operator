@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Fine-tune alloy-events and alloy-logs resource usage configuration to avoid causing issues for customer workload and cluster tests.
+
 ## [0.25.1] - 2025-03-13
 
 ### Changed
