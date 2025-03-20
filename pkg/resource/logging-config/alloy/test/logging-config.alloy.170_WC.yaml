@@ -374,7 +374,7 @@ verticalPodAutoscaler:
       - memory
       controlledValues: "RequestsAndLimits"
       maxAllowed:
-        memory: 500Mi
+        memory: 512Mi
 podLogs:
 - name: default-namespaces
   namespace: kube-system

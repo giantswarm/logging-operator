@@ -80,7 +80,7 @@ verticalPodAutoscaler:
       - memory
       controlledValues: "RequestsAndLimits"
       maxAllowed:
-        memory: 500Mi
+        memory: 512Mi
 {{- end }}
 
 {{- if .SupportPodLogs }}
