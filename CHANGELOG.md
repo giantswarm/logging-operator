@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.1] - 2025-03-24
+
 ### Fixed
 
 - Fix alloy logs schema violations because cpu limit was not a string.
@@ -509,7 +511,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.26.1...HEAD
+[0.26.1]: https://github.com/giantswarm/logging-operator/compare/v0.26.0...v0.26.1
 [0.26.0]: https://github.com/giantswarm/logging-operator/compare/v0.25.1...v0.26.0
 [0.25.1]: https://github.com/giantswarm/logging-operator/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/giantswarm/logging-operator/compare/v0.24.1...v0.25.0
