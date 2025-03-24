@@ -2,7 +2,7 @@ apiVersion: v2
 name: logging-operator
 description: The logging-operator manages loki and logging related config.
 home: https://github.com/giantswarm/logging-operator
-version: 0.25.1
+version: 0.26.0
 appVersion: 0.0.1
 annotations:
   application.giantswarm.io/team: "atlas"
