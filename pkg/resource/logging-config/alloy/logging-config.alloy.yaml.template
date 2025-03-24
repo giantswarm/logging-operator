@@ -36,7 +36,7 @@ alloy:
     # We decided to configure the alloy-logs resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
     resources:
       limits:
-        cpu: 2
+        cpu: 2000m
         memory: 300Mi
       requests:
         cpu: 25m
