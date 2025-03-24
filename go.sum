@@ -54,8 +54,8 @@ github.com/giantswarm/grafana-multi-tenant-proxy v0.8.0 h1:9Tl6mwlg/laZA5X9fHfo4
 github.com/giantswarm/grafana-multi-tenant-proxy v0.8.0/go.mod h1:RICWt1Sw4CTBj+Kb8eUqIMaHOlU7gqZyZ/bSPOaa6JM=
 github.com/giantswarm/k8smetadata v0.25.0 h1:6mKmmm4xHPuBvxDMAkIhU5oj6KJkJSaR2s5esIsnHs4=
 github.com/giantswarm/k8smetadata v0.25.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
-github.com/giantswarm/observability-operator v0.21.0 h1:j865SHHY2y0u8yD0ZSIYc9RHSZwUzXIIORGiA+XgmMM=
-github.com/giantswarm/observability-operator v0.21.0/go.mod h1:/Rv8akfFDFaNIHLDOO30bW/t6KYvgT6O6N5wfvCLbQ0=
+github.com/giantswarm/observability-operator v0.21.1 h1:qCdDJWC8C41tfpQvXKBjpb2sXg9wd2Q42t2Ec5kC1vI=
+github.com/giantswarm/observability-operator v0.21.1/go.mod h1:1JWJZ70G6/TQL8YOSOkSXJV+KsX7FAvb7v8CRK1ookY=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
@@ -248,8 +248,8 @@ google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7 h1:
 google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7/go.mod h1:UqMtugtsSgubUsoxbuAoiCXvqvErP7Gf0so0mK9tHxU=
 google.golang.org/grpc v1.65.1 h1:toSN4j5/Xju+HVovfaY5g1YZVuJeHzQZhP8eJ0L0f1I=
 google.golang.org/grpc v1.65.1/go.mod h1:WgYC2ypjlB0EiQi6wdKixMqukr6lBc0Vo+oOgjrM5ZQ=
-google.golang.org/protobuf v1.36.5 h1:tPhr+woSbjfYvY6/GPufUoYizxw1cF/yFoxJ2fmpwlM=
-google.golang.org/protobuf v1.36.5/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
+google.golang.org/protobuf v1.36.6 h1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=
+google.golang.org/protobuf v1.36.6/go.mod h1:jduwjTPXsFjZGTmRluh+L6NjiWu7pchiJ2/5YcXBHnY=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
