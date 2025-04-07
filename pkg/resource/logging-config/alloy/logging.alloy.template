@@ -289,7 +289,7 @@ local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apiserver/audit.log",
-		node   = coalesce(env("NODENAME"), "unknown"),
+		node   = coalesce(sys.env("NODENAME"), "unknown"),
 		scrape_job  = "audit-logs",
 	}]
 }
@@ -340,12 +340,12 @@ loki.source.file "kubernetes_audit" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		url                = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+		tenant_id          = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {
-			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
+			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
 
