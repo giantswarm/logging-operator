@@ -41,7 +41,7 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/giantswarm/k8smetadata v0.25.0 // indirect
-	github.com/giantswarm/observability-operator v0.22.1
+	github.com/giantswarm/observability-operator v0.23.0
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
