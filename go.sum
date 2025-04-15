@@ -54,8 +54,8 @@ github.com/giantswarm/grafana-multi-tenant-proxy v0.8.0 h1:9Tl6mwlg/laZA5X9fHfo4
 github.com/giantswarm/grafana-multi-tenant-proxy v0.8.0/go.mod h1:RICWt1Sw4CTBj+Kb8eUqIMaHOlU7gqZyZ/bSPOaa6JM=
 github.com/giantswarm/k8smetadata v0.25.0 h1:6mKmmm4xHPuBvxDMAkIhU5oj6KJkJSaR2s5esIsnHs4=
 github.com/giantswarm/k8smetadata v0.25.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
-github.com/giantswarm/observability-operator v0.23.2 h1:Rf7XSUiZF09plcP5NSYKLZsiyPRXY8T9J/Z8MPHja6A=
-github.com/giantswarm/observability-operator v0.23.2/go.mod h1:2EY9kwa0h9suuWl4tzf8oJPq+Qm/06yldM76c+EtJl4=
+github.com/giantswarm/observability-operator v0.24.0 h1:oJakKSDeQQ1mACPTnlEDckY4zZbiS5u1bX+HFHFqGHc=
+github.com/giantswarm/observability-operator v0.24.0/go.mod h1:Ha/jokogZuD6bkip5rEVk+3aMFX4Un1JZIiTq2ITp8I=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
@@ -139,8 +139,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prashantv/gostub v1.1.0 h1:BTyx3RfQjRHnUWaGF9oQos79AlQ5k8WNktv7VGvVH4g=
 github.com/prashantv/gostub v1.1.0/go.mod h1:A5zLQHz7ieHGG7is6LLXLz7I8+3LZzsrV0P1IAHhP5U=
-github.com/prometheus/client_golang v1.21.1 h1:DOvXXTqVzvkIewV/CDPFdejpMCGeMcbGCQ8YOmu+Ibk=
-github.com/prometheus/client_golang v1.21.1/go.mod h1:U9NM32ykUErtVBxdvD3zfi+EuFkkaBvMb09mIfe0Zgg=
+github.com/prometheus/client_golang v1.22.0 h1:rb93p9lokFEsctTys46VnV1kLCDpVZ0a/Y92Vm0Zc6Q=
+github.com/prometheus/client_golang v1.22.0/go.mod h1:R7ljNsLXhuQXYZYtw6GAE9AZg8Y7vEW5scdCXrWRXC0=
 github.com/prometheus/client_model v0.6.1 h1:ZKSh/rekM+n3CeS952MLRAdFwIKqeY8b62p8ais2e9E=
 github.com/prometheus/client_model v0.6.1/go.mod h1:OrxVMOVHjw3lKMa8+x6HeMGkHMQyHDk9E3jmP2AmGiY=
 github.com/prometheus/common v0.63.0 h1:YR/EIY1o3mEFP/kZCD7iDMnLPlGyuU2Gb3HIcXnA98k=
