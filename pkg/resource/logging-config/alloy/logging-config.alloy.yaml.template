@@ -7,6 +7,41 @@
 # - Running as root user is required in order to be able to read log files within
 #   /var/log/journal and /run/log/journal directories.
 # - NODENAME env var is used as additional label for kubernetes_audit logs.
+networkPolicy:
+  cilium:
+    egress:
+    - toEntities:
+      - kube-apiserver
+      - world
+    - toEndpoints:
+      - matchLabels:
+          io.kubernetes.pod.namespace: kube-system
+          k8s-app: coredns
+      - matchLabels:
+          io.kubernetes.pod.namespace: kube-system
+          k8s-app: k8s-dns-node-cache
+      toPorts:
+      - ports:
+        - port: "1053"
+          protocol: UDP
+        - port: "1053"
+          protocol: TCP
+        - port: "53"
+          protocol: UDP
+        - port: "53"
+          protocol: TCP
+    {{- if not .IsWorkloadCluster }}
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/component: backend
+          app.kubernetes.io/name: loki
+          io.kubernetes.pod.namespace: loki
+      toPorts:
+      - ports:
+        - port: "3100"
+          protocol: TCP
+    {{- end }}
+
 alloy:
   alloy:
     configMap:

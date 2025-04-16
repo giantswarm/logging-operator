@@ -1,7 +1,39 @@
+logging {
+	level  = "warn"
+	format = "logfmt"
+}
+
 remote.kubernetes.secret "credentials" {
 	namespace = "kube-system"
 	name = "{{ .SecretName }}"
 }
+
+{{- range .Tenants }}
+// load rules for tenant {{ . }}
+loki.rules.kubernetes "{{ . }}" {
+	{{- if $.IsWorkloadCluster }}
+	address = remote.kubernetes.secret.credentials.data["{{ $.RulerAPIURLKey }}"]
+	basic_auth {
+		username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LoggingUsernameKey }}"])
+		password = remote.kubernetes.secret.credentials.data["{{ $.LoggingPasswordKey }}"]
+	}
+	{{- else }}
+	address = "http://loki-backend.loki.svc:3100/"
+	{{- end }}
+	loki_namespace_prefix = "{{ $.ClusterName }}"
+	tenant_id = "{{ . }}"
+	rule_selector {
+		match_labels = {
+			"observability.giantswarm.io/tenant" = "{{ . }}",
+		}
+		match_expression {
+			key = "application.giantswarm.io/prometheus-rule-kind"
+			operator = "In"
+			values = ["loki"]
+		}
+	}
+}
+{{- end }}
 
 // Kubernetes pods logs
 {{- if .SupportPodLogs }}
@@ -354,12 +386,7 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}",
+		cluster_id   = "{{ .ClusterName }}",
 		installation = "{{ .Installation }}",
 	}
-}
-
-logging {
-	level  = "warn"
-	format = "logfmt"
 }

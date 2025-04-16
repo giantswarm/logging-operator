@@ -48,12 +48,14 @@ const (
 	AlloyEventsLoggerAppNamespace = "kube-system"
 
 	MaxBackoffPeriod = "10m"
-	LokiURLFormat    = "https://%s/loki/api/v1/push"
+	LokiBaseURL      = "https://%s"
+	LokiPushURL      = LokiBaseURL + "/loki/api/v1/push"
 
 	LoggingURL      = "logging-url"
 	LoggingTenantID = "logging-tenant-id"
 	LoggingUsername = "logging-username"
 	LoggingPassword = "logging-password"
+	RulerAPIURL     = "ruler-api-url"
 )
 
 func GrafanaAgentExtraSecretName() string {
@@ -76,8 +78,8 @@ func IsWorkloadCluster(lc loggedcluster.Interface) bool {
 	return lc.GetInstallationName() != lc.GetClusterName()
 }
 
-// Read Proxy URL from ingress
-func ReadProxyIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
+// Read Loki URL from ingress
+func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
 	var lokiIngress netv1.Ingress
 
 	var objectKey types.NamespacedName

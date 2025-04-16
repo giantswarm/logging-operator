@@ -100,4 +100,7 @@ require (
 replace (
 	github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.6.0
 	github.com/imdario/mergo => github.com/imdario/mergo v0.3.6
+
+	// Needed to fix CVE CVE-2025-22872 (TODO remove when fixed upstream in github.com/prometheus/common/config)
+	golang.org/x/net v0.37.0 => golang.org/x/net v0.39.0
 )
