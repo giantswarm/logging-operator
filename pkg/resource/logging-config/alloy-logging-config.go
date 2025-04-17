@@ -78,7 +78,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 	}
 
 	data := struct {
-		ClusterName        string
+		ClusterID          string
 		Installation       string
 		MaxBackoffPeriod   string
 		IsWorkloadCluster  bool
@@ -89,10 +89,10 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
 		LoggingPasswordKey string
-		RulerAPIURLKey     string
+		LokiRulerAPIURLKey string
 		Tenants            []string
 	}{
-		ClusterName:       clusterName,
+		ClusterID:         clusterName,
 		Installation:      lc.GetInstallationName(),
 		MaxBackoffPeriod:  common.MaxBackoffPeriod,
 		IsWorkloadCluster: common.IsWorkloadCluster(lc),
@@ -104,7 +104,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		RulerAPIURLKey:     common.RulerAPIURL,
+		LokiRulerAPIURLKey: common.LokiRulerAPIURL,
 		Tenants:            tenants,
 	}
 

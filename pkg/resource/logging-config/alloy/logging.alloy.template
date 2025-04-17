@@ -12,7 +12,7 @@ remote.kubernetes.secret "credentials" {
 // load rules for tenant {{ . }}
 loki.rules.kubernetes "{{ . }}" {
 	{{- if $.IsWorkloadCluster }}
-	address = remote.kubernetes.secret.credentials.data["{{ $.RulerAPIURLKey }}"]
+	address = nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LokiRulerAPIURLKey }}"])
 	basic_auth {
 		username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LoggingUsernameKey }}"])
 		password = remote.kubernetes.secret.credentials.data["{{ $.LoggingPasswordKey }}"]
@@ -20,7 +20,7 @@ loki.rules.kubernetes "{{ . }}" {
 	{{- else }}
 	address = "http://loki-backend.loki.svc:3100/"
 	{{- end }}
-	loki_namespace_prefix = "{{ $.ClusterName }}"
+	loki_namespace_prefix = "{{ $.ClusterID }}"
 	tenant_id = "{{ . }}"
 	rule_selector {
 		match_labels = {
@@ -386,7 +386,7 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterName }}",
+		cluster_id   = "{{ .ClusterID }}",
 		installation = "{{ .Installation }}",
 	}
 }

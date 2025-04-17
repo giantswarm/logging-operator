@@ -47,7 +47,7 @@ alloy:
         }
         // load rules for tenant test-tenant-a
         loki.rules.kubernetes "test-tenant-a" {
-        	address = remote.kubernetes.secret.credentials.data["ruler-api-url"]
+        	address = nonsensitive(remote.kubernetes.secret.credentials.data["ruler-api-url"])
         	basic_auth {
         		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         		password = remote.kubernetes.secret.credentials.data["logging-password"]
@@ -67,7 +67,7 @@ alloy:
         }
         // load rules for tenant test-tenant-b
         loki.rules.kubernetes "test-tenant-b" {
-        	address = remote.kubernetes.secret.credentials.data["ruler-api-url"]
+        	address = nonsensitive(remote.kubernetes.secret.credentials.data["ruler-api-url"])
         	basic_auth {
         		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         		password = remote.kubernetes.secret.credentials.data["logging-password"]
@@ -87,7 +87,7 @@ alloy:
         }
         // load rules for tenant giantswarm
         loki.rules.kubernetes "giantswarm" {
-        	address = remote.kubernetes.secret.credentials.data["ruler-api-url"]
+        	address = nonsensitive(remote.kubernetes.secret.credentials.data["ruler-api-url"])
         	basic_auth {
         		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         		password = remote.kubernetes.secret.credentials.data["logging-password"]

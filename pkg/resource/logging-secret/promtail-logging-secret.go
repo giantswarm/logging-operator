@@ -69,7 +69,7 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 			Config: promtailConfig{
 				Clients: []promtailConfigClient{
 					{
-						URL:      fmt.Sprintf(common.LokiPushURL, lokiURL),
+						URL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
 						TenantID: lc.GetTenant(),
 						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,

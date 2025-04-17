@@ -47,15 +47,16 @@ const (
 	AlloyEventsLoggerAppName      = "alloy-events"
 	AlloyEventsLoggerAppNamespace = "kube-system"
 
-	MaxBackoffPeriod = "10m"
-	LokiBaseURL      = "https://%s"
-	LokiPushURL      = LokiBaseURL + "/loki/api/v1/push"
+	MaxBackoffPeriod  = "10m"
+	LokiBaseURLFormat = "https://%s"
+	lokiAPIV1PushPath = "/loki/api/v1/push"
+	LokiPushURLFormat = LokiBaseURLFormat + lokiAPIV1PushPath
 
 	LoggingURL      = "logging-url"
 	LoggingTenantID = "logging-tenant-id"
 	LoggingUsername = "logging-username"
 	LoggingPassword = "logging-password"
-	RulerAPIURL     = "ruler-api-url"
+	LokiRulerAPIURL = "ruler-api-url"
 )
 
 func GrafanaAgentExtraSecretName() string {
