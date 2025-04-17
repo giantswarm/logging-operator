@@ -89,6 +89,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		LoggingTenantIDKey string
 		LoggingUsernameKey string
 		LoggingPasswordKey string
+		LokiRulerAPIURLKey string
 		Tenants            []string
 	}{
 		ClusterID:         clusterName,
@@ -103,6 +104,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
+		LokiRulerAPIURLKey: common.LokiRulerAPIURL,
 		Tenants:            tenants,
 	}
 

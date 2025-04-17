@@ -7,14 +7,103 @@
 # - Running as root user is required in order to be able to read log files within
 #   /var/log/journal and /run/log/journal directories.
 # - NODENAME env var is used as additional label for kubernetes_audit logs.
+networkPolicy:
+  cilium:
+    egress:
+    - toEntities:
+      - kube-apiserver
+      - world
+    - toEndpoints:
+      - matchLabels:
+          io.kubernetes.pod.namespace: kube-system
+          k8s-app: coredns
+      - matchLabels:
+          io.kubernetes.pod.namespace: kube-system
+          k8s-app: k8s-dns-node-cache
+      toPorts:
+      - ports:
+        - port: "1053"
+          protocol: UDP
+        - port: "1053"
+          protocol: TCP
+        - port: "53"
+          protocol: UDP
+        - port: "53"
+          protocol: TCP
+
 alloy:
   alloy:
     configMap:
       create: true
       content: |-
+        logging {
+        	level  = "warn"
+        	format = "logfmt"
+        }
+        
         remote.kubernetes.secret "credentials" {
         	namespace = "kube-system"
         	name = "alloy-logs"
+        }
+        // load rules for tenant test-tenant-a
+        loki.rules.kubernetes "test-tenant-a" {
+        	address = nonsensitive(remote.kubernetes.secret.credentials.data["ruler-api-url"])
+        	basic_auth {
+        		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
+        		password = remote.kubernetes.secret.credentials.data["logging-password"]
+        	}
+        	loki_namespace_prefix = "test-cluster"
+        	tenant_id = "test-tenant-a"
+        	rule_selector {
+        		match_labels = {
+        			"observability.giantswarm.io/tenant" = "test-tenant-a",
+        		}
+        		match_expression {
+        			key = "application.giantswarm.io/prometheus-rule-kind"
+        			operator = "In"
+        			values = ["loki"]
+        		}
+        	}
+        }
+        // load rules for tenant test-tenant-b
+        loki.rules.kubernetes "test-tenant-b" {
+        	address = nonsensitive(remote.kubernetes.secret.credentials.data["ruler-api-url"])
+        	basic_auth {
+        		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
+        		password = remote.kubernetes.secret.credentials.data["logging-password"]
+        	}
+        	loki_namespace_prefix = "test-cluster"
+        	tenant_id = "test-tenant-b"
+        	rule_selector {
+        		match_labels = {
+        			"observability.giantswarm.io/tenant" = "test-tenant-b",
+        		}
+        		match_expression {
+        			key = "application.giantswarm.io/prometheus-rule-kind"
+        			operator = "In"
+        			values = ["loki"]
+        		}
+        	}
+        }
+        // load rules for tenant giantswarm
+        loki.rules.kubernetes "giantswarm" {
+        	address = nonsensitive(remote.kubernetes.secret.credentials.data["ruler-api-url"])
+        	basic_auth {
+        		username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
+        		password = remote.kubernetes.secret.credentials.data["logging-password"]
+        	}
+        	loki_namespace_prefix = "test-cluster"
+        	tenant_id = "giantswarm"
+        	rule_selector {
+        		match_labels = {
+        			"observability.giantswarm.io/tenant" = "giantswarm",
+        		}
+        		match_expression {
+        			key = "application.giantswarm.io/prometheus-rule-kind"
+        			operator = "In"
+        			values = ["loki"]
+        		}
+        	}
         }
         
         // Kubernetes pods logs
@@ -304,11 +393,6 @@ alloy:
         		cluster_id   = "test-cluster",
         		installation = "test-installation",
         	}
-        }
-        
-        logging {
-        	level  = "warn"
-        	format = "logfmt"
         }
         
     clustering:
