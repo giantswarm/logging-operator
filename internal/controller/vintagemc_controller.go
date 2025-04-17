@@ -40,7 +40,7 @@ import (
 
 // VintageMCReconciler reconciles a Service object
 type VintageMCReconciler struct {
-	client.Client
+	Client     client.Client
 	Scheme     *runtime.Scheme
 	Reconciler logging.LoggingReconciler
 }

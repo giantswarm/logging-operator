@@ -21,7 +21,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
 type Reconciler struct {
-	client.Client
+	Client client.Client
 }
 
 // ReconcileCreate ensures events-logger-secret is created with the right credentials

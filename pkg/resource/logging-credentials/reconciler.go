@@ -18,7 +18,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Logging Credentials: store and maintain logging credentials
 type Reconciler struct {
-	client.Client
+	Client client.Client
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
@@ -47,7 +47,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Check if metadata has been updated
-	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta().Labels) {
+	if !reflect.DeepEqual(loggingCredentialsSecret.Labels, LoggingCredentialsSecretMeta().Labels) {
 		logger.Info("loggingCredentials - metatada update required")
 		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta()
 		secretUpdated = true
@@ -97,7 +97,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	secretUpdated := RemoveLoggingCredentials(lc, loggingCredentialsSecret)
 
 	// Check if metadata has been updated
-	if !reflect.DeepEqual(loggingCredentialsSecret.ObjectMeta.Labels, LoggingCredentialsSecretMeta().Labels) {
+	if !reflect.DeepEqual(loggingCredentialsSecret.Labels, LoggingCredentialsSecretMeta().Labels) {
 		logger.Info("loggingCredentials - metatada update required")
 		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta()
 		secretUpdated = true

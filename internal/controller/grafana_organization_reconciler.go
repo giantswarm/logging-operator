@@ -37,7 +37,7 @@ import (
 
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
-	client.Client
+	Client     client.Client
 	Scheme     *runtime.Scheme
 	Reconciler loggingconfig.Reconciler
 }

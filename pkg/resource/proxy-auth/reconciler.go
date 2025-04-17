@@ -20,7 +20,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Proxy auth: a secret for the grafana-multi-tenant-proxy config
 type Reconciler struct {
-	client.Client
+	Client client.Client
 }
 
 // ReconcileCreate ensures grafana-multi-tenant-proxy auth map is created with the right credentials

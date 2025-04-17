@@ -21,7 +21,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Logging secret: extra logging secret about where and how to send logs
 type Reconciler struct {
-	client.Client
+	Client client.Client
 }
 
 // ReconcileCreate ensures logging-secret is created with the right credentials

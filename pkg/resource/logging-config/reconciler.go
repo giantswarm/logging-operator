@@ -21,7 +21,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Logging config: extra logging config defining what we want to retrieve.
 type Reconciler struct {
-	client.Client
+	Client                           client.Client
 	DefaultWorkloadClusterNamespaces []string
 }
 

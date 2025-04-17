@@ -19,7 +19,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Logging agents toggle: enable or disable logging agents in a given Cluster.
 type Reconciler struct {
-	client.Client
+	Client client.Client
 	Scheme *runtime.Scheme
 }
 

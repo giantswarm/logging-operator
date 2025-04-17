@@ -19,7 +19,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // EventsLogger config: extra events-logger config defining what we want to retrieve.
 type Reconciler struct {
-	client.Client
+	Client            client.Client
 	IncludeNamespaces []string
 	ExcludeNamespaces []string
 }
