@@ -86,7 +86,7 @@ func GetPassword(lc loggedcluster.Interface, credentialsSecret *v1.Secret, usern
 
 // AddLoggingCredentials - Add credentials to LoggingCredentials secret if needed
 func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) (bool, error) {
-	var secretUpdated bool = false
+	var secretUpdated = false
 
 	// Always check credentials for "readuser"
 	if _, ok := loggingCredentials.Data[common.ReadUser]; !ok {
@@ -134,7 +134,7 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 
 // RemoveLoggingCredentials - Remove credentials from LoggingCredentials secret
 func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) bool {
-	var secretUpdated bool = false
+	var secretUpdated = false
 
 	// Check credentials for [clustername]
 	clusterName := lc.GetClusterName()

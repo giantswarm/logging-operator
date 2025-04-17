@@ -40,7 +40,7 @@ import (
 
 // CapiClusterReconciler reconciles a Cluster object
 type CapiClusterReconciler struct {
-	client.Client
+	Client     client.Client
 	Scheme     *runtime.Scheme
 	Reconciler logging.LoggingReconciler
 }

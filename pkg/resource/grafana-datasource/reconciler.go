@@ -20,7 +20,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Grafana datasource secret: secret which stores Loki datasource information for Grafana
 type Reconciler struct {
-	client.Client
+	Client client.Client
 }
 
 // ReconcileCreate ensures Grafana Datasource for Loki is created with the right credentials

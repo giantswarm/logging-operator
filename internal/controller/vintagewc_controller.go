@@ -41,7 +41,7 @@ import (
 
 // VintageWCReconciler reconciles a Cluster object
 type VintageWCReconciler struct {
-	client.Client
+	Client     client.Client
 	Scheme     *runtime.Scheme
 	Reconciler logging.LoggingReconciler
 }

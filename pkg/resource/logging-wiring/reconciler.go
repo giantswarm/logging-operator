@@ -23,7 +23,7 @@ import (
 // Logging wiring: set or unset the user value configmap created by
 // logging-agents-toggle in the observability bundle.
 type Reconciler struct {
-	client.Client
+	Client client.Client
 	Scheme *runtime.Scheme
 }
 

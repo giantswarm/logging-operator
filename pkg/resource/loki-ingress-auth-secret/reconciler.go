@@ -19,7 +19,7 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // loki ingress auth secret: a secret for the loki ingress that adds support for basic auth for the write path
 type Reconciler struct {
-	client.Client
+	Client client.Client
 }
 
 // ReconcileCreate ensures loki ingress auth map is created with the right credentials on CAPI

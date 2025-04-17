@@ -17,7 +17,7 @@ type Object struct {
 }
 
 func (o Object) HasLoggingEnabled() bool {
-	labels := o.Object.GetLabels()
+	labels := o.GetLabels()
 
 	// If logging is disabled at the installation level, we return false
 	if !o.Options.EnableLoggingFlag {
@@ -41,19 +41,19 @@ func (o Object) IsInsecureCA() bool {
 }
 
 func (o Object) GetAppsNamespace() string {
-	return o.Object.GetName()
+	return o.GetName()
 }
 
 func (o Object) AppConfigName(app string) string {
 	if app == "observability-bundle" {
-		return o.GetObject().GetName() + "-" + app
+		return o.GetName() + "-" + app
 	} else {
 		return app
 	}
 }
 
 func (o Object) GetClusterName() string {
-	return o.Object.GetName()
+	return o.GetName()
 }
 
 func (o Object) GetInstallationName() string {

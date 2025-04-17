@@ -20,7 +20,7 @@ type Object struct {
 }
 
 func (o Object) HasLoggingEnabled() bool {
-	labels := o.Object.GetLabels()
+	labels := o.GetLabels()
 
 	// If logging is disabled at the installation level, we return false
 	if !o.Options.EnableLoggingFlag {
@@ -44,7 +44,7 @@ func (o Object) IsInsecureCA() bool {
 }
 
 func (o Object) GetAppsNamespace() string {
-	return o.Object.GetNamespace()
+	return o.GetNamespace()
 }
 
 func (o Object) AppConfigName(app string) string {
@@ -52,7 +52,7 @@ func (o Object) AppConfigName(app string) string {
 }
 
 func (o Object) GetClusterName() string {
-	return o.Object.GetName()
+	return o.GetName()
 }
 
 func (o Object) GetInstallationName() string {
@@ -110,7 +110,7 @@ func (o Object) WireLogging(currentApp appv1.App) *appv1.App {
 	wiredExtraConfig := o.getWiredExtraConfig()
 
 	// We check if the extra config already exists to know if we need to remove it.
-	var containsWiredExtraConfig bool = false
+	var containsWiredExtraConfig = false
 	for _, extraConfig := range currentApp.Spec.ExtraConfigs {
 		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
 			containsWiredExtraConfig = true
