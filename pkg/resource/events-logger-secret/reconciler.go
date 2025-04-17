@@ -38,7 +38,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Retrieve Loki ingress name
-	lokiURL, err := common.ReadProxyIngressURL(ctx, lc, r.Client)
+	lokiURL, err := common.ReadLokiIngressURL(ctx, lc, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

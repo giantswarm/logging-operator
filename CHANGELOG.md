@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for loading log-based Prometheus Rules in the Loki Ruler from management and workload clusters.
+
 ## [0.26.1] - 2025-03-24
 
 ### Fixed
