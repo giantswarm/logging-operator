@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix network policy to support loading Prometheus Rules for logs (clustering and loki-backend direct access on MCs).
+
 ## [0.27.0] - 2025-04-22
 
 ### Added
