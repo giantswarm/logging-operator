@@ -31,6 +31,7 @@ networkPolicy:
         - port: "53"
           protocol: TCP
     {{- if not .IsWorkloadCluster }}
+    # Allow direct access to loki-backend and nginx
     - toEndpoints:
       - matchLabels:
           app.kubernetes.io/component: backend
@@ -40,7 +41,29 @@ networkPolicy:
       - ports:
         - port: "3100"
           protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: ANY
+        - port: "443"
+          protocol: ANY
     {{- end }}
+    # Allow clustering
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: alloy-logs
+          app.kubernetes.io/name: alloy
+      toPorts:
+      - ports:
+        - port: "12345"
+          protocol: TCP
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: alloy-logs
+      app.kubernetes.io/name: alloy
 
 alloy:
   alloy:
