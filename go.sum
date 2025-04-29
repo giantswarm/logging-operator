@@ -54,8 +54,8 @@ github.com/giantswarm/grafana-multi-tenant-proxy v0.8.0 h1:9Tl6mwlg/laZA5X9fHfo4
 github.com/giantswarm/grafana-multi-tenant-proxy v0.8.0/go.mod h1:RICWt1Sw4CTBj+Kb8eUqIMaHOlU7gqZyZ/bSPOaa6JM=
 github.com/giantswarm/k8smetadata v0.25.0 h1:6mKmmm4xHPuBvxDMAkIhU5oj6KJkJSaR2s5esIsnHs4=
 github.com/giantswarm/k8smetadata v0.25.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
-github.com/giantswarm/observability-operator v0.27.0 h1:1jMg1mOemMrAPAoZPCl4/uqLLsGZWEsBSZtaDtKBwwQ=
-github.com/giantswarm/observability-operator v0.27.0/go.mod h1:tj0+UaOdMeRfmFTUVVMAle5C1iBK+Bq4n3gjuKsmGHg=
+github.com/giantswarm/observability-operator v0.28.0 h1:kszSs8mDeVnFiKYgsbme/jy6i48lPW100CSLvpyPhmg=
+github.com/giantswarm/observability-operator v0.28.0/go.mod h1:oZqBNlpn6xpPfdKODmwtQLOzeKkOJshDFc7bgDGnVAg=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
