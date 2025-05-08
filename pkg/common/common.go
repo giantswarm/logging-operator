@@ -17,9 +17,6 @@ const (
 	ReadUser = "read"
 	// DefaultWriteTenant is the default tenant for writing logs
 	DefaultWriteTenant = "giantswarm"
-	// Grafana Multi Tenant Proxy Ingress
-	proxyIngressNamespace = "monitoring"
-	proxyIngressName      = "grafana-multi-tenant-proxy"
 	// Loki Gateway Ingress
 	lokiGatewayIngressNamespace = "loki"
 	lokiGatewayIngressName      = "loki-gateway"
@@ -83,13 +80,7 @@ func IsWorkloadCluster(lc loggedcluster.Interface) bool {
 func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
 	var lokiIngress netv1.Ingress
 
-	var objectKey types.NamespacedName
-	if lc.IsCAPI() {
-		objectKey = types.NamespacedName{Name: lokiGatewayIngressName, Namespace: lokiGatewayIngressNamespace}
-	} else {
-		objectKey = types.NamespacedName{Name: proxyIngressName, Namespace: proxyIngressNamespace}
-	}
-
+	var objectKey = types.NamespacedName{Name: lokiGatewayIngressName, Namespace: lokiGatewayIngressNamespace}
 	if err := client.Get(ctx, objectKey, &lokiIngress); err != nil {
 		return "", errors.WithStack(err)
 	}
