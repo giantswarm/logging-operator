@@ -46,9 +46,6 @@
                 },
                 "loggingEnabled": {
                     "type": "boolean"
-                },
-                "vintageMode": {
-                    "type": "boolean"
                 }
             }
         },

@@ -49,13 +49,11 @@ import (
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
-	grafanadatasource "github.com/giantswarm/logging-operator/pkg/resource/grafana-datasource"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
 	lokiingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/loki-ingress-auth-secret"
-	proxyauth "github.com/giantswarm/logging-operator/pkg/resource/proxy-auth"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -97,7 +95,6 @@ func main() {
 	var metricsAddr string
 	var profilesAddr string
 	var probeAddr string
-	var vintageMode bool
 	flag.Var(&defaultNamespaces, "default-namespaces", "List of namespaces to collect logs from by default on workload clusters")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
@@ -112,7 +109,6 @@ func main() {
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&profilesAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
-	flag.BoolVar(&vintageMode, "vintage", false, "Reconcile resources on a Vintage installation")
 	opts := zap.Options{
 		Development: false,
 	}
@@ -175,14 +171,6 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	grafanaDatasource := grafanadatasource.Reconciler{
-		Client: mgr.GetClient(),
-	}
-
-	proxyAuth := proxyauth.Reconciler{
-		Client: mgr.GetClient(),
-	}
-
 	lokiIngressAuthSecret := lokiingressauthsecret.Reconciler{
 		Client: mgr.GetClient(),
 	}
@@ -220,9 +208,7 @@ func main() {
 			&agentsToggle,
 			&loggingWiring,
 			&loggingSecrets,
-			&grafanaDatasource,
 			&lokiIngressAuthSecret,
-			&proxyAuth,
 			&loggingSecret,
 			&loggingConfig,
 			&eventsLoggerSecret,
@@ -230,48 +216,23 @@ func main() {
 		},
 	}
 
-	if vintageMode {
-		setupLog.Info("Vintage mode selected")
+	if err = (&controller.CapiClusterReconciler{
+		Client:     mgr.GetClient(),
+		Scheme:     mgr.GetScheme(),
+		Reconciler: loggingReconciler,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
+		os.Exit(1)
+	}
 
-		if err = (&controller.VintageMCReconciler{
-			Client:     mgr.GetClient(),
-			Scheme:     mgr.GetScheme(),
-			Reconciler: loggingReconciler,
-		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create Vintage MC controller", "controller", "Service")
-			os.Exit(1)
-		}
-
-		if err = (&controller.VintageWCReconciler{
-			Client:     mgr.GetClient(),
-			Scheme:     mgr.GetScheme(),
-			Reconciler: loggingReconciler,
-		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create Vintage WC controller", "controller", "Service")
-			os.Exit(1)
-		}
-
-	} else {
-		setupLog.Info("CAPI mode selected")
-
-		if err = (&controller.CapiClusterReconciler{
-			Client:     mgr.GetClient(),
-			Scheme:     mgr.GetScheme(),
-			Reconciler: loggingReconciler,
-		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
-			os.Exit(1)
-		}
-
-		// The GrafanaOrganizationREconciler is only used in CAPI mode
-		if err = (&controller.GrafanaOrganizationReconciler{
-			Client:     mgr.GetClient(),
-			Scheme:     mgr.GetScheme(),
-			Reconciler: loggingConfig,
-		}).SetupWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
-			os.Exit(1)
-		}
+	// The GrafanaOrganizationReconciler is only used in CAPI mode
+	if err = (&controller.GrafanaOrganizationReconciler{
+		Client:     mgr.GetClient(),
+		Scheme:     mgr.GetScheme(),
+		Reconciler: loggingConfig,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
+		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
 

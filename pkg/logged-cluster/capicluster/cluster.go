@@ -71,10 +71,6 @@ func (o Object) GetTenant() string {
 	return common.DefaultWriteTenant
 }
 
-func (o Object) IsCAPI() bool {
-	return true
-}
-
 // On capi clusters, use an extraconfig
 func (o Object) GetObservabilityBundleConfigMap() string {
 	return "observability-bundle-logging-extraconfig"

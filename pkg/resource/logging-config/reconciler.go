@@ -43,11 +43,9 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 	// Get list of tenants
 	var tenants = []string{}
-	if lc.IsCAPI() {
-		tenants, err = listTenants(r.Client, ctx)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+	tenants, err = listTenants(r.Client, ctx)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired config

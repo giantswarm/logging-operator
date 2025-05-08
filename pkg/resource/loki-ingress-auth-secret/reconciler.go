@@ -24,21 +24,11 @@ type Reconciler struct {
 
 // ReconcileCreate ensures loki ingress auth map is created with the right credentials on CAPI
 func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
-	// If we are not on CAPI, we don't need to create the secret as we are using the multi-tenant-proxy
-	if !lc.IsCAPI() {
-		return ctrl.Result{}, nil
-	}
-
 	return r.createOrUpdateSecret(ctx, lc)
 }
 
 // ReconcileDelete - Delete the loki ingress auth secret on capi
 func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
-	// If we are not on CAPI, we don't need to create the secret as we are using the multi-tenant-proxy
-	if !lc.IsCAPI() {
-		return ctrl.Result{}, nil
-	}
-
 	return r.createOrUpdateSecret(ctx, lc)
 }
 

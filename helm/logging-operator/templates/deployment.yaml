@@ -32,9 +32,6 @@ spec:
       - name: {{ include "name" . }}
         image: "{{ .Values.registry.domain }}/{{ .Values.image.name }}:{{ default .Chart.Version .Values.image.tag }}"
         args:
-          {{ if .Values.loggingOperator.vintageMode -}}
-          - -vintage
-          {{- end }}
           - -enable-logging={{ .Values.loggingOperator.loggingEnabled }}
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}
