@@ -50,8 +50,8 @@ github.com/giantswarm/apiextensions-application v0.6.2 h1:XL86OrpprWl5Wp38EUvUXt
 github.com/giantswarm/apiextensions-application v0.6.2/go.mod h1:8ylqSmDSzFblCppRQTFo8v9s/F6MX6RTusVVoDDfWso=
 github.com/giantswarm/k8smetadata v0.25.0 h1:6mKmmm4xHPuBvxDMAkIhU5oj6KJkJSaR2s5esIsnHs4=
 github.com/giantswarm/k8smetadata v0.25.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
-github.com/giantswarm/observability-operator v0.29.0 h1:ic/tYxqVw7sRlaFetAIp/thVCU8ED6svc1hTe75Vcm8=
-github.com/giantswarm/observability-operator v0.29.0/go.mod h1:cs3D6CfrWuUI2nGq1nh6CLa/4lAfVc8Wqm7h+TaNtSY=
+github.com/giantswarm/observability-operator v0.30.0 h1:grYwCKk8wRFaNJBsU4XFE7igqdJ/aftgpT+t3XQ5R7Q=
+github.com/giantswarm/observability-operator v0.30.0/go.mod h1:zVZg7kvlRNZNXkSOOYfe3xypDdZ+u9BJY1jQYgbic9U=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
