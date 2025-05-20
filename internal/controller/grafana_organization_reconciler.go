@@ -37,9 +37,10 @@ import (
 
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
-	Client     client.Client
-	Scheme     *runtime.Scheme
-	Reconciler loggingconfig.Reconciler
+	Client                  client.Client
+	Scheme                  *runtime.Scheme
+	Reconciler              loggingconfig.Reconciler
+	ManagementClusterConfig common.ManagementClusterConfig
 }
 
 //+kubebuilder:rbac:groups=observability.giantswarm.io,resources=grafanaorganizations,verbs=get;list;watch;update;patch
@@ -70,15 +71,14 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	for _, cluster := range clusters.Items {
 		loggedCluster := &capicluster.Object{
-			Object:  &cluster,
-			Options: loggedcluster.O,
+			Object: &cluster,
 			LoggingAgent: &loggedcluster.LoggingAgent{
-				LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
-				KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
+				LoggingAgent:     g.ManagementClusterConfig.DefaultLoggingAgent,
+				KubeEventsLogger: g.ManagementClusterConfig.DefaultKubeEventsLogger,
 			},
 		}
 
-		if common.IsLoggingEnabled(loggedCluster) {
+		if common.IsLoggingEnabled(g.ManagementClusterConfig, loggedCluster) {
 			err = common.ToggleAgents(ctx, g.Client, loggedCluster)
 			if err != nil {
 				// Handle case where the app is not found.

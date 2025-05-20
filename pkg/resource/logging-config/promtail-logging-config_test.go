@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
 
@@ -39,20 +39,25 @@ func TestGeneratePromtailLoggingConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
+			managementClusterConfig := common.ManagementClusterConfig{
+				InstallationName: tc.installationName,
+			}
+
 			loggedCluster := &capicluster.Object{
 				Object: &capi.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: tc.clusterName,
 					},
 				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-				},
 			}
 
-			config, err := GeneratePromtailLoggingConfig(loggedCluster)
+			reconciler := Reconciler{
+				ManagementClusterConfig: managementClusterConfig,
+			}
+
+			config, err := reconciler.generatePromtailLoggingConfig(loggedCluster)
 			if err != nil {
-				t.Fatalf("Failed to generate alloy config: %v", err)
+				t.Fatalf("Failed to generate promtail config: %v", err)
 			}
 
 			if string(golden) != config {

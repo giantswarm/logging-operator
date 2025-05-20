@@ -17,18 +17,18 @@ const (
 	grafanaAgentConfigName  = "grafana-agent-config"
 )
 
-func generateEventsLoggerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (v1.ConfigMap, error) {
+func (r *Reconciler) generateEventsLoggerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		values, err = generateGrafanaAgentConfig(lc, includeNamespaces, excludeNamespaces)
+		values, err = r.generateGrafanaAgentConfig(lc, includeNamespaces, excludeNamespaces)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.EventsLoggerAlloy:
-		values, err = generateAlloyEventsConfig(lc, includeNamespaces, excludeNamespaces)
+		values, err = r.generateAlloyEventsConfig(lc, includeNamespaces, excludeNamespaces)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
@@ -50,7 +50,7 @@ func generateEventsLoggerConfig(lc loggedcluster.Interface, includeNamespaces []
 func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      getEventsLoggerConfigName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Namespace: lc.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 

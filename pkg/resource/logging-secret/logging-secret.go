@@ -16,13 +16,13 @@ const (
 	loggingClientSecretName = "logging-secret"
 )
 
-func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func (r *Reconciler) generateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = r.generatePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
@@ -47,7 +47,7 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      GetLoggingSecretName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Namespace: lc.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 

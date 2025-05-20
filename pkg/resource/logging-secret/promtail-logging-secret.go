@@ -54,7 +54,7 @@ type promtailConfigClientBasicAuth struct {
 
 // GeneratePromtailLoggingSecret returns a secret for
 // the Loki-multi-tenant-proxy config
-func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
+func (r *Reconciler) generatePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
 	clusterName := lc.GetClusterName()
 
 	writeUser := clusterName
@@ -70,7 +70,7 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 				Clients: []promtailConfigClient{
 					{
 						URL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
-						TenantID: lc.GetTenant(),
+						TenantID: common.DefaultWriteTenant,
 						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,
 							Password: writePassword,
@@ -79,11 +79,11 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 							MaxPeriod: common.MaxBackoffPeriod,
 						},
 						ExternalLabels: promtailConfigClientExternalLabels{
-							Installation: lc.GetInstallationName(),
+							Installation: r.ManagementClusterConfig.InstallationName,
 							ClusterID:    lc.GetClusterName(),
 						},
 						TLSConfig: promtailConfigClientTLSConfig{
-							InsecureSkipVerify: lc.IsInsecureCA(),
+							InsecureSkipVerify: r.ManagementClusterConfig.InsecureCA,
 						},
 					},
 				},

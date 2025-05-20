@@ -1,7 +1,6 @@
 package capicluster
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -16,16 +15,10 @@ import (
 type Object struct {
 	client.Object
 	*loggedcluster.LoggingAgent
-	Options loggedcluster.Options
 }
 
 func (o Object) HasLoggingEnabled() bool {
 	labels := o.GetLabels()
-
-	// If logging is disabled at the installation level, we return false
-	if !o.Options.EnableLoggingFlag {
-		return false
-	}
 
 	loggingLabelValue, ok := labels[key.LoggingLabel]
 	if !ok {
@@ -39,41 +32,16 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
-func (o Object) IsInsecureCA() bool {
-	return o.Options.InsecureCA
-}
-
 func (o Object) GetAppsNamespace() string {
 	return o.GetNamespace()
-}
-
-func (o Object) AppConfigName(app string) string {
-	return fmt.Sprintf("%s-%s", o.GetName(), app)
 }
 
 func (o Object) GetClusterName() string {
 	return o.GetName()
 }
 
-func (o Object) GetInstallationName() string {
-	return o.Options.InstallationName
-}
-
-func (o Object) GetEnableLoggingFlag() bool {
-	return o.Options.EnableLoggingFlag
-}
-
 func (o Object) GetObject() client.Object {
 	return o.Object
-}
-
-func (o Object) GetTenant() string {
-	return common.DefaultWriteTenant
-}
-
-// On capi clusters, use an extraconfig
-func (o Object) GetObservabilityBundleConfigMap() string {
-	return "observability-bundle-logging-extraconfig"
 }
 
 func (o Object) getWiredExtraConfig() appv1.AppExtraConfig {

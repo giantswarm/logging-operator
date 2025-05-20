@@ -22,18 +22,18 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (v1.ConfigMap, error) {
+func (r *Reconciler) generateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(lc)
+		values, err = r.generatePromtailLoggingConfig(lc)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces, tenants)
+		values, err = r.generateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces, tenants)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
@@ -55,7 +55,7 @@ func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersio
 func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      getLoggingConfigName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Namespace: lc.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 

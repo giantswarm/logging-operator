@@ -88,7 +88,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected secret.
 	var currentEventsLoggerSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: GetEventsLoggerSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: GetEventsLoggerSecretName(lc), Namespace: lc.GetNamespace()}, &currentEventsLoggerSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-secret not found, stop here")

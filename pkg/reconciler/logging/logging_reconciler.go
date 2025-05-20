@@ -22,12 +22,13 @@ import (
 // LoggingReconciler reconciles logging for any supported object
 type LoggingReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	Reconcilers []reconciler.Interface
+	Scheme                  *runtime.Scheme
+	Reconcilers             []reconciler.Interface
+	ManagementClusterConfig common.ManagementClusterConfig
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
-	if common.IsLoggingEnabled(lc) {
+	if common.IsLoggingEnabled(l.ManagementClusterConfig, lc) {
 		result, err = l.reconcileCreate(ctx, lc)
 	} else {
 		result, err = l.reconcileDelete(ctx, lc)

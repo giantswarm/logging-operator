@@ -43,7 +43,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
@@ -85,27 +84,25 @@ func (s *StringSliceVar) Set(value string) error {
 func main() {
 	var defaultNamespaces StringSliceVar
 	var enableLeaderElection bool
-	var enableLogging bool
-	var loggingAgent string
-	var eventsLogger string
 	var includeEventsFromNamespaces StringSliceVar
 	var excludeEventsFromNamespaces StringSliceVar
-	var installationName string
-	var insecureCA bool
 	var metricsAddr string
 	var profilesAddr string
 	var probeAddr string
+
+	managementClusterConfig := common.ManagementClusterConfig{}
+
 	flag.Var(&defaultNamespaces, "default-namespaces", "List of namespaces to collect logs from by default on workload clusters")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
-	flag.StringVar(&loggingAgent, "logging-agent", common.LoggingAgentAlloy, fmt.Sprintf("select logging agent to use (%s or %s)", common.LoggingAgentPromtail, common.LoggingAgentAlloy))
-	flag.StringVar(&eventsLogger, "events-logger", common.EventsLoggerAlloy, fmt.Sprintf("select events logger to use (%s or %s)", common.EventsLoggerAlloy, common.EventsLoggerGrafanaAgent))
+	flag.BoolVar(&managementClusterConfig.EnableLoggingFlag, "enable-logging", true, "enable/disable logging for the whole installation")
+	flag.StringVar(&managementClusterConfig.DefaultLoggingAgent, "logging-agent", common.LoggingAgentAlloy, fmt.Sprintf("select logging agent to use (%s or %s)", common.LoggingAgentPromtail, common.LoggingAgentAlloy))
+	flag.StringVar(&managementClusterConfig.DefaultKubeEventsLogger, "events-logger", common.EventsLoggerAlloy, fmt.Sprintf("select events logger to use (%s or %s)", common.EventsLoggerAlloy, common.EventsLoggerGrafanaAgent))
 	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
 	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
-	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
-	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
+	flag.StringVar(&managementClusterConfig.InstallationName, "installation-name", "unknown", "Name of the installation")
+	flag.BoolVar(&managementClusterConfig.InsecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&profilesAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -194,16 +191,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	loggedcluster.O.EnableLoggingFlag = enableLogging
-	loggedcluster.O.DefaultLoggingAgent = loggingAgent
-	loggedcluster.O.DefaultKubeEventsLogger = eventsLogger
-	loggedcluster.O.InstallationName = installationName
-	loggedcluster.O.InsecureCA = insecureCA
-	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
-
 	loggingReconciler := logging.LoggingReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:                  mgr.GetClient(),
+		Scheme:                  mgr.GetScheme(),
+		ManagementClusterConfig: managementClusterConfig,
 		Reconcilers: []reconciler.Interface{
 			&agentsToggle,
 			&loggingWiring,
@@ -217,9 +208,10 @@ func main() {
 	}
 
 	if err = (&controller.CapiClusterReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		Reconciler: loggingReconciler,
+		Client:                  mgr.GetClient(),
+		Scheme:                  mgr.GetScheme(),
+		Reconciler:              loggingReconciler,
+		ManagementClusterConfig: managementClusterConfig,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 		os.Exit(1)
@@ -227,9 +219,10 @@ func main() {
 
 	// The GrafanaOrganizationReconciler is only used in CAPI mode
 	if err = (&controller.GrafanaOrganizationReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		Reconciler: loggingConfig,
+		Client:                  mgr.GetClient(),
+		Scheme:                  mgr.GetScheme(),
+		Reconciler:              loggingConfig,
+		ManagementClusterConfig: managementClusterConfig,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
 		os.Exit(1)

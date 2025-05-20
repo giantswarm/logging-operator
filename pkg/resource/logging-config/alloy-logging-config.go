@@ -33,10 +33,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (string, error) {
+func (r *Reconciler) generateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion, tenants)
+	alloyConfig, err := r.generateAlloyConfig(lc, observabilityBundleVersion, tenants)
 	if err != nil {
 		return "", err
 	}
@@ -51,8 +51,8 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
-		DefaultWriteTenant:               lc.GetTenant(),
-		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		DefaultWriteTenant:               common.DefaultWriteTenant,
+		IsWorkloadCluster:                common.IsWorkloadCluster(r.ManagementClusterConfig, lc),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
@@ -67,14 +67,14 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string) (string, error) {
+func (r *Reconciler) generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string) (string, error) {
 	var values bytes.Buffer
 
 	clusterName := lc.GetClusterName()
 
 	// Ensure default tenant is included in the list of tenants
-	if !slices.Contains(tenants, lc.GetTenant()) {
-		tenants = append(tenants, lc.GetTenant())
+	if !slices.Contains(tenants, common.DefaultWriteTenant) {
+		tenants = append(tenants, common.DefaultWriteTenant)
 	}
 
 	data := struct {
@@ -93,12 +93,12 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		Tenants            []string
 	}{
 		ClusterID:         clusterName,
-		Installation:      lc.GetInstallationName(),
+		Installation:      r.ManagementClusterConfig.InstallationName,
 		MaxBackoffPeriod:  common.MaxBackoffPeriod,
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
+		IsWorkloadCluster: common.IsWorkloadCluster(r.ManagementClusterConfig, lc),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
-		InsecureSkipVerify: lc.IsInsecureCA(),
+		InsecureSkipVerify: r.ManagementClusterConfig.InsecureCA,
 		SecretName:         common.AlloyLogAgentAppName,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,

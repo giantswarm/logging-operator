@@ -50,7 +50,7 @@ func generateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSe
 func secretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      GetEventsLoggerSecretName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Namespace: lc.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 

@@ -22,6 +22,7 @@ import (
 // Logging config: extra logging config defining what we want to retrieve.
 type Reconciler struct {
 	Client                           client.Client
+	ManagementClusterConfig          common.ManagementClusterConfig
 	DefaultWorkloadClusterNamespaces []string
 }
 
@@ -49,7 +50,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants)
+	desiredLoggingConfig, err := r.generateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -93,7 +94,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected configmap.
 	var currentLoggingConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(lc), Namespace: lc.GetNamespace()}, &currentLoggingConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-config not found, stop here")

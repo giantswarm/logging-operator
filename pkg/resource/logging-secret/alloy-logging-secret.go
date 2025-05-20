@@ -38,7 +38,7 @@ func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v
 	}{
 		ExtraSecretEnv: map[string]string{
 			common.LoggingURL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
-			common.LoggingTenantID: lc.GetTenant(),
+			common.LoggingTenantID: common.DefaultWriteTenant,
 			common.LoggingUsername: clusterName,
 			common.LoggingPassword: writePassword,
 			common.LokiRulerAPIURL: fmt.Sprintf(common.LokiBaseURLFormat, lokiURL),

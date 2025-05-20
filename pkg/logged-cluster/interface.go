@@ -16,15 +16,8 @@ type Interface interface {
 	SetLoggingAgent(string)
 	GetKubeEventsLogger() string
 	SetKubeEventsLogger(string)
-	IsInsecureCA() bool
-	GetAppsNamespace() string
-	GetEnableLoggingFlag() bool
 	GetClusterName() string
-	GetInstallationName() string
-	AppConfigName(app string) string
 	GetObject() client.Object
-	GetTenant() string
-	GetObservabilityBundleConfigMap() string
 	UnwireLogging(currentApp appv1.App) *appv1.App
 	WireLogging(currentApp appv1.App) *appv1.App
 }
