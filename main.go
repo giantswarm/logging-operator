@@ -156,12 +156,10 @@ func main() {
 
 	agentsToggle := agentstoggle.Reconciler{
 		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
 	}
 
 	loggingWiring := loggingwiring.Reconciler{
 		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
 	}
 
 	loggingSecrets := loggingcredentials.Reconciler{
@@ -173,18 +171,21 @@ func main() {
 	}
 
 	loggingSecret := loggingsecret.Reconciler{
-		Client: mgr.GetClient(),
+		Client:                  mgr.GetClient(),
+		ManagementClusterConfig: managementClusterConfig,
 	}
 
 	loggingConfig := loggingconfig.Reconciler{
 		Client:                           mgr.GetClient(),
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
+		ManagementClusterConfig:          managementClusterConfig,
 	}
 
 	eventsLoggerConfig := eventsloggerconfig.Reconciler{
-		Client:            mgr.GetClient(),
-		IncludeNamespaces: includeEventsFromNamespaces,
-		ExcludeNamespaces: excludeEventsFromNamespaces,
+		Client:                  mgr.GetClient(),
+		IncludeNamespaces:       includeEventsFromNamespaces,
+		ExcludeNamespaces:       excludeEventsFromNamespaces,
+		ManagementClusterConfig: managementClusterConfig,
 	}
 
 	eventsLoggerSecret := eventsloggersecret.Reconciler{
@@ -193,7 +194,6 @@ func main() {
 
 	loggingReconciler := logging.LoggingReconciler{
 		Client:                  mgr.GetClient(),
-		Scheme:                  mgr.GetScheme(),
 		ManagementClusterConfig: managementClusterConfig,
 		Reconcilers: []reconciler.Interface{
 			&agentsToggle,
@@ -209,7 +209,6 @@ func main() {
 
 	if err = (&controller.CapiClusterReconciler{
 		Client:                  mgr.GetClient(),
-		Scheme:                  mgr.GetScheme(),
 		Reconciler:              loggingReconciler,
 		ManagementClusterConfig: managementClusterConfig,
 	}).SetupWithManager(mgr); err != nil {
@@ -220,7 +219,6 @@ func main() {
 	// The GrafanaOrganizationReconciler is only used in CAPI mode
 	if err = (&controller.GrafanaOrganizationReconciler{
 		Client:                  mgr.GetClient(),
-		Scheme:                  mgr.GetScheme(),
 		Reconciler:              loggingConfig,
 		ManagementClusterConfig: managementClusterConfig,
 	}).SetupWithManager(mgr); err != nil {

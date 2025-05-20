@@ -23,7 +23,6 @@ import (
 	grafanaorganization "github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,7 +37,6 @@ import (
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
 	Client                  client.Client
-	Scheme                  *runtime.Scheme
 	Reconciler              loggingconfig.Reconciler
 	ManagementClusterConfig common.ManagementClusterConfig
 }

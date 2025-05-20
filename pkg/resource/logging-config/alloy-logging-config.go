@@ -70,7 +70,7 @@ func (r *Reconciler) generateAlloyLoggingConfig(lc loggedcluster.Interface, obse
 func (r *Reconciler) generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string) (string, error) {
 	var values bytes.Buffer
 
-	clusterName := lc.GetClusterName()
+	clusterName := lc.GetName()
 
 	// Ensure default tenant is included in the list of tenants
 	if !slices.Contains(tenants, common.DefaultWriteTenant) {

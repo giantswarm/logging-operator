@@ -22,7 +22,6 @@ import (
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -42,7 +41,6 @@ import (
 // CapiClusterReconciler reconciles a Cluster object
 type CapiClusterReconciler struct {
 	Client                  client.Client
-	Scheme                  *runtime.Scheme
 	Reconciler              logging.LoggingReconciler
 	ManagementClusterConfig common.ManagementClusterConfig
 }

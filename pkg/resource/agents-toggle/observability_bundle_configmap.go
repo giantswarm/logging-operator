@@ -1,8 +1,6 @@
 package agentstoggle
 
 import (
-	"context"
-
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
 
@@ -21,14 +19,14 @@ type app struct {
 
 // generateObservabilityBundleConfig returns a configmap for
 // the observabilitybundle application to enable logging agents and events-loggers.
-func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Interface) (string, error) {
+func generateObservabilityBundleConfig(lc loggedcluster.Interface) (string, error) {
 	appsToEnable := map[string]app{}
 
-	if err := toggleLogAgent(ctx, lc, appsToEnable); err != nil {
+	if err := toggleLogAgent(lc, appsToEnable); err != nil {
 		return "", errors.WithStack(err)
 	}
 
-	if err := toggleKubeEventsLogger(ctx, lc, appsToEnable); err != nil {
+	if err := toggleKubeEventsLogger(lc, appsToEnable); err != nil {
 		return "", errors.WithStack(err)
 	}
 
@@ -45,7 +43,7 @@ func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Int
 }
 
 // toggleLogAgent toggles the logging agent based on the observability bundle version.
-func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, appsToEnable map[string]app) error {
+func toggleLogAgent(lc loggedcluster.Interface, appsToEnable map[string]app) error {
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
 		appsToEnable[common.PromtailObservabilityBundleAppName] = app{
@@ -70,7 +68,7 @@ func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, appsToEnabl
 }
 
 // toggleKubeEventsLogger toggles the kube-events-logger based on the observability bundle version.
-func toggleKubeEventsLogger(ctx context.Context, lc loggedcluster.Interface, appsToEnable map[string]app) error {
+func toggleKubeEventsLogger(lc loggedcluster.Interface, appsToEnable map[string]app) error {
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
 		appsToEnable["grafanaAgent"] = app{

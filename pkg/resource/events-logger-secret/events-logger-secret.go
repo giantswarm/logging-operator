@@ -61,8 +61,8 @@ func secretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 func GetEventsLoggerSecretName(lc loggedcluster.Interface) string {
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentSecretName)
+		return fmt.Sprintf("%s-%s", lc.GetName(), grafanaAgentSecretName)
 	default:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLoggerSecretName)
+		return fmt.Sprintf("%s-%s", lc.GetName(), eventsLoggerSecretName)
 	}
 }

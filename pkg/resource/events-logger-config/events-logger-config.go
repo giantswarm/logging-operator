@@ -61,8 +61,8 @@ func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 func getEventsLoggerConfigName(lc loggedcluster.Interface) string {
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentConfigName)
+		return fmt.Sprintf("%s-%s", lc.GetName(), grafanaAgentConfigName)
 	default:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLogggerConfigName)
+		return fmt.Sprintf("%s-%s", lc.GetName(), eventsLogggerConfigName)
 	}
 }

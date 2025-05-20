@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -22,7 +21,6 @@ import (
 // LoggingReconciler reconciles logging for any supported object
 type LoggingReconciler struct {
 	client.Client
-	Scheme                  *runtime.Scheme
 	Reconcilers             []reconciler.Interface
 	ManagementClusterConfig common.ManagementClusterConfig
 }
@@ -47,12 +45,12 @@ func (l *LoggingReconciler) reconcileCreate(ctx context.Context, lc loggedcluste
 
 		// We use a patch rather than an update to avoid conflicts when multiple controllers are adding their finalizer to the ClusterCR
 		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
-		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
+		patchHelper, err := patch.NewHelper(lc, l.Client)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 		controllerutil.AddFinalizer(lc, key.Finalizer)
-		if err := patchHelper.Patch(ctx, lc.GetObject()); err != nil {
+		if err := patchHelper.Patch(ctx, lc); err != nil {
 			logger.Error(err, "failed to add finalizer to logger cluster", "finalizer", key.Finalizer)
 			return ctrl.Result{}, errors.WithStack(err)
 		}
@@ -107,12 +105,12 @@ func (l *LoggingReconciler) reconcileDelete(ctx context.Context, lc loggedcluste
 
 		// We use a patch rather than an update to avoid conflicts when multiple controllers are removing their finalizer from the ClusterCR
 		// We use the patch from sigs.k8s.io/cluster-api/util/patch to handle the patching without conflicts
-		patchHelper, err := patch.NewHelper(lc.GetObject(), l.Client)
+		patchHelper, err := patch.NewHelper(lc, l.Client)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 		controllerutil.RemoveFinalizer(lc, key.Finalizer)
-		if err := patchHelper.Patch(ctx, lc.GetObject()); err != nil {
+		if err := patchHelper.Patch(ctx, lc); err != nil {
 			logger.Error(err, "failed to remove finalizer from logger cluster, requeuing", "finalizer", key.Finalizer)
 			return ctrl.Result{}, errors.WithStack(err)
 		}

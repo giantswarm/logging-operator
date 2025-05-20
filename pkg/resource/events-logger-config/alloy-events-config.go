@@ -66,7 +66,7 @@ func (r *Reconciler) generateAlloyConfig(lc loggedcluster.Interface, includeName
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
 	}{
-		ClusterID:          lc.GetClusterName(),
+		ClusterID:          lc.GetName(),
 		Installation:       r.ManagementClusterConfig.InstallationName,
 		InsecureSkipVerify: fmt.Sprintf("%t", r.ManagementClusterConfig.InsecureCA),
 		MaxBackoffPeriod:   common.MaxBackoffPeriod,

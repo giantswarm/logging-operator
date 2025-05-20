@@ -56,5 +56,5 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 }
 
 func GetLoggingSecretName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingClientSecretName)
+	return fmt.Sprintf("%s-%s", lc.GetName(), loggingClientSecretName)
 }

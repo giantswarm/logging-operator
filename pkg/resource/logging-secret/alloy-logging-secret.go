@@ -26,7 +26,7 @@ func init() {
 }
 
 func GenerateAlloyLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
-	clusterName := lc.GetClusterName()
+	clusterName := lc.GetName()
 
 	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
 	if err != nil {

@@ -68,7 +68,7 @@ func (r *Reconciler) generateGrafanaAgentInnerConfig(lc loggedcluster.Interface,
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
 	}{
-		ClusterID:          lc.GetClusterName(),
+		ClusterID:          lc.GetName(),
 		Installation:       r.ManagementClusterConfig.InstallationName,
 		InsecureSkipVerify: fmt.Sprintf("%t", r.ManagementClusterConfig.InsecureCA),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),

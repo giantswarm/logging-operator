@@ -64,7 +64,7 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 }
 
 func getLoggingConfigName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingConfigName)
+	return fmt.Sprintf("%s-%s", lc.GetName(), loggingConfigName)
 }
 
 func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error) {

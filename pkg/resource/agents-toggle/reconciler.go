@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
@@ -20,7 +19,6 @@ import (
 // Logging agents toggle: enable or disable logging agents in a given Cluster.
 type Reconciler struct {
 	Client client.Client
-	Scheme *runtime.Scheme
 }
 
 // ReconcileCreate ensure logging agents and events loggers are enabled in the given cluster.
@@ -33,7 +31,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &desiredConfigMap, func() error {
-		config, err := generateObservabilityBundleConfig(ctx, lc)
+		config, err := generateObservabilityBundleConfig(lc)
 		if err != nil {
 			return errors.WithStack(err)
 		}
