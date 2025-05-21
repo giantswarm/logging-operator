@@ -9,6 +9,7 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -19,9 +20,10 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // EventsLogger config: extra events-logger config defining what we want to retrieve.
 type Reconciler struct {
-	Client            client.Client
-	IncludeNamespaces []string
-	ExcludeNamespaces []string
+	Client                  client.Client
+	ManagementClusterConfig common.ManagementClusterConfig
+	IncludeNamespaces       []string
+	ExcludeNamespaces       []string
 }
 
 // ReconcileCreate ensures events-logger config is created with the right credentials
@@ -30,7 +32,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("events-logger-config create")
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc, r.IncludeNamespaces, r.ExcludeNamespaces)
+	desiredEventsLoggerConfig, err := r.generateEventsLoggerConfig(lc, r.IncludeNamespaces, r.ExcludeNamespaces)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -74,7 +76,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected configmap.
 	var currentEventsLoggerConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-config not found, stop here")

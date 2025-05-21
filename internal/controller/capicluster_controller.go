@@ -22,7 +22,6 @@ import (
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/giantswarm/logging-operator/internal/controller/predicates"
+	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
@@ -40,9 +40,9 @@ import (
 
 // CapiClusterReconciler reconciles a Cluster object
 type CapiClusterReconciler struct {
-	Client     client.Client
-	Scheme     *runtime.Scheme
-	Reconciler logging.LoggingReconciler
+	Client                  client.Client
+	Reconciler              logging.LoggingReconciler
+	ManagementClusterConfig common.ManagementClusterConfig
 }
 
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters,verbs=get;list;watch
@@ -71,11 +71,10 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	logger.Info("Reconciling CAPI Cluster", "name", cluster.GetName())
 
 	loggedCluster := &capicluster.Object{
-		Object:  cluster,
-		Options: loggedcluster.O,
+		Object: cluster,
 		LoggingAgent: &loggedcluster.LoggingAgent{
-			LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
-			KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
+			LoggingAgent:     r.ManagementClusterConfig.DefaultLoggingAgent,
+			KubeEventsLogger: r.ManagementClusterConfig.DefaultKubeEventsLogger,
 		},
 	}
 

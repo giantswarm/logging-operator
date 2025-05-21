@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,13 +20,20 @@ var (
 	supportAlloyLogs   = semver.MustParse("1.6.0")
 )
 
-const observabilityBundleAppName string = "observability-bundle"
+const (
+	observabilityBundleAppName         string = "observability-bundle"
+	observabilityBundleExtraConfigName string = "observability-bundle-logging-extraconfig"
+)
+
+func appConfigName(lc loggedcluster.Interface, app string) string {
+	return fmt.Sprintf("%s-%s", lc.GetName(), app)
+}
 
 // ObservabilityBundleAppMeta returns metadata for the observability bundle app.
 func ObservabilityBundleAppMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      lc.AppConfigName(observabilityBundleAppName),
-		Namespace: lc.GetAppsNamespace(),
+		Name:      appConfigName(lc, observabilityBundleAppName),
+		Namespace: lc.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 
@@ -36,8 +44,8 @@ func ObservabilityBundleAppMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 // ObservabilityBundleConfigMapMeta returns metadata for the observability bundle extra values configmap.
 func ObservabilityBundleConfigMapMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      lc.AppConfigName(lc.GetObservabilityBundleConfigMap()),
-		Namespace: lc.GetAppsNamespace(),
+		Name:      appConfigName(lc, observabilityBundleExtraConfigName),
+		Namespace: lc.GetNamespace(),
 		Labels: map[string]string{
 			// This label is used by cluster-operator to find extraconfig. This only works on vintage WCs
 			"app.kubernetes.io/name": observabilityBundleAppName,

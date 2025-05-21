@@ -21,7 +21,8 @@ import (
 // Reconciler implements a reconciler.Interface to handle
 // Logging secret: extra logging secret about where and how to send logs
 type Reconciler struct {
-	Client client.Client
+	Client                  client.Client
+	ManagementClusterConfig common.ManagementClusterConfig
 }
 
 // ReconcileCreate ensures logging-secret is created with the right credentials
@@ -44,7 +45,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	desiredLoggingSecret, err := GenerateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
+	desiredLoggingSecret, err := r.generateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
 	if err != nil {
 		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -88,7 +89,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected secret.
 	var currentLoggingSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: GetLoggingSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: GetLoggingSecretName(lc), Namespace: lc.GetNamespace()}, &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-secret not found, stop here")

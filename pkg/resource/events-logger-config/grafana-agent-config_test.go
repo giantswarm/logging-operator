@@ -61,21 +61,26 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
-			loggedCluster := &capicluster.Object{
+			managementClusterConfig := common.ManagementClusterConfig{
+				InstallationName: tc.installationName,
+			}
+
+			lc := &capicluster.Object{
 				Object: &capi.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: tc.clusterName,
 					},
-				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
 				},
 				LoggingAgent: &loggedcluster.LoggingAgent{
 					KubeEventsLogger: common.EventsLoggerGrafanaAgent,
 				},
 			}
 
-			config, err := generateGrafanaAgentConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
+			reconciler := &Reconciler{
+				ManagementClusterConfig: managementClusterConfig,
+			}
+
+			config, err := reconciler.generateGrafanaAgentConfig(lc, tc.includeNamespaces, tc.excludeNamespaces)
 			if err != nil {
 				t.Fatalf("Failed to generate grafana-agent config: %v", err)
 			}

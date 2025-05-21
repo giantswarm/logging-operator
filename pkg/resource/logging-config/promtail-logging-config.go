@@ -24,13 +24,13 @@ func init() {
 
 // GeneratePromtailLoggingConfig returns a configmap for
 // the logging extra-config
-func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
+func (r *Reconciler) generatePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
 		IsWorkloadCluster bool
 	}{
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
+		IsWorkloadCluster: common.IsWorkloadCluster(r.ManagementClusterConfig, lc),
 	}
 
 	err := promtailLoggingConfigTemplate.Execute(&values, data)
