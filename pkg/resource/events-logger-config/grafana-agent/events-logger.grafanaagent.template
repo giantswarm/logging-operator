@@ -37,6 +37,7 @@ loki.process "default" {
 loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		remote_timeout     = "{{ .RemoteTimeout }}"
 		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		basic_auth {

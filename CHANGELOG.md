@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Introduce the new `remote_timeout` parameter to configure timeouts for remote write operations.
+  This change affects the following agents: `promtail`, `grafana-agent`, `alloy-events`, and `alloy-logs`.
+  The default value has been updated to better support larger installations.
+
 ### Removed
 
 - Remove vintage mode from the operator. This includes the vintage MC and WC reconciliers.

@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
@@ -44,7 +45,11 @@ const (
 	AlloyEventsLoggerAppName      = "alloy-events"
 	AlloyEventsLoggerAppNamespace = "kube-system"
 
-	MaxBackoffPeriod  = "10m"
+	// LokiMaxBackoffPeriod specifies the maximum retry backoff duration for Loki writes.
+	LokiMaxBackoffPeriod = 10 * time.Minute
+	// LokiRemoteTimeout configures the write timeout for remote Loki endpoints.
+	LokiRemoteTimeout = 60 * time.Second
+
 	LokiBaseURLFormat = "https://%s"
 	lokiAPIV1PushPath = "/loki/api/v1/push"
 	LokiPushURLFormat = LokiBaseURLFormat + lokiAPIV1PushPath

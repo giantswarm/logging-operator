@@ -59,6 +59,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		ClusterID          string
 		Installation       string
 		InsecureSkipVerify string
+		RemoteTimeout      string
 		SecretName         string
 		IncludeNamespaces  []string
 		ExcludeNamespaces  []string
@@ -71,6 +72,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
+		RemoteTimeout:      common.LokiRemoteTimeout.String(),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
 		IncludeNamespaces:  includeNamespaces,
 		ExcludeNamespaces:  excludeNamespaces,

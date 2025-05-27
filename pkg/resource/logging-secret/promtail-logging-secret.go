@@ -32,6 +32,7 @@ type promtailConfigClient struct {
 	BackoffConfig  promtailConfigClientBackoffConfig  `yaml:"backoff_config" json:"backoff_config"`
 	ExternalLabels promtailConfigClientExternalLabels `yaml:"external_labels" json:"external_labels"`
 	TLSConfig      promtailConfigClientTLSConfig      `yaml:"tls_config" json:"tls_config"`
+	Timeout        string                             `yaml:"timeout" json:"timeout"`
 }
 
 type promtailConfigClientTLSConfig struct {
@@ -71,12 +72,13 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 					{
 						URL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
 						TenantID: lc.GetTenant(),
+						Timeout:  common.LokiRemoteTimeout.String(),
 						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,
 							Password: writePassword,
 						},
 						BackoffConfig: promtailConfigClientBackoffConfig{
-							MaxPeriod: common.MaxBackoffPeriod,
+							MaxPeriod: common.LokiMaxBackoffPeriod.String(),
 						},
 						ExternalLabels: promtailConfigClientExternalLabels{
 							Installation: lc.GetInstallationName(),
