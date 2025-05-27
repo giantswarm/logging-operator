@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update default grafana-agent and alloy-logs timeout to support bigger installations.
+- Introduce the new `remote_timeout` parameter to configure timeouts for remote write operations.
+  This change affects the following agents: `promtail`, `grafana-agent`, `alloy-events`, and `alloy-logs`.
+  The default value has been updated to better support larger installations.
 
 ### Removed
 
