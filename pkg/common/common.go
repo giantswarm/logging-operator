@@ -45,6 +45,7 @@ const (
 	AlloyEventsLoggerAppName      = "alloy-events"
 	AlloyEventsLoggerAppNamespace = "kube-system"
 
+        // LokiMaxBackoffPeriod specifies the maximum retry backoff duration for Loki writes.
 	LokiMaxBackoffPeriod = 10 * time.Minute
 	LokiRemoteTimeout    = 60 * time.Second
 	LokiBaseURLFormat    = "https://%s"
