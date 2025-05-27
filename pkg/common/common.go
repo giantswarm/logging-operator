@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
@@ -44,10 +45,11 @@ const (
 	AlloyEventsLoggerAppName      = "alloy-events"
 	AlloyEventsLoggerAppNamespace = "kube-system"
 
-	MaxBackoffPeriod  = "10m"
-	LokiBaseURLFormat = "https://%s"
-	lokiAPIV1PushPath = "/loki/api/v1/push"
-	LokiPushURLFormat = LokiBaseURLFormat + lokiAPIV1PushPath
+	LokiMaxBackoffPeriod = 10 * time.Minute
+	LokiRemoteTimeout    = 60 * time.Second
+	LokiBaseURLFormat    = "https://%s"
+	lokiAPIV1PushPath    = "/loki/api/v1/push"
+	LokiPushURLFormat    = LokiBaseURLFormat + lokiAPIV1PushPath
 
 	LoggingURL      = "logging-url"
 	LoggingTenantID = "logging-tenant-id"

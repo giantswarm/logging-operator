@@ -34,6 +34,7 @@ grafana-agent:
         loki.write "default" {
         	endpoint {
         		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
+        		remote_timeout     = "1m0s"
         		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         
         		basic_auth {

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update default grafana-agent and alloy-logs timeout to support bigger installations.
+
 ### Removed
 
 - Remove vintage mode from the operator. This includes the vintage MC and WC reconciliers.

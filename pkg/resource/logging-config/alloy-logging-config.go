@@ -81,6 +81,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		ClusterID          string
 		Installation       string
 		MaxBackoffPeriod   string
+		RemoteTimeout      string
 		IsWorkloadCluster  bool
 		SupportPodLogs     bool
 		InsecureSkipVerify bool
@@ -94,7 +95,8 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 	}{
 		ClusterID:         clusterName,
 		Installation:      lc.GetInstallationName(),
-		MaxBackoffPeriod:  common.MaxBackoffPeriod,
+		MaxBackoffPeriod:  common.LokiMaxBackoffPeriod.String(),
+		RemoteTimeout:     common.LokiRemoteTimeout.String(),
 		IsWorkloadCluster: common.IsWorkloadCluster(lc),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),

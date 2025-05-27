@@ -57,6 +57,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		Installation       string
 		InsecureSkipVerify string
 		MaxBackoffPeriod   string
+		RemoteTimeout      string
 		IncludeNamespaces  []string
 		ExcludeNamespaces  []string
 		SecretName         string
@@ -69,7 +70,8 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		ClusterID:          lc.GetClusterName(),
 		Installation:       lc.GetInstallationName(),
 		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
-		MaxBackoffPeriod:   common.MaxBackoffPeriod,
+		MaxBackoffPeriod:   common.LokiMaxBackoffPeriod.String(),
+		RemoteTimeout:      common.LokiRemoteTimeout.String(),
 		SecretName:         common.AlloyEventsLoggerAppName,
 		IncludeNamespaces:  includeNamespaces,
 		ExcludeNamespaces:  excludeNamespaces,
