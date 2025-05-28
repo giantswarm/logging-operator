@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.29.0] - 2025-05-28
+
 ### Changed
 
 - Introduce the new `remote_timeout` parameter to configure timeouts for remote write operations.
@@ -533,7 +535,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/giantswarm/logging-operator/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/giantswarm/logging-operator/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/giantswarm/logging-operator/compare/v0.26.1...v0.27.0
 [0.26.1]: https://github.com/giantswarm/logging-operator/compare/v0.26.0...v0.26.1
