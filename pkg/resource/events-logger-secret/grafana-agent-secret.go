@@ -24,7 +24,7 @@ type extraSecret struct {
 // GenerateGrafanaAgentSecret returns a secret for
 // the Loki-multi-tenant-proxy config
 func generateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
-	clusterName := lc.GetClusterName()
+	clusterName := lc.GetName()
 	writeUser := clusterName
 	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
 	if err != nil {
@@ -36,7 +36,7 @@ func generateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 			Name: fmt.Sprintf("%s-%s", clusterName, common.GrafanaAgentExtraSecretName()),
 			Data: map[string]string{
 				common.LoggingURL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
-				common.LoggingTenantID: lc.GetTenant(),
+				common.LoggingTenantID: common.DefaultWriteTenant,
 				common.LoggingUsername: writeUser,
 				common.LoggingPassword: writePassword,
 			},

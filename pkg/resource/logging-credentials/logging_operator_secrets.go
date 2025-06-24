@@ -109,7 +109,7 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 	}
 
 	// Check credentials for [clustername]
-	clusterName := lc.GetClusterName()
+	clusterName := lc.GetName()
 	if _, ok := loggingCredentials.Data[clusterName]; !ok {
 		clusterUser := userCredentials{}
 
@@ -137,7 +137,7 @@ func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1
 	var secretUpdated = false
 
 	// Check credentials for [clustername]
-	clusterName := lc.GetClusterName()
+	clusterName := lc.GetName()
 
 	if _, ok := loggingCredentials.Data[clusterName]; ok {
 		delete(loggingCredentials.Data, clusterName)

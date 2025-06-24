@@ -48,7 +48,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	desiredApp := lc.WireLogging(currentApp)
+	desiredApp := wireLogging(lc, currentApp)
 	if !reflect.DeepEqual(currentApp, *desiredApp) {
 		logger.Info("logging wiring updating")
 		// Update the app.
@@ -82,7 +82,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	desiredApp := lc.UnwireLogging(currentApp)
+	desiredApp := unwireLogging(lc, currentApp)
 	if !reflect.DeepEqual(currentApp, *desiredApp) {
 		logger.Info("logging wiring updating")
 		// Update the app.
@@ -95,4 +95,48 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("logging wiring up to date")
 
 	return ctrl.Result{}, nil
+}
+
+func getWiredExtraConfig(lc loggedcluster.Interface) appv1.AppExtraConfig {
+	observabilityBundleConfigMapMeta := common.ObservabilityBundleConfigMapMeta(lc)
+	return appv1.AppExtraConfig{
+		Kind:      "configMap",
+		Name:      observabilityBundleConfigMapMeta.GetName(),
+		Namespace: observabilityBundleConfigMapMeta.GetNamespace(),
+		Priority:  25,
+	}
+}
+
+// unwireLogging unsets the extraconfig confimap in a copy of the app
+func unwireLogging(lc loggedcluster.Interface, currentApp appv1.App) *appv1.App {
+	desiredApp := currentApp.DeepCopy()
+
+	wiredExtraConfig := getWiredExtraConfig(lc)
+	for index, extraConfig := range currentApp.Spec.ExtraConfigs {
+		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
+			desiredApp.Spec.ExtraConfigs = append(currentApp.Spec.ExtraConfigs[:index], currentApp.Spec.ExtraConfigs[index+1:]...)
+		}
+	}
+
+	return desiredApp
+}
+
+// wireLogging sets the extraconfig confimap in a copy of the app.
+func wireLogging(lc loggedcluster.Interface, currentApp appv1.App) *appv1.App {
+	desiredApp := currentApp.DeepCopy()
+
+	wiredExtraConfig := getWiredExtraConfig(lc)
+	// We check if the extra config already exists to know if we need to remove it.
+	var containsWiredExtraConfig = false
+	for _, extraConfig := range currentApp.Spec.ExtraConfigs {
+		if reflect.DeepEqual(extraConfig, wiredExtraConfig) {
+			containsWiredExtraConfig = true
+		}
+	}
+
+	if !containsWiredExtraConfig {
+		desiredApp.Spec.ExtraConfigs = append(desiredApp.Spec.ExtraConfigs, wiredExtraConfig)
+	}
+
+	return desiredApp
 }

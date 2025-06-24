@@ -51,8 +51,8 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
-		DefaultWriteTenant:               lc.GetTenant(),
-		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, lc.GetClusterName()),
+		DefaultWriteTenant:               common.DefaultWriteTenant,
+		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, lc.GetName()),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
@@ -70,11 +70,11 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	clusterName := lc.GetClusterName()
+	clusterName := lc.GetName()
 
 	// Ensure default tenant is included in the list of tenants
-	if !slices.Contains(tenants, lc.GetTenant()) {
-		tenants = append(tenants, lc.GetTenant())
+	if !slices.Contains(tenants, common.DefaultWriteTenant) {
+		tenants = append(tenants, common.DefaultWriteTenant)
 	}
 
 	data := struct {

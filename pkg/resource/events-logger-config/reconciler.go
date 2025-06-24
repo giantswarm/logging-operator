@@ -76,7 +76,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected configmap.
 	var currentEventsLoggerConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-config not found, stop here")

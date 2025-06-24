@@ -30,7 +30,7 @@ func GeneratePromtailLoggingConfig(lc loggedcluster.Interface, installationName 
 	data := struct {
 		IsWorkloadCluster bool
 	}{
-		IsWorkloadCluster: common.IsWorkloadCluster(installationName, lc.GetClusterName()),
+		IsWorkloadCluster: common.IsWorkloadCluster(installationName, lc.GetName()),
 	}
 
 	err := promtailLoggingConfigTemplate.Execute(&values, data)
