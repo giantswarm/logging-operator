@@ -25,7 +25,7 @@ type LoggingReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
 	Reconcilers []reconciler.Interface
-	Config      *config.Config
+	Config      config.Config
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
