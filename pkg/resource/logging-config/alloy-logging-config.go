@@ -8,9 +8,9 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/blang/semver"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 var (
@@ -33,10 +33,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
+func GenerateAlloyLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion, tenants, installationName, insecureCA)
+	alloyConfig, err := generateAlloyConfig(cluster, observabilityBundleVersion, tenants, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               common.DefaultWriteTenant,
-		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, lc.GetName()),
+		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, cluster.GetName()),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
@@ -67,10 +67,10 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA bool) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	clusterName := lc.GetName()
+	clusterName := cluster.GetName()
 
 	// Ensure default tenant is included in the list of tenants
 	if !slices.Contains(tenants, common.DefaultWriteTenant) {

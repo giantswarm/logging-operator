@@ -9,10 +9,10 @@ import (
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/logging-operator/pkg/key"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 const (
@@ -70,13 +70,13 @@ func GrafanaAgentExtraSecretName() string {
 	return grafanaAgentExtraSecretName
 }
 
-func IsLoggingEnabled(lc loggedcluster.Interface, enableLoggingFlag bool) bool {
+func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 	// Logging should be enabled when all conditions are met:
 	//   - logging label is set and true on the cluster
 	//   - cluster is not being deleted
 	//   - global logging flag is enabled
 
-	labels := lc.GetLabels()
+	labels := cluster.GetLabels()
 
 	// If logging is disabled at the installation level, we return false
 	if !enableLoggingFlag {
@@ -92,7 +92,7 @@ func IsLoggingEnabled(lc loggedcluster.Interface, enableLoggingFlag bool) bool {
 	if err != nil {
 		return LoggingEnabledDefault
 	}
-	return loggingEnabled && lc.GetDeletionTimestamp().IsZero()
+	return loggingEnabled && cluster.GetDeletionTimestamp().IsZero()
 }
 
 func AddCommonLabels(labels map[string]string) {
@@ -104,13 +104,13 @@ func IsWorkloadCluster(installationName, clusterName string) bool {
 }
 
 // AppConfigName generates an app config name for the given cluster and app.
-// This function can work with any cluster that implements the basic Interface methods.
-func AppConfigName(lc loggedcluster.Interface, app string) string {
-	return fmt.Sprintf("%s-%s", lc.GetName(), app)
+// This function can work with any cluster object.
+func AppConfigName(cluster *capi.Cluster, app string) string {
+	return fmt.Sprintf("%s-%s", cluster.GetName(), app)
 }
 
 // Read Loki URL from ingress
-func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
+func ReadLokiIngressURL(ctx context.Context, cluster *capi.Cluster, client client.Client) (string, error) {
 	var lokiIngress netv1.Ingress
 
 	var objectKey = types.NamespacedName{Name: lokiGatewayIngressName, Namespace: lokiGatewayIngressNamespace}
