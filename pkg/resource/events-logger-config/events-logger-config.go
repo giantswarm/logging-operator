@@ -3,13 +3,12 @@ package eventsloggerconfig
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -50,7 +49,7 @@ func generateEventsLoggerConfig(lc loggedcluster.Interface, includeNamespaces []
 func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      getEventsLoggerConfigName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Namespace: lc.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 
@@ -61,8 +60,8 @@ func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 func getEventsLoggerConfigName(lc loggedcluster.Interface) string {
 	switch lc.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentConfigName)
+		return fmt.Sprintf("%s-%s", lc.GetName(), grafanaAgentConfigName)
 	default:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLogggerConfigName)
+		return fmt.Sprintf("%s-%s", lc.GetName(), eventsLogggerConfigName)
 	}
 }

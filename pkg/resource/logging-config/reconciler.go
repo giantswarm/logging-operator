@@ -95,7 +95,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 
 	// Get expected configmap.
 	var currentLoggingConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(lc), Namespace: lc.GetNamespace()}, &currentLoggingConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-config not found, stop here")

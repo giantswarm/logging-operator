@@ -158,7 +158,7 @@ func main() {
 	}
 
 	// Create Config for dependency injection
-	appConfig := &config.Config{
+	appConfig := config.Config{
 		EnableLoggingFlag:       enableLogging,
 		DefaultLoggingAgent:     loggingAgent,
 		DefaultKubeEventsLogger: eventsLogger,
