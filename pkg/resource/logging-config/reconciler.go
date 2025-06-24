@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -22,6 +23,7 @@ import (
 // Logging config: extra logging config defining what we want to retrieve.
 type Reconciler struct {
 	Client                           client.Client
+	Config                           config.Config
 	DefaultWorkloadClusterNamespaces []string
 }
 
@@ -49,7 +51,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants)
+	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
