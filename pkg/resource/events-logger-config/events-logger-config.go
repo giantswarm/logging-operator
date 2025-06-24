@@ -9,7 +9,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/pkg/errors"
 )
 
 const (
