@@ -1,7 +1,6 @@
 package capicluster
 
 import (
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
