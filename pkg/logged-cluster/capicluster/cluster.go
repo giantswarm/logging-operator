@@ -14,4 +14,3 @@ type Object struct {
 func (o Object) GetObject() client.Object {
 	return o.Object
 }
-
