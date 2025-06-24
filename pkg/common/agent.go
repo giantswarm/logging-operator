@@ -1,4 +1,4 @@
-package loggedcluster
+package common
 
 type LoggingAgent struct {
 	LoggingAgent     string

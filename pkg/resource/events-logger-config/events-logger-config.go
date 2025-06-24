@@ -6,9 +6,9 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 const (
@@ -16,27 +16,27 @@ const (
 	grafanaAgentConfigName  = "grafana-agent-config"
 )
 
-func generateEventsLoggerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
+func generateEventsLoggerConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
-	switch lc.GetKubeEventsLogger() {
+	switch loggingAgent.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		values, err = generateGrafanaAgentConfig(lc, includeNamespaces, excludeNamespaces, installationName, insecureCA)
+		values, err = generateGrafanaAgentConfig(cluster, loggingAgent, includeNamespaces, excludeNamespaces, installationName, insecureCA)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.EventsLoggerAlloy:
-		values, err = generateAlloyEventsConfig(lc, includeNamespaces, excludeNamespaces, installationName, insecureCA)
+		values, err = generateAlloyEventsConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	default:
-		return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", lc.GetKubeEventsLogger())
+		return v1.ConfigMap{}, errors.Errorf("unsupported events logger %q", loggingAgent.GetKubeEventsLogger())
 	}
 
 	configmap := v1.ConfigMap{
-		ObjectMeta: configMeta(lc),
+		ObjectMeta: configMeta(cluster, loggingAgent),
 		Data: map[string]string{
 			"values": values,
 		},
@@ -46,10 +46,10 @@ func generateEventsLoggerConfig(lc loggedcluster.Interface, includeNamespaces []
 }
 
 // ConfigMeta returns metadata for the logging-config
-func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func configMeta(cluster *capi.Cluster, loggingAgent *common.LoggingAgent) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      getEventsLoggerConfigName(lc),
-		Namespace: lc.GetNamespace(),
+		Name:      getEventsLoggerConfigName(cluster, loggingAgent),
+		Namespace: cluster.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 
@@ -57,11 +57,11 @@ func configMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-func getEventsLoggerConfigName(lc loggedcluster.Interface) string {
-	switch lc.GetKubeEventsLogger() {
+func getEventsLoggerConfigName(cluster *capi.Cluster, loggingAgent *common.LoggingAgent) string {
+	switch loggingAgent.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		return fmt.Sprintf("%s-%s", lc.GetName(), grafanaAgentConfigName)
+		return fmt.Sprintf("%s-%s", cluster.GetName(), grafanaAgentConfigName)
 	default:
-		return fmt.Sprintf("%s-%s", lc.GetName(), eventsLogggerConfigName)
+		return fmt.Sprintf("%s-%s", cluster.GetName(), eventsLogggerConfigName)
 	}
 }

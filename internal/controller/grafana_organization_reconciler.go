@@ -30,8 +30,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 )
 
@@ -69,16 +67,8 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	for _, cluster := range clusters.Items {
-		loggedCluster := &capicluster.Object{
-			Object: &cluster,
-			LoggingAgent: &loggedcluster.LoggingAgent{
-				LoggingAgent:     g.Reconciler.Config.DefaultLoggingAgent,
-				KubeEventsLogger: g.Reconciler.Config.DefaultKubeEventsLogger,
-			},
-		}
-
-		if common.IsLoggingEnabled(loggedCluster, g.Reconciler.Config.EnableLoggingFlag) {
-			err = common.ToggleAgents(ctx, g.Client, loggedCluster)
+		if common.IsLoggingEnabled(&cluster, g.Reconciler.Config.EnableLoggingFlag) {
+			loggingAgentConfig, err := common.ToggleAgents(ctx, g.Client, &cluster, g.Reconciler.Config)
 			if err != nil {
 				// Handle case where the app is not found.
 				if apimachineryerrors.IsNotFound(err) {
@@ -90,7 +80,7 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 			}
 
 			// Reconcile logging config for each cluster
-			result, err := g.Reconciler.ReconcileCreate(ctx, loggedCluster)
+			result, err := g.Reconciler.ReconcileCreate(ctx, &cluster, loggingAgentConfig)
 			if err != nil {
 				return result, errors.WithStack(err)
 			}

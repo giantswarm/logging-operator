@@ -5,9 +5,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
@@ -51,11 +51,11 @@ func listWriteUsers(credentialsSecret *v1.Secret) []string {
 }
 
 // generateLokiIngressAuthSecret returns a secret for the loki ingress auth
-func generateLokiIngressAuthSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret) (map[string]string, error) {
+func generateLokiIngressAuthSecret(cluster *capi.Cluster, credentialsSecret *v1.Secret) (map[string]string, error) {
 	users := make(map[string]string)
 	// Loop on write users
 	for _, writeUser := range listWriteUsers(credentialsSecret) {
-		writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, writeUser)
+		writePassword, err := loggingcredentials.GetPassword(cluster, credentialsSecret, writeUser)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}

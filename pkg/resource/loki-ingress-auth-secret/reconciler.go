@@ -6,14 +6,15 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
 // Reconciler implements a reconciler.Interface to handle
@@ -23,16 +24,16 @@ type Reconciler struct {
 }
 
 // ReconcileCreate ensures loki ingress auth map is created with the right credentials on CAPI
-func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
-	return r.createOrUpdateSecret(ctx, lc)
+func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+	return r.createOrUpdateSecret(ctx, cluster)
 }
 
 // ReconcileDelete - Delete the loki ingress auth secret on capi
-func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
-	return r.createOrUpdateSecret(ctx, lc)
+func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+	return r.createOrUpdateSecret(ctx, cluster)
 }
 
-func (r *Reconciler) createOrUpdateSecret(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Reconciler) createOrUpdateSecret(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	// Retrieve currently generated write path credentials
@@ -49,7 +50,7 @@ func (r *Reconciler) createOrUpdateSecret(ctx context.Context, lc loggedcluster.
 	secret := lokiIngressAuthSecret()
 	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &secret, func() error {
 		// Generate loki ingress auth secret
-		data, err := generateLokiIngressAuthSecret(lc, &writePathCredentials)
+		data, err := generateLokiIngressAuthSecret(cluster, &writePathCredentials)
 		if err != nil {
 			logger.Error(err, "failed to generate loki ingress auth secret")
 			return errors.WithStack(err)

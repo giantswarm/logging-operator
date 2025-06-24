@@ -7,9 +7,9 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 var (
@@ -27,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
+func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, includeNamespaces, excludeNamespaces, installationName, insecureCA)
+	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func generateAlloyEventsConfig(lc loggedcluster.Interface, includeNamespaces []s
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -67,7 +67,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
 	}{
-		ClusterID:          lc.GetName(),
+		ClusterID:          cluster.GetName(),
 		Installation:       installationName,
 		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
 		MaxBackoffPeriod:   common.LokiMaxBackoffPeriod.String(),
@@ -79,7 +79,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetName()),
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)

@@ -33,8 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/giantswarm/logging-operator/internal/controller/predicates"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
 )
 
@@ -70,15 +68,7 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	logger.Info("Reconciling CAPI Cluster", "name", cluster.GetName())
 
-	loggedCluster := &capicluster.Object{
-		Object: cluster,
-		LoggingAgent: &loggedcluster.LoggingAgent{
-			LoggingAgent:     r.Reconciler.Config.DefaultLoggingAgent,
-			KubeEventsLogger: r.Reconciler.Config.DefaultKubeEventsLogger,
-		},
-	}
-
-	return r.Reconciler.Reconcile(ctx, loggedCluster)
+	return r.Reconciler.Reconcile(ctx, cluster)
 }
 
 // SetupWithManager sets up the controller with the Manager.
