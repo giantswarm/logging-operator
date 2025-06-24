@@ -207,9 +207,9 @@ func main() {
 	}
 
 	loggingReconciler := logging.LoggingReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Config: appConfig,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		Config:      appConfig,
 		Reconcilers: []reconciler.Interface{
 			&agentsToggle,
 			&loggingWiring,
