@@ -44,8 +44,7 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
-	"github.com/giantswarm/logging-operator/pkg/reconciler"
-	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
+	"github.com/giantswarm/logging-operator/pkg/resource"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
@@ -206,11 +205,11 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	loggingReconciler := logging.LoggingReconciler{
-		Client:      mgr.GetClient(),
-		Scheme:      mgr.GetScheme(),
-		Config:      appConfig,
-		Reconcilers: []reconciler.Interface{
+	if err = (&controller.CapiClusterReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+		Config: appConfig,
+		Reconcilers: []resource.Interface{
 			&agentsToggle,
 			&loggingWiring,
 			&loggingSecrets,
@@ -220,12 +219,6 @@ func main() {
 			&eventsLoggerSecret,
 			&eventsLoggerConfig,
 		},
-	}
-
-	if err = (&controller.CapiClusterReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		Reconciler: loggingReconciler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 		os.Exit(1)

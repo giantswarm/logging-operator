@@ -1,4 +1,4 @@
-package reconciler
+package resource
 
 import (
 	"context"
