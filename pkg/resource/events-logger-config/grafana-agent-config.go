@@ -30,10 +30,10 @@ func init() {
 
 // generateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func generateGrafanaAgentConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
+func generateGrafanaAgentConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, includeNamespaces, excludeNamespaces)
+	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, includeNamespaces, excludeNamespaces, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, includeNamespaces []
 	return values.String(), nil
 }
 
-func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
+func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -70,8 +70,8 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		IsWorkloadCluster  bool
 	}{
 		ClusterID:          lc.GetClusterName(),
-		Installation:       lc.GetInstallationName(),
-		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
+		Installation:       installationName,
+		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
 		RemoteTimeout:      common.LokiRemoteTimeout.String(),
 		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
 		IncludeNamespaces:  includeNamespaces,
@@ -80,7 +80,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetClusterName()),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)

@@ -11,16 +11,13 @@ const LoggingEnabledDefault = true
 // Interface contains the definition of functions that can differ between each type of cluster
 type Interface interface {
 	client.Object
-	HasLoggingEnabled() bool
+	HasLoggingEnabled(enableLoggingFlag bool) bool
 	GetLoggingAgent() string
 	SetLoggingAgent(string)
 	GetKubeEventsLogger() string
 	SetKubeEventsLogger(string)
-	IsInsecureCA() bool
 	GetAppsNamespace() string
-	GetEnableLoggingFlag() bool
 	GetClusterName() string
-	GetInstallationName() string
 	AppConfigName(app string) string
 	GetObject() client.Object
 	GetTenant() string

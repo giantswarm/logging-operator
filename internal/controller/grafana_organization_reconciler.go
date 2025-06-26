@@ -70,15 +70,14 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	for _, cluster := range clusters.Items {
 		loggedCluster := &capicluster.Object{
-			Object:  &cluster,
-			Options: loggedcluster.O,
+			Object: &cluster,
 			LoggingAgent: &loggedcluster.LoggingAgent{
-				LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
-				KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
+				LoggingAgent:     g.Reconciler.Config.DefaultLoggingAgent,
+				KubeEventsLogger: g.Reconciler.Config.DefaultKubeEventsLogger,
 			},
 		}
 
-		if common.IsLoggingEnabled(loggedCluster) {
+		if common.IsLoggingEnabled(loggedCluster, g.Reconciler.Config.EnableLoggingFlag) {
 			err = common.ToggleAgents(ctx, g.Client, loggedCluster)
 			if err != nil {
 				// Handle case where the app is not found.

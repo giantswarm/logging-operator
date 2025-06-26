@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refactor configuration management by removing the embedded Options struct from logged-cluster objects and implementing dependency injection pattern for reconcilers to improve code maintainability and decouple configuration from cluster representation.
+
 ## [0.29.0] - 2025-05-28
 
 ### Changed

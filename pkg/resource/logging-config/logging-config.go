@@ -22,18 +22,18 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (v1.ConfigMap, error) {
+func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(lc)
+		values, err = GeneratePromtailLoggingConfig(lc, installationName)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces, tenants)
+		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}

@@ -67,15 +67,12 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 						Name: tc.clusterName,
 					},
 				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-				},
 				LoggingAgent: &loggedcluster.LoggingAgent{
 					KubeEventsLogger: common.EventsLoggerGrafanaAgent,
 				},
 			}
 
-			config, err := generateGrafanaAgentConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
+			config, err := generateGrafanaAgentConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate grafana-agent config: %v", err)
 			}

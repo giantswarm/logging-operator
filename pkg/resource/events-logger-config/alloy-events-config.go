@@ -27,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
+func generateAlloyEventsConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, includeNamespaces, excludeNamespaces)
+	alloyConfig, err := generateAlloyConfig(lc, includeNamespaces, excludeNamespaces, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func generateAlloyEventsConfig(lc loggedcluster.Interface, includeNamespaces []s
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
+func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -68,8 +68,8 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		IsWorkloadCluster  bool
 	}{
 		ClusterID:          lc.GetClusterName(),
-		Installation:       lc.GetInstallationName(),
-		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
+		Installation:       installationName,
+		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
 		MaxBackoffPeriod:   common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:      common.LokiRemoteTimeout.String(),
 		SecretName:         common.AlloyEventsLoggerAppName,
@@ -79,7 +79,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetClusterName()),
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)

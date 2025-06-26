@@ -13,7 +13,6 @@ import (
 	"github.com/blang/semver"
 	"github.com/google/go-cmp/cmp"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
 
@@ -97,12 +96,9 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 						Name: tc.clusterName,
 					},
 				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-				},
 			}
 
-			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants)
+			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

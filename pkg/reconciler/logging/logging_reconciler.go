@@ -14,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
@@ -24,10 +25,11 @@ type LoggingReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
 	Reconcilers []reconciler.Interface
+	Config      config.Config
 }
 
 func (l *LoggingReconciler) Reconcile(ctx context.Context, lc loggedcluster.Interface) (result ctrl.Result, err error) {
-	if common.IsLoggingEnabled(lc) {
+	if common.IsLoggingEnabled(lc, l.Config.EnableLoggingFlag) {
 		result, err = l.reconcileCreate(ctx, lc)
 	} else {
 		result, err = l.reconcileDelete(ctx, lc)

@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 
@@ -22,6 +23,7 @@ import (
 // Logging secret: extra logging secret about where and how to send logs
 type Reconciler struct {
 	Client client.Client
+	Config config.Config
 }
 
 // ReconcileCreate ensures logging-secret is created with the right credentials
@@ -44,7 +46,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get desired secret
-	desiredLoggingSecret, err := GenerateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
+	desiredLoggingSecret, err := GenerateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
