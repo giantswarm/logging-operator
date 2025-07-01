@@ -16,14 +16,13 @@ import (
 type Object struct {
 	client.Object
 	*loggedcluster.LoggingAgent
-	Options loggedcluster.Options
 }
 
-func (o Object) HasLoggingEnabled() bool {
+func (o Object) HasLoggingEnabled(enableLoggingFlag bool) bool {
 	labels := o.GetLabels()
 
 	// If logging is disabled at the installation level, we return false
-	if !o.Options.EnableLoggingFlag {
+	if !enableLoggingFlag {
 		return false
 	}
 
@@ -39,10 +38,6 @@ func (o Object) HasLoggingEnabled() bool {
 	return loggingEnabled
 }
 
-func (o Object) IsInsecureCA() bool {
-	return o.Options.InsecureCA
-}
-
 func (o Object) GetAppsNamespace() string {
 	return o.GetNamespace()
 }
@@ -53,14 +48,6 @@ func (o Object) AppConfigName(app string) string {
 
 func (o Object) GetClusterName() string {
 	return o.GetName()
-}
-
-func (o Object) GetInstallationName() string {
-	return o.Options.InstallationName
-}
-
-func (o Object) GetEnableLoggingFlag() bool {
-	return o.Options.EnableLoggingFlag
 }
 
 func (o Object) GetObject() client.Object {

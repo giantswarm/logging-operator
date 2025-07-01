@@ -33,10 +33,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (string, error) {
+func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion, tenants)
+	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion, tenants, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               lc.GetTenant(),
-		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, lc.GetClusterName()),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
@@ -67,7 +67,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string) (string, error) {
+func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
 	clusterName := lc.GetClusterName()
@@ -94,13 +94,13 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		Tenants            []string
 	}{
 		ClusterID:         clusterName,
-		Installation:      lc.GetInstallationName(),
+		Installation:      installationName,
 		MaxBackoffPeriod:  common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:     common.LokiRemoteTimeout.String(),
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
+		IsWorkloadCluster: common.IsWorkloadCluster(installationName, clusterName),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
-		InsecureSkipVerify: lc.IsInsecureCA(),
+		InsecureSkipVerify: insecureCA,
 		SecretName:         common.AlloyLogAgentAppName,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,

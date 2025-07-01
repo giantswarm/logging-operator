@@ -10,7 +10,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
 
@@ -45,12 +44,9 @@ func TestGeneratePromtailLoggingConfig(t *testing.T) {
 						Name: tc.clusterName,
 					},
 				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-				},
 			}
 
-			config, err := GeneratePromtailLoggingConfig(loggedCluster)
+			config, err := GeneratePromtailLoggingConfig(loggedCluster, tc.installationName)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

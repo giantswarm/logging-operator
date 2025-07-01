@@ -62,15 +62,12 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 						Name: tc.clusterName,
 					},
 				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-				},
 				LoggingAgent: &loggedcluster.LoggingAgent{
 					KubeEventsLogger: common.EventsLoggerAlloy,
 				},
 			}
 
-			config, err := generateAlloyEventsConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
+			config, err := generateAlloyEventsConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

@@ -71,11 +71,10 @@ func (r *CapiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	logger.Info("Reconciling CAPI Cluster", "name", cluster.GetName())
 
 	loggedCluster := &capicluster.Object{
-		Object:  cluster,
-		Options: loggedcluster.O,
+		Object: cluster,
 		LoggingAgent: &loggedcluster.LoggingAgent{
-			LoggingAgent:     loggedcluster.O.DefaultLoggingAgent,
-			KubeEventsLogger: loggedcluster.O.DefaultKubeEventsLogger,
+			LoggingAgent:     r.Reconciler.Config.DefaultLoggingAgent,
+			KubeEventsLogger: r.Reconciler.Config.DefaultKubeEventsLogger,
 		},
 	}
 

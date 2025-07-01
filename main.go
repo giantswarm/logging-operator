@@ -43,7 +43,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/reconciler"
 	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
@@ -157,6 +157,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create Config for dependency injection
+	appConfig := config.Config{
+		EnableLoggingFlag:       enableLogging,
+		DefaultLoggingAgent:     loggingAgent,
+		DefaultKubeEventsLogger: eventsLogger,
+		InstallationName:        installationName,
+		InsecureCA:              insecureCA,
+	}
+
 	agentsToggle := agentstoggle.Reconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -177,15 +186,18 @@ func main() {
 
 	loggingSecret := loggingsecret.Reconciler{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
 	loggingConfig := loggingconfig.Reconciler{
 		Client:                           mgr.GetClient(),
+		Config:                           appConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
 	eventsLoggerConfig := eventsloggerconfig.Reconciler{
 		Client:            mgr.GetClient(),
+		Config:            appConfig,
 		IncludeNamespaces: includeEventsFromNamespaces,
 		ExcludeNamespaces: excludeEventsFromNamespaces,
 	}
@@ -194,16 +206,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	loggedcluster.O.EnableLoggingFlag = enableLogging
-	loggedcluster.O.DefaultLoggingAgent = loggingAgent
-	loggedcluster.O.DefaultKubeEventsLogger = eventsLogger
-	loggedcluster.O.InstallationName = installationName
-	loggedcluster.O.InsecureCA = insecureCA
-	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
-
 	loggingReconciler := logging.LoggingReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Config: appConfig,
 		Reconcilers: []reconciler.Interface{
 			&agentsToggle,
 			&loggingWiring,

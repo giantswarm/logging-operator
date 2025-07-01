@@ -65,20 +65,20 @@ func GrafanaAgentExtraSecretName() string {
 	return grafanaAgentExtraSecretName
 }
 
-func IsLoggingEnabled(lc loggedcluster.Interface) bool {
+func IsLoggingEnabled(lc loggedcluster.Interface, enableLoggingFlag bool) bool {
 	// Logging should be enabled when all conditions are met:
 	//   - logging label is set and true on the cluster
 	//   - cluster is not being deleted
 	//   - global logging flag is enabled
-	return lc.HasLoggingEnabled() && lc.GetDeletionTimestamp().IsZero() && lc.GetEnableLoggingFlag()
+	return lc.HasLoggingEnabled(enableLoggingFlag) && lc.GetDeletionTimestamp().IsZero()
 }
 
 func AddCommonLabels(labels map[string]string) {
 	labels["giantswarm.io/managed-by"] = "logging-operator"
 }
 
-func IsWorkloadCluster(lc loggedcluster.Interface) bool {
-	return lc.GetInstallationName() != lc.GetClusterName()
+func IsWorkloadCluster(installationName, clusterName string) bool {
+	return installationName != clusterName
 }
 
 // Read Loki URL from ingress

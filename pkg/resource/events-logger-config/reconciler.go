@@ -9,17 +9,19 @@ import (
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/config"
+	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 // Reconciler implements a reconciler.Interface to handle
 // EventsLogger config: extra events-logger config defining what we want to retrieve.
 type Reconciler struct {
 	Client            client.Client
+	Config            config.Config
 	IncludeNamespaces []string
 	ExcludeNamespaces []string
 }
@@ -30,7 +32,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	logger.Info("events-logger-config create")
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc, r.IncludeNamespaces, r.ExcludeNamespaces)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

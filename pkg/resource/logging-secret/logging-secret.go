@@ -16,13 +16,13 @@ const (
 	loggingClientSecretName = "logging-secret"
 )
 
-func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string, installationName string, insecureCA bool) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
 	switch lc.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL, installationName, insecureCA)
 		if err != nil {
 			return v1.Secret{}, err
 		}
