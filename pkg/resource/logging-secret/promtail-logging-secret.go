@@ -17,38 +17,38 @@ type values struct {
 }
 
 type promtail struct {
-	Config promtailClusterConfig `yaml:"config" json:"config"`
+	Config promtailConfig `yaml:"config" json:"config"`
 }
 
-type promtailClusterConfig struct {
-	Clients []promtailClusterConfigClient `yaml:"clients" json:"clients"`
+type promtailConfig struct {
+	Clients []promtailConfigClient `yaml:"clients" json:"clients"`
 }
 
 // TODO: use upstream promtail structures
-type promtailClusterConfigClient struct {
-	URL            string                                    `yaml:"url" json:"url"`
-	TenantID       string                                    `yaml:"tenant_id" json:"tenant_id"`
-	BasicAuth      promtailClusterConfigClientBasicAuth      `yaml:"basic_auth" json:"basic_auth"`
-	BackoffConfig  promtailClusterConfigClientBackoffConfig  `yaml:"backoff_config" json:"backoff_config"`
-	ExternalLabels promtailClusterConfigClientExternalLabels `yaml:"external_labels" json:"external_labels"`
-	TLSConfig      promtailClusterConfigClientTLSConfig      `yaml:"tls_config" json:"tls_config"`
-	Timeout        string                                    `yaml:"timeout" json:"timeout"`
+type promtailConfigClient struct {
+	URL            string                             `yaml:"url" json:"url"`
+	TenantID       string                             `yaml:"tenant_id" json:"tenant_id"`
+	BasicAuth      promtailConfigClientBasicAuth      `yaml:"basic_auth" json:"basic_auth"`
+	BackoffConfig  promtailConfigClientBackoffConfig  `yaml:"backoff_config" json:"backoff_config"`
+	ExternalLabels promtailConfigClientExternalLabels `yaml:"external_labels" json:"external_labels"`
+	TLSConfig      promtailConfigClientTLSConfig      `yaml:"tls_config" json:"tls_config"`
+	Timeout        string                             `yaml:"timeout" json:"timeout"`
 }
 
-type promtailClusterConfigClientTLSConfig struct {
+type promtailConfigClientTLSConfig struct {
 	InsecureSkipVerify bool `yaml:"insecure_skip_verify" json:"insecure_skip_verify"`
 }
 
-type promtailClusterConfigClientExternalLabels struct {
+type promtailConfigClientExternalLabels struct {
 	Installation string `yaml:"installation" json:"installation"`
 	ClusterID    string `yaml:"cluster_id" json:"cluster_id"`
 }
 
-type promtailClusterConfigClientBackoffConfig struct {
+type promtailConfigClientBackoffConfig struct {
 	MaxPeriod string `yaml:"max_period" json:"max_period"`
 }
 
-type promtailClusterConfigClientBasicAuth struct {
+type promtailConfigClientBasicAuth struct {
 	Username string `yaml:"username" json:"username"`
 	Password string `yaml:"password" json:"password"`
 }
@@ -67,24 +67,24 @@ func GeneratePromtailLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.
 
 	values := values{
 		Promtail: promtail{
-			Config: promtailClusterConfig{
-				Clients: []promtailClusterConfigClient{
+			Config: promtailConfig{
+				Clients: []promtailConfigClient{
 					{
 						URL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
 						TenantID: common.DefaultWriteTenant,
 						Timeout:  common.LokiRemoteTimeout.String(),
-						BasicAuth: promtailClusterConfigClientBasicAuth{
+						BasicAuth: promtailConfigClientBasicAuth{
 							Username: writeUser,
 							Password: writePassword,
 						},
-						BackoffConfig: promtailClusterConfigClientBackoffConfig{
+						BackoffConfig: promtailConfigClientBackoffConfig{
 							MaxPeriod: common.LokiMaxBackoffPeriod.String(),
 						},
-						ExternalLabels: promtailClusterConfigClientExternalLabels{
+						ExternalLabels: promtailConfigClientExternalLabels{
 							Installation: installationName,
 							ClusterID:    clusterName,
 						},
-						TLSConfig: promtailClusterConfigClientTLSConfig{
+						TLSConfig: promtailConfigClientTLSConfig{
 							InsecureSkipVerify: insecureCA,
 						},
 					},
