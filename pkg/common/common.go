@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,10 +11,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/logging-operator/pkg/key"
 	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 const (
+	// LoggingEnabledDefault defines if WCs logs are collected by default
+	LoggingEnabledDefault = true
+
 	// ReadUser is the global user for reading logs
 	ReadUser = "read"
 	// DefaultWriteTenant is the default tenant for writing logs
@@ -70,7 +75,24 @@ func IsLoggingEnabled(lc loggedcluster.Interface, enableLoggingFlag bool) bool {
 	//   - logging label is set and true on the cluster
 	//   - cluster is not being deleted
 	//   - global logging flag is enabled
-	return lc.HasLoggingEnabled(enableLoggingFlag) && lc.GetDeletionTimestamp().IsZero()
+
+	labels := lc.GetLabels()
+
+	// If logging is disabled at the installation level, we return false
+	if !enableLoggingFlag {
+		return false
+	}
+
+	loggingLabelValue, ok := labels[key.LoggingLabel]
+	if !ok {
+		return LoggingEnabledDefault
+	}
+
+	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
+	if err != nil {
+		return LoggingEnabledDefault
+	}
+	return loggingEnabled && lc.GetDeletionTimestamp().IsZero()
 }
 
 func AddCommonLabels(labels map[string]string) {
@@ -79,6 +101,12 @@ func AddCommonLabels(labels map[string]string) {
 
 func IsWorkloadCluster(installationName, clusterName string) bool {
 	return installationName != clusterName
+}
+
+// AppConfigName generates an app config name for the given cluster and app.
+// This function can work with any cluster that implements the basic Interface methods.
+func AppConfigName(lc loggedcluster.Interface, app string) string {
+	return fmt.Sprintf("%s-%s", lc.GetName(), app)
 }
 
 // Read Loki URL from ingress

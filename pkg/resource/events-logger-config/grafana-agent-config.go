@@ -69,7 +69,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
 	}{
-		ClusterID:          lc.GetClusterName(),
+		ClusterID:          lc.GetName(),
 		Installation:       installationName,
 		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
 		RemoteTimeout:      common.LokiRemoteTimeout.String(),
@@ -80,7 +80,7 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetClusterName()),
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetName()),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)

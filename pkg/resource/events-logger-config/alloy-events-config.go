@@ -67,7 +67,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
 	}{
-		ClusterID:          lc.GetClusterName(),
+		ClusterID:          lc.GetName(),
 		Installation:       installationName,
 		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
 		MaxBackoffPeriod:   common.LokiMaxBackoffPeriod.String(),
@@ -79,7 +79,7 @@ func generateAlloyConfig(lc loggedcluster.Interface, includeNamespaces []string,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetClusterName()),
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, lc.GetName()),
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)
