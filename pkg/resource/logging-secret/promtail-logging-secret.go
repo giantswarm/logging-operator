@@ -5,10 +5,10 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
@@ -55,12 +55,12 @@ type promtailConfigClientBasicAuth struct {
 
 // GeneratePromtailLoggingSecret returns a secret for
 // the Loki-multi-tenant-proxy config
-func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string, installationName string, insecureCA bool) (map[string][]byte, error) {
-	clusterName := lc.GetName()
+func GeneratePromtailLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.Secret, lokiURL string, installationName string, insecureCA bool) (map[string][]byte, error) {
+	clusterName := cluster.GetName()
 
 	writeUser := clusterName
 
-	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
+	writePassword, err := loggingcredentials.GetPassword(cluster, credentialsSecret, clusterName)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -82,7 +82,7 @@ func GeneratePromtailLoggingSecret(lc loggedcluster.Interface, credentialsSecret
 						},
 						ExternalLabels: promtailConfigClientExternalLabels{
 							Installation: installationName,
-							ClusterID:    lc.GetName(),
+							ClusterID:    clusterName,
 						},
 						TLSConfig: promtailConfigClientTLSConfig{
 							InsecureSkipVerify: insecureCA,

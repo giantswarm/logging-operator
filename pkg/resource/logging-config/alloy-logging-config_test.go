@@ -13,7 +13,7 @@ import (
 	"github.com/blang/semver"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
+	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
 var (
@@ -90,15 +90,18 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
-			loggedCluster := &capicluster.Object{
-				Object: &capi.Cluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: tc.clusterName,
-					},
+			cluster := &capi.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: tc.clusterName,
 				},
 			}
 
-			config, err := GenerateAlloyLoggingConfig(loggedCluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
+			loggingAgent := &common.LoggingAgent{
+				LoggingAgent:     common.LoggingAgentAlloy,
+				KubeEventsLogger: common.EventsLoggerAlloy,
+			}
+
+			config, err := GenerateAlloyLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

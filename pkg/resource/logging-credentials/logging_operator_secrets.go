@@ -2,18 +2,16 @@ package loggingcredentials
 
 import (
 	"crypto/rand"
-	"math/big"
-
 	"fmt"
+	"math/big"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
-
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 const (
@@ -59,7 +57,7 @@ func generatePassword() (string, error) {
 
 // GenerateObservabilityBundleConfigMap returns a configmap for
 // the observabilitybundle application to enable logging.
-func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secret {
+func GenerateLoggingCredentialsBasicSecret(cluster *capi.Cluster) *v1.Secret {
 	secret := v1.Secret{
 		ObjectMeta: LoggingCredentialsSecretMeta(),
 		Data:       map[string][]byte{},
@@ -68,7 +66,7 @@ func GenerateLoggingCredentialsBasicSecret(lc loggedcluster.Interface) *v1.Secre
 	return &secret
 }
 
-func GetPassword(lc loggedcluster.Interface, credentialsSecret *v1.Secret, username string) (string, error) {
+func GetPassword(cluster *capi.Cluster, credentialsSecret *v1.Secret, username string) (string, error) {
 	var userYaml userCredentials
 
 	userSecret, ok := credentialsSecret.Data[username]
@@ -85,7 +83,7 @@ func GetPassword(lc loggedcluster.Interface, credentialsSecret *v1.Secret, usern
 }
 
 // AddLoggingCredentials - Add credentials to LoggingCredentials secret if needed
-func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) (bool, error) {
+func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret) (bool, error) {
 	var secretUpdated = false
 
 	// Always check credentials for "readuser"
@@ -109,7 +107,7 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 	}
 
 	// Check credentials for [clustername]
-	clusterName := lc.GetName()
+	clusterName := cluster.GetName()
 	if _, ok := loggingCredentials.Data[clusterName]; !ok {
 		clusterUser := userCredentials{}
 
@@ -133,11 +131,11 @@ func AddLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Se
 }
 
 // RemoveLoggingCredentials - Remove credentials from LoggingCredentials secret
-func RemoveLoggingCredentials(lc loggedcluster.Interface, loggingCredentials *v1.Secret) bool {
+func RemoveLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret) bool {
 	var secretUpdated = false
 
 	// Check credentials for [clustername]
-	clusterName := lc.GetName()
+	clusterName := cluster.GetName()
 
 	if _, ok := loggingCredentials.Data[clusterName]; ok {
 		delete(loggingCredentials.Data, clusterName)
