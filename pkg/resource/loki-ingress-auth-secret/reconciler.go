@@ -17,23 +17,23 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // loki ingress auth secret: a secret for the loki ingress that adds support for basic auth for the write path
-type Reconciler struct {
+type Resource struct {
 	Client client.Client
 }
 
 // ReconcileCreate ensures loki ingress auth map is created with the right credentials on CAPI
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	return r.createOrUpdateSecret(ctx, cluster)
 }
 
 // ReconcileDelete - Delete the loki ingress auth secret on capi
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	return r.createOrUpdateSecret(ctx, cluster)
 }
 
-func (r *Reconciler) createOrUpdateSecret(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
+func (r *Resource) createOrUpdateSecret(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	// Retrieve currently generated write path credentials

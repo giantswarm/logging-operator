@@ -44,10 +44,10 @@ import (
 
 // CapiClusterReconciler reconciles a Cluster object
 type CapiClusterReconciler struct {
-	Client      client.Client
-	Scheme      *runtime.Scheme
-	Config      config.Config
-	Reconcilers []resource.Interface
+	Client    client.Client
+	Scheme    *runtime.Scheme
+	Config    config.Config
+	Resources []resource.Interface
 }
 
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters,verbs=get;list;watch
@@ -116,9 +116,9 @@ func (r *CapiClusterReconciler) reconcileCreate(ctx context.Context, cluster *ca
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	// Call all reconcilers ReconcileCreate methods.
-	for _, reconciler := range r.Reconcilers {
-		result, err := reconciler.ReconcileCreate(ctx, cluster, loggingAgentConfig)
+	// Call all resources ReconcileCreate methods.
+	for _, resource := range r.Resources {
+		result, err := resource.ReconcileCreate(ctx, cluster, loggingAgentConfig)
 		if err != nil || !result.IsZero() {
 			return result, errors.WithStack(err)
 		}
@@ -140,9 +140,9 @@ func (r *CapiClusterReconciler) reconcileDelete(ctx context.Context, cluster *ca
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 
-		// Call all reconcilers ReconcileDelete methods.
-		for _, reconciler := range r.Reconcilers {
-			result, err := reconciler.ReconcileDelete(ctx, cluster, loggingAgentConfig)
+		// Call all resources ReconcileDelete methods.
+		for _, resource := range r.Resources {
+			result, err := resource.ReconcileDelete(ctx, cluster, loggingAgentConfig)
 			if err != nil || !result.IsZero() {
 				return result, errors.WithStack(err)
 			}

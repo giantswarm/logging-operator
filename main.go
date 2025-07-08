@@ -165,43 +165,43 @@ func main() {
 		InsecureCA:              insecureCA,
 	}
 
-	agentsToggle := agentstoggle.Reconciler{
+	agentsToggle := agentstoggle.Resource{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingWiring := loggingwiring.Reconciler{
+	loggingWiring := loggingwiring.Resource{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingSecrets := loggingcredentials.Reconciler{
+	loggingSecrets := loggingcredentials.Resource{
 		Client: mgr.GetClient(),
 	}
 
-	lokiIngressAuthSecret := lokiingressauthsecret.Reconciler{
+	lokiIngressAuthSecret := lokiingressauthsecret.Resource{
 		Client: mgr.GetClient(),
 	}
 
-	loggingSecret := loggingsecret.Reconciler{
+	loggingSecret := loggingsecret.Resource{
 		Client: mgr.GetClient(),
 		Config: appConfig,
 	}
 
-	loggingConfig := loggingconfig.Reconciler{
+	loggingConfig := loggingconfig.Resource{
 		Client:                           mgr.GetClient(),
 		Config:                           appConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
-	eventsLoggerConfig := eventsloggerconfig.Reconciler{
+	eventsLoggerConfig := eventsloggerconfig.Resource{
 		Client:            mgr.GetClient(),
 		Config:            appConfig,
 		IncludeNamespaces: includeEventsFromNamespaces,
 		ExcludeNamespaces: excludeEventsFromNamespaces,
 	}
 
-	eventsLoggerSecret := eventsloggersecret.Reconciler{
+	eventsLoggerSecret := eventsloggersecret.Resource{
 		Client: mgr.GetClient(),
 	}
 
@@ -209,7 +209,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Config: appConfig,
-		Reconcilers: []resource.Interface{
+		Resources: []resource.Interface{
 			&agentsToggle,
 			&loggingWiring,
 			&loggingSecrets,
@@ -226,9 +226,9 @@ func main() {
 
 	// The GrafanaOrganizationReconciler is only used in CAPI mode
 	if err = (&controller.GrafanaOrganizationReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		Reconciler: loggingConfig,
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Resource: loggingConfig,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
 		os.Exit(1)

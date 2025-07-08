@@ -16,14 +16,14 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging Credentials: store and maintain logging credentials
-type Reconciler struct {
+type Resource struct {
 	Client client.Client
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("loggingcredentials checking secret", "namespace", LoggingCredentialsSecretMeta().Namespace, "name", LoggingCredentialsSecretMeta().Name)
@@ -75,7 +75,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster,
 }
 
 // ReconcileDelete ensures a secret is removed for the current cluster
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("loggingcredentials secret delete", "namespace", LoggingCredentialsSecretMeta().Namespace, "name", LoggingCredentialsSecretMeta().Name)
