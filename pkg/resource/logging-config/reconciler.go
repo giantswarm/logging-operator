@@ -18,16 +18,16 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/config"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging config: extra logging config defining what we want to retrieve.
-type Reconciler struct {
+type Resource struct {
 	Client                           client.Client
 	Config                           config.Config
 	DefaultWorkloadClusterNamespaces []string
 }
 
 // ReconcileCreate ensures logging-config is created with the right credentials
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config create")
 
@@ -88,7 +88,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster,
 }
 
 // ReconcileDelete ensure logging-config is deleted for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config delete")
 

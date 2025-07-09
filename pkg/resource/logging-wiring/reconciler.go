@@ -18,17 +18,17 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging wiring: set or unset the user value configmap created by
 // logging-agents-toggle in the observability bundle.
-type Reconciler struct {
+type Resource struct {
 	Client client.Client
 	Scheme *runtime.Scheme
 }
 
 // ReconcileCreate ensure user value configmap is set in observability bundle
 // for the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging wiring create")
 
@@ -64,7 +64,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster,
 
 // ReconcileCreate ensure user value configmap is unset in observability bundle
 // for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging wiring delete")
 

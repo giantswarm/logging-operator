@@ -16,15 +16,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging agents toggle: enable or disable logging agents in a given Cluster.
-type Reconciler struct {
+type Resource struct {
 	Client client.Client
 	Scheme *runtime.Scheme
 }
 
 // ReconcileCreate ensure logging agents and events loggers are enabled in the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("agents toggle create")
 
@@ -52,7 +52,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster,
 }
 
 // ReconcileDelete ensure logging agents and events loggers are disabled for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("delete agents toggle config")
 

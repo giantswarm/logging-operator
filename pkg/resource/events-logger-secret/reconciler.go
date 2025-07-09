@@ -17,14 +17,14 @@ import (
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
-type Reconciler struct {
+type Resource struct {
 	Client client.Client
 }
 
 // ReconcileCreate ensures events-logger-secret is created with the right credentials
-func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-secret create")
 
@@ -81,7 +81,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, cluster *capi.Cluster,
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
-func (r *Reconciler) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-secret delete")
 
