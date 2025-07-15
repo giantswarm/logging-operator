@@ -35,9 +35,9 @@ import (
 
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
-	Client     client.Client
-	Scheme     *runtime.Scheme
-	Reconciler loggingconfig.Reconciler
+	Client   client.Client
+	Scheme   *runtime.Scheme
+	Resource loggingconfig.Resource
 }
 
 //+kubebuilder:rbac:groups=observability.giantswarm.io,resources=grafanaorganizations,verbs=get;list;watch;update;patch
@@ -46,7 +46,7 @@ type GrafanaOrganizationReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // It is triggered whenever a change happen to a grafanaOrganization CR and
-// calls the logging config reconciler for each cluster so that their tenant
+// calls the logging config resource for each cluster so that their tenant
 // list is always up to date.
 //
 // For more details, check Reconcile and its Result here:
@@ -67,8 +67,8 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	for _, cluster := range clusters.Items {
-		if common.IsLoggingEnabled(&cluster, g.Reconciler.Config.EnableLoggingFlag) {
-			loggingAgentConfig, err := common.ToggleAgents(ctx, g.Client, &cluster, g.Reconciler.Config)
+		if common.IsLoggingEnabled(&cluster, g.Resource.Config.EnableLoggingFlag) {
+			loggingAgentConfig, err := common.ToggleAgents(ctx, g.Client, &cluster, g.Resource.Config)
 			if err != nil {
 				// Handle case where the app is not found.
 				if apimachineryerrors.IsNotFound(err) {
@@ -80,7 +80,7 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 			}
 
 			// Reconcile logging config for each cluster
-			result, err := g.Reconciler.ReconcileCreate(ctx, &cluster, loggingAgentConfig)
+			result, err := g.Resource.ReconcileCreate(ctx, &cluster, loggingAgentConfig)
 			if err != nil {
 				return result, errors.WithStack(err)
 			}
