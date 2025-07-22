@@ -10,7 +10,7 @@ require (
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/google/go-cmp v0.7.0
 	github.com/onsi/ginkgo/v2 v2.23.4
-	github.com/onsi/gomega v1.37.0
+	github.com/onsi/gomega v1.38.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/crypto v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
