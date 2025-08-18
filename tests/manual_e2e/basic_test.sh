@@ -97,7 +97,7 @@ main() {
   # Checking if the grafana-agent and logging cms and secrets have been created by the operator
   for type in "${configTypes[@]}"; do
     for name in "${configNames[@]}"; do
-      check_configs "$name" "$type" 
+      check_configs "$name" "$type"
     done
   done
 
