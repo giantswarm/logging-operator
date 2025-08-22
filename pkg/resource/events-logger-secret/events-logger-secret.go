@@ -7,9 +7,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pkg/errors"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 )
 
@@ -18,28 +18,28 @@ const (
 	grafanaAgentSecretName = "grafana-agent-secret" // #nosec G101
 )
 
-func generateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func generateEventsLoggerSecret(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
-	switch lc.GetKubeEventsLogger() {
+	switch loggingAgent.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		data, err = generateGrafanaAgentSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = generateGrafanaAgentSecret(cluster, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
 	case common.EventsLoggerAlloy:
 		// In the case of Alloy being the events logger, we reuse the secret generation from the logging-secret package
-		data, err = loggingsecret.GenerateAlloyLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = loggingsecret.GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
 	default:
-		return v1.Secret{}, errors.Errorf("unsupported logging agent %q", lc.GetKubeEventsLogger())
+		return v1.Secret{}, errors.Errorf("unsupported logging agent %q", loggingAgent.GetKubeEventsLogger())
 	}
 
 	secret := v1.Secret{
-		ObjectMeta: secretMeta(lc),
+		ObjectMeta: secretMeta(cluster, loggingAgent),
 		Data:       data,
 	}
 
@@ -47,10 +47,10 @@ func generateEventsLoggerSecret(lc loggedcluster.Interface, loggingCredentialsSe
 }
 
 // SecretMeta returns metadata for the events-logger-secret
-func secretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func secretMeta(cluster *capi.Cluster, loggingAgent *common.LoggingAgent) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      GetEventsLoggerSecretName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Name:      GetEventsLoggerSecretName(cluster, loggingAgent),
+		Namespace: cluster.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 
@@ -58,11 +58,11 @@ func secretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-func GetEventsLoggerSecretName(lc loggedcluster.Interface) string {
-	switch lc.GetKubeEventsLogger() {
+func GetEventsLoggerSecretName(cluster *capi.Cluster, loggingAgent *common.LoggingAgent) string {
+	switch loggingAgent.GetKubeEventsLogger() {
 	case common.EventsLoggerGrafanaAgent:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), grafanaAgentSecretName)
+		return fmt.Sprintf("%s-%s", cluster.GetName(), grafanaAgentSecretName)
 	default:
-		return fmt.Sprintf("%s-%s", lc.GetClusterName(), eventsLoggerSecretName)
+		return fmt.Sprintf("%s-%s", cluster.GetName(), eventsLoggerSecretName)
 	}
 }

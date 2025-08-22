@@ -2,14 +2,13 @@ package loggingconfig
 
 import (
 	"bytes"
+	_ "embed"
 	"text/template"
 
-	_ "embed"
-
 	"github.com/Masterminds/sprig/v3"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 var (
@@ -24,13 +23,13 @@ func init() {
 
 // GeneratePromtailLoggingConfig returns a configmap for
 // the logging extra-config
-func GeneratePromtailLoggingConfig(lc loggedcluster.Interface) (string, error) {
+func GeneratePromtailLoggingConfig(cluster *capi.Cluster, installationName string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
 		IsWorkloadCluster bool
 	}{
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
+		IsWorkloadCluster: common.IsWorkloadCluster(installationName, cluster.GetName()),
 	}
 
 	err := promtailLoggingConfigTemplate.Execute(&values, data)

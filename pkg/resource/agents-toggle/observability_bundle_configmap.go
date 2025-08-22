@@ -1,13 +1,10 @@
 package agentstoggle
 
 import (
-	"context"
-
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 type values struct {
@@ -21,14 +18,14 @@ type app struct {
 
 // generateObservabilityBundleConfig returns a configmap for
 // the observabilitybundle application to enable logging agents and events-loggers.
-func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Interface) (string, error) {
+func generateObservabilityBundleConfig(loggingAgent *common.LoggingAgent) (string, error) {
 	appsToEnable := map[string]app{}
 
-	if err := toggleLogAgent(ctx, lc, appsToEnable); err != nil {
+	if err := toggleLogAgent(loggingAgent, appsToEnable); err != nil {
 		return "", errors.WithStack(err)
 	}
 
-	if err := toggleKubeEventsLogger(ctx, lc, appsToEnable); err != nil {
+	if err := toggleKubeEventsLogger(loggingAgent, appsToEnable); err != nil {
 		return "", errors.WithStack(err)
 	}
 
@@ -45,8 +42,8 @@ func generateObservabilityBundleConfig(ctx context.Context, lc loggedcluster.Int
 }
 
 // toggleLogAgent toggles the logging agent based on the observability bundle version.
-func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, appsToEnable map[string]app) error {
-	switch lc.GetLoggingAgent() {
+func toggleLogAgent(loggingAgent *common.LoggingAgent, appsToEnable map[string]app) error {
+	switch loggingAgent.LoggingAgent {
 	case common.LoggingAgentPromtail:
 		appsToEnable[common.PromtailObservabilityBundleAppName] = app{
 			Enabled: true,
@@ -63,15 +60,15 @@ func toggleLogAgent(ctx context.Context, lc loggedcluster.Interface, appsToEnabl
 			Enabled: false,
 		}
 	default:
-		return errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
+		return errors.Errorf("unsupported logging agent %q", loggingAgent.LoggingAgent)
 	}
 
 	return nil
 }
 
 // toggleKubeEventsLogger toggles the kube-events-logger based on the observability bundle version.
-func toggleKubeEventsLogger(ctx context.Context, lc loggedcluster.Interface, appsToEnable map[string]app) error {
-	switch lc.GetKubeEventsLogger() {
+func toggleKubeEventsLogger(loggingAgent *common.LoggingAgent, appsToEnable map[string]app) error {
+	switch loggingAgent.KubeEventsLogger {
 	case common.EventsLoggerGrafanaAgent:
 		appsToEnable["grafanaAgent"] = app{
 			Enabled: true,
@@ -87,7 +84,7 @@ func toggleKubeEventsLogger(ctx context.Context, lc loggedcluster.Interface, app
 			Enabled: true,
 		}
 	default:
-		return errors.Errorf("unsupported events logger %q", lc.GetKubeEventsLogger())
+		return errors.Errorf("unsupported events logger %q", loggingAgent.KubeEventsLogger)
 	}
 
 	return nil

@@ -3,17 +3,22 @@ package common
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	"github.com/giantswarm/logging-operator/pkg/key"
 )
 
 const (
+	// LoggingEnabledDefault defines if WCs logs are collected by default
+	LoggingEnabledDefault = true
+
 	// ReadUser is the global user for reading logs
 	ReadUser = "read"
 	// DefaultWriteTenant is the default tenant for writing logs
@@ -65,24 +70,47 @@ func GrafanaAgentExtraSecretName() string {
 	return grafanaAgentExtraSecretName
 }
 
-func IsLoggingEnabled(lc loggedcluster.Interface) bool {
+func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 	// Logging should be enabled when all conditions are met:
 	//   - logging label is set and true on the cluster
 	//   - cluster is not being deleted
 	//   - global logging flag is enabled
-	return lc.HasLoggingEnabled() && lc.GetDeletionTimestamp().IsZero() && lc.GetEnableLoggingFlag()
+
+	labels := cluster.GetLabels()
+
+	// If logging is disabled at the installation level, we return false
+	if !enableLoggingFlag {
+		return false
+	}
+
+	loggingLabelValue, ok := labels[key.LoggingLabel]
+	if !ok {
+		return LoggingEnabledDefault
+	}
+
+	loggingEnabled, err := strconv.ParseBool(loggingLabelValue)
+	if err != nil {
+		return LoggingEnabledDefault
+	}
+	return loggingEnabled && cluster.GetDeletionTimestamp().IsZero()
 }
 
 func AddCommonLabels(labels map[string]string) {
 	labels["giantswarm.io/managed-by"] = "logging-operator"
 }
 
-func IsWorkloadCluster(lc loggedcluster.Interface) bool {
-	return lc.GetInstallationName() != lc.GetClusterName()
+func IsWorkloadCluster(installationName, clusterName string) bool {
+	return installationName != clusterName
+}
+
+// AppConfigName generates an app config name for the given cluster and app.
+// This function can work with any cluster object.
+func AppConfigName(cluster *capi.Cluster, app string) string {
+	return fmt.Sprintf("%s-%s", cluster.GetName(), app)
 }
 
 // Read Loki URL from ingress
-func ReadLokiIngressURL(ctx context.Context, lc loggedcluster.Interface, client client.Client) (string, error) {
+func ReadLokiIngressURL(ctx context.Context, cluster *capi.Cluster, client client.Client) (string, error) {
 	var lokiIngress netv1.Ingress
 
 	var objectKey = types.NamespacedName{Name: lokiGatewayIngressName, Namespace: lokiGatewayIngressNamespace}

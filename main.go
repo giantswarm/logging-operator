@@ -43,9 +43,8 @@ import (
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/reconciler"
-	"github.com/giantswarm/logging-operator/pkg/reconciler/logging"
+	"github.com/giantswarm/logging-operator/pkg/config"
+	"github.com/giantswarm/logging-operator/pkg/resource"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
@@ -157,54 +156,60 @@ func main() {
 		os.Exit(1)
 	}
 
-	agentsToggle := agentstoggle.Reconciler{
+	// Create Config for dependency injection
+	appConfig := config.Config{
+		EnableLoggingFlag:       enableLogging,
+		DefaultLoggingAgent:     loggingAgent,
+		DefaultKubeEventsLogger: eventsLogger,
+		InstallationName:        installationName,
+		InsecureCA:              insecureCA,
+	}
+
+	agentsToggle := agentstoggle.Resource{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingWiring := loggingwiring.Reconciler{
+	loggingWiring := loggingwiring.Resource{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingSecrets := loggingcredentials.Reconciler{
+	loggingSecrets := loggingcredentials.Resource{
 		Client: mgr.GetClient(),
 	}
 
-	lokiIngressAuthSecret := lokiingressauthsecret.Reconciler{
+	lokiIngressAuthSecret := lokiingressauthsecret.Resource{
 		Client: mgr.GetClient(),
 	}
 
-	loggingSecret := loggingsecret.Reconciler{
+	loggingSecret := loggingsecret.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
-	loggingConfig := loggingconfig.Reconciler{
+	loggingConfig := loggingconfig.Resource{
 		Client:                           mgr.GetClient(),
+		Config:                           appConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
-	eventsLoggerConfig := eventsloggerconfig.Reconciler{
+	eventsLoggerConfig := eventsloggerconfig.Resource{
 		Client:            mgr.GetClient(),
+		Config:            appConfig,
 		IncludeNamespaces: includeEventsFromNamespaces,
 		ExcludeNamespaces: excludeEventsFromNamespaces,
 	}
 
-	eventsLoggerSecret := eventsloggersecret.Reconciler{
+	eventsLoggerSecret := eventsloggersecret.Resource{
 		Client: mgr.GetClient(),
 	}
 
-	loggedcluster.O.EnableLoggingFlag = enableLogging
-	loggedcluster.O.DefaultLoggingAgent = loggingAgent
-	loggedcluster.O.DefaultKubeEventsLogger = eventsLogger
-	loggedcluster.O.InstallationName = installationName
-	loggedcluster.O.InsecureCA = insecureCA
-	setupLog.Info("Loggedcluster config", "options", loggedcluster.O)
-
-	loggingReconciler := logging.LoggingReconciler{
+	if err = (&controller.CapiClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-		Reconcilers: []reconciler.Interface{
+		Config: appConfig,
+		Resources: []resource.Interface{
 			&agentsToggle,
 			&loggingWiring,
 			&loggingSecrets,
@@ -214,12 +219,6 @@ func main() {
 			&eventsLoggerSecret,
 			&eventsLoggerConfig,
 		},
-	}
-
-	if err = (&controller.CapiClusterReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		Reconciler: loggingReconciler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 		os.Exit(1)
@@ -227,9 +226,9 @@ func main() {
 
 	// The GrafanaOrganizationReconciler is only used in CAPI mode
 	if err = (&controller.GrafanaOrganizationReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		Reconciler: loggingConfig,
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Resource: loggingConfig,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
 		os.Exit(1)

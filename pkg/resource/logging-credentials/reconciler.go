@@ -7,28 +7,29 @@ import (
 	"github.com/pkg/errors"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging Credentials: store and maintain logging credentials
-type Reconciler struct {
+type Resource struct {
 	Client client.Client
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
-func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("loggingcredentials checking secret", "namespace", LoggingCredentialsSecretMeta().Namespace, "name", LoggingCredentialsSecretMeta().Name)
 
 	// Start with some empty secret
-	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)
+	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
 
 	// Retrieve existing secret if it exists
 	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta().Name, Namespace: LoggingCredentialsSecretMeta().Namespace}, loggingCredentialsSecret)
@@ -41,7 +42,7 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// update the secret's contents if needed
-	secretUpdated, err := AddLoggingCredentials(lc, loggingCredentialsSecret)
+	secretUpdated, err := AddLoggingCredentials(cluster, loggingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -74,13 +75,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 }
 
 // ReconcileDelete ensures a secret is removed for the current cluster
-func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("loggingcredentials secret delete", "namespace", LoggingCredentialsSecretMeta().Namespace, "name", LoggingCredentialsSecretMeta().Name)
 
 	// Start with some empty secret
-	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(lc)
+	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
 
 	// Retrieve existing secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta().Name, Namespace: LoggingCredentialsSecretMeta().Namespace}, loggingCredentialsSecret)
@@ -94,7 +95,7 @@ func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// update the secret's contents if needed
-	secretUpdated := RemoveLoggingCredentials(lc, loggingCredentialsSecret)
+	secretUpdated := RemoveLoggingCredentials(cluster, loggingCredentialsSecret)
 
 	// Check if metadata has been updated
 	if !reflect.DeepEqual(loggingCredentialsSecret.Labels, LoggingCredentialsSecretMeta().Labels) {

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refactor logging architecture by removing the logged-cluster package, implementing dependency injection for reconcilers, replacing client.Object with explicit *capi.Cluster types, modernizing ToggleAgents to return *common.LoggingAgent directly, and moving agent interface to common package for improved type safety, reduced code duplication, and better separation of concerns.
+
 ## [0.29.0] - 2025-05-28
 
 ### Changed

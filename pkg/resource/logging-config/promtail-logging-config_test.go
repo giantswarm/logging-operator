@@ -9,9 +9,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
 
 func TestGeneratePromtailLoggingConfig(t *testing.T) {
@@ -39,18 +36,13 @@ func TestGeneratePromtailLoggingConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
-			loggedCluster := &capicluster.Object{
-				Object: &capi.Cluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: tc.clusterName,
-					},
-				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
+			cluster := &capi.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: tc.clusterName,
 				},
 			}
 
-			config, err := GeneratePromtailLoggingConfig(loggedCluster)
+			config, err := GeneratePromtailLoggingConfig(cluster, tc.installationName)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

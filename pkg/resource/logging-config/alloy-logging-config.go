@@ -8,9 +8,9 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/blang/semver"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 var (
@@ -33,10 +33,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (string, error) {
+func GenerateAlloyLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(lc, observabilityBundleVersion, tenants)
+	alloyConfig, err := generateAlloyConfig(cluster, observabilityBundleVersion, tenants, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -51,8 +51,8 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	}{
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
-		DefaultWriteTenant:               lc.GetTenant(),
-		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		DefaultWriteTenant:               common.DefaultWriteTenant,
+		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, cluster.GetName()),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
@@ -67,14 +67,14 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 	return values.String(), nil
 }
 
-func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, tenants []string) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	clusterName := lc.GetClusterName()
+	clusterName := cluster.GetName()
 
 	// Ensure default tenant is included in the list of tenants
-	if !slices.Contains(tenants, lc.GetTenant()) {
-		tenants = append(tenants, lc.GetTenant())
+	if !slices.Contains(tenants, common.DefaultWriteTenant) {
+		tenants = append(tenants, common.DefaultWriteTenant)
 	}
 
 	data := struct {
@@ -94,13 +94,13 @@ func generateAlloyConfig(lc loggedcluster.Interface, observabilityBundleVersion 
 		Tenants            []string
 	}{
 		ClusterID:         clusterName,
-		Installation:      lc.GetInstallationName(),
+		Installation:      installationName,
 		MaxBackoffPeriod:  common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:     common.LokiRemoteTimeout.String(),
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
+		IsWorkloadCluster: common.IsWorkloadCluster(installationName, clusterName),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
-		InsecureSkipVerify: lc.IsInsecureCA(),
+		InsecureSkipVerify: insecureCA,
 		SecretName:         common.AlloyLogAgentAppName,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,
