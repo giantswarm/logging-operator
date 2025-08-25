@@ -21,6 +21,13 @@ make
 
 See `make help` for help.
 
+### Generating test files
+
+Golden test files are re-generated via:
+```
+make ./... -update
+```
+
 ## Architecture
 
 The operator is built around a central reconciler, that calls multiple sub-reconcilers sequentially.

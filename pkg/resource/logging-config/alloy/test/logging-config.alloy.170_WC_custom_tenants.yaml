@@ -53,7 +53,6 @@ alloy:
         	level  = "warn"
         	format = "logfmt"
         }
-        
         remote.kubernetes.secret "credentials" {
         	namespace = "kube-system"
         	name = "alloy-logs"
@@ -118,7 +117,6 @@ alloy:
         		}
         	}
         }
-        
         // Kubernetes pods logs
         loki.source.podlogs "kubernetes_pods" {
         	forward_to      = [loki.relabel.kubernetes_pods.receiver]
@@ -134,39 +132,32 @@ alloy:
         		enabled = true
         	}
         }
-        
         loki.relabel "kubernetes_pods" {
         	forward_to      = [loki.process.kubernetes_pods.receiver]
-        
         	rule {
         		source_labels = ["__meta_kubernetes_pod_controller_name"]
         		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
         		target_label  = "__tmp_controller_name"
         	}
-        
         	rule {
         		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
         		regex         = "^;*([^;]+)(;.*)?$"
         		target_label  = "app"
         	}
-        
         	rule {
         		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_instance", "__meta_kubernetes_pod_label_instance"]
         		regex         = "^;*([^;]+)(;.*)?$"
         		target_label  = "instance"
         	}
-        
         	rule {
         		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component", "__meta_kubernetes_pod_label_component"]
         		regex         = "^;*([^;]+)(;.*)?$"
         		target_label  = "component"
         	}
-        
         	rule {
         		target_label = "scrape_job"
         		replacement  = "kubernetes-pods"
         	}
-        
         	rule {
         		source_labels = ["__meta_kubernetes_pod_node_name"]
         		target_label  = "node"
@@ -176,13 +167,11 @@ alloy:
         		regex         = "(.+)/.+"
         		target_label  = "namespace"
         	}
-        
         	rule {
         		source_labels = ["instance"]
         		regex         = ".+/(.+):.+"
         		target_label  = "pod"
         	}
-        
         	rule {
         		source_labels = ["instance"]
         		regex         = ".+/.+:(.+)"
@@ -195,17 +184,14 @@ alloy:
         		regex         = "^(test-tenant-a|test-tenant-b|giantswarm)$"
         		target_label  = "__tenant_id__"
         	}
-        
         	// We drop the label to not have it ingested in loki
         	rule {
         		regex = "giantswarm_observability_tenant"
         		action = "labeldrop"
         	}
         }
-        
         loki.process "kubernetes_pods" {
         	forward_to = [loki.write.default.receiver]
-        
         	stage.cri { }
         	// Drop log lines that do not contain a tenant id
         	stage.drop {
@@ -213,14 +199,12 @@ alloy:
         		source              = "__tenant_id__"
         		expression          = "^$"
         	}
-        
         	stage.structured_metadata {
         		values = {
         			"filename" = "",
         			"stream" = "",
         		}
         	}
-        
         	stage.label_drop {
         		values = [
         			"filename",
@@ -228,48 +212,39 @@ alloy:
         		]
         	}
         }
-        
         // journald logs from /run/log/journal
         loki.process "systemd_journal_run" {
         	forward_to = [loki.write.default.receiver]
-        
         	stage.json {
         		expressions = {
         			SYSLOG_IDENTIFIER = "SYSLOG_IDENTIFIER",
         		}
         	}
-        
         	stage.drop {
         		source = "SYSLOG_IDENTIFIER"
         		value  = "audit"
         	}
         }
-        
         discovery.relabel "systemd_journal_run" {
         	targets = []
-        
         	rule {
         		source_labels = ["__journal__systemd_unit"]
         		target_label  = "__tmp_systemd_unit"
         	}
-        
         	rule {
         		source_labels = ["__journal__systemd_unit", "__journal_syslog_identifier"]
         		regex         = ";(.+)"
         		target_label  = "__tmp_systemd_unit"
         	}
-        
         	rule {
         		source_labels = ["__tmp_systemd_unit"]
         		target_label  = "systemd_unit"
         	}
-        
         	rule {
         		source_labels = ["__journal__hostname"]
         		target_label  = "node"
         	}
         }
-        
         loki.source.journal "systemd_journal_run" {
         	format_as_json = true
         	max_age        = "12h0m0s"
@@ -280,48 +255,39 @@ alloy:
         		scrape_job = "system-logs",
         	}
         }
-        
         // journald logs from /var/log/journal
         loki.process "systemd_journal_var" {
         	forward_to = [loki.write.default.receiver]
-        
         	stage.json {
         		expressions = {
         			SYSLOG_IDENTIFIER = "SYSLOG_IDENTIFIER",
         		}
         	}
-        
         	stage.drop {
         		source = "SYSLOG_IDENTIFIER"
         		value  = "audit"
         	}
         }
-        
         discovery.relabel "systemd_journal_var" {
         	targets = []
-        
         	rule {
         		source_labels = ["__journal__systemd_unit"]
         		target_label  = "__tmp_systemd_unit"
         	}
-        
         	rule {
         		source_labels = ["__journal__systemd_unit", "__journal_syslog_identifier"]
         		regex         = ";(.+)"
         		target_label  = "__tmp_systemd_unit"
         	}
-        
         	rule {
         		source_labels = ["__tmp_systemd_unit"]
         		target_label  = "systemd_unit"
         	}
-        
         	rule {
         		source_labels = ["__journal__hostname"]
         		target_label  = "node"
         	}
         }
-        
         loki.source.journal "systemd_journal_var" {
         	format_as_json = true
         	max_age        = "12h0m0s"
@@ -332,7 +298,6 @@ alloy:
         		scrape_job = "system-logs",
         	}
         }
-        
         // Kubernetes API server audit logs
         local.file_match "kubernetes_audit" {
         	path_targets = [{
@@ -342,16 +307,13 @@ alloy:
         		scrape_job  = "audit-logs",
         	}]
         }
-        
         loki.process "kubernetes_audit" {
         	forward_to = [loki.write.default.receiver]
-        
         	stage.json {
         		expressions = {
         			objectRef = "objectRef",
         		}
         	}
-        
         	stage.json {
         		expressions = {
         			namespace = "namespace",
@@ -359,33 +321,28 @@ alloy:
         		}
         		source = "objectRef"
         	}
-        
         	stage.structured_metadata {
         		values = {
         			"resource" = "",
         			"filename" = "",
         		}
         	}
-        
         	stage.label_drop {
         		values = [
         			"filename",
         		]
         	}
-        
         	stage.labels {
         		values = {
         			namespace = "",
         		}
         	}
         }
-        
         loki.source.file "kubernetes_audit" {
         	targets               = local.file_match.kubernetes_audit.targets
         	forward_to            = [loki.process.kubernetes_audit.receiver]
         	legacy_positions_file = "/run/promtail/positions.yaml"
         }
-        
         // Loki target configuration
         loki.write "default" {
         	endpoint {
@@ -393,12 +350,10 @@ alloy:
         		max_backoff_period = "10m0s"
         		remote_timeout     = "1m0s"
         		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        
         		basic_auth {
         			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         			password = remote.kubernetes.secret.credentials.data["logging-password"]
         		}
-        
         		tls_config {
         			insecure_skip_verify = false
         		}
@@ -408,7 +363,6 @@ alloy:
         		installation = "test-installation",
         	}
         }
-        
     clustering:
       enabled: true
       name: alloy-logs

@@ -11,12 +11,10 @@ grafana-agent:
         	level  = "info"
         	format = "logfmt"
         }
-        
         remote.kubernetes.secret "credentials" {
         	namespace = "kube-system"
         	name = "exclude-namespaces-grafana-agent-secret"
         }
-        
         loki.source.kubernetes_events "local" {
         	namespaces = []
         	forward_to = [loki.process.default.receiver]
@@ -24,24 +22,20 @@ grafana-agent:
         // exclude configured namespaces
         loki.process "default" {
         	forward_to = [loki.write.default.receiver]
-        
-        	stage.drop {
+         	stage.drop {
         		source = "namespace"
         		expression = "namespace1|namespace2"
         	}
         }
-        
         loki.write "default" {
         	endpoint {
         		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
         		remote_timeout     = "1m0s"
         		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        
         		basic_auth {
         			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         			password = remote.kubernetes.secret.credentials.data["logging-password"]
         		}
-        
         		tls_config {
         			insecure_skip_verify = false
         		}
@@ -52,7 +46,6 @@ grafana-agent:
         		scrape_job = "kubernetes-events",
         	}
         }
-        
     extraArgs:
     - --disable-reporting
   controller:

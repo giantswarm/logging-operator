@@ -70,7 +70,7 @@ alloy:
     configMap:
       create: true
       content: |-
-        {{- .AlloyConfig | nindent 8 }}
+        {{ .AlloyConfig | nindent 8 | replace "        \n" "" | trim }}
     {{- if .SupportPodLogs }}
     clustering:
       enabled: true
