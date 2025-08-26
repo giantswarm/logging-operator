@@ -25,7 +25,7 @@ See `make help` for help.
 
 Golden test files are re-generated via:
 ```
-make ./... -update
+make update-golden-files
 ```
 
 ## Architecture
