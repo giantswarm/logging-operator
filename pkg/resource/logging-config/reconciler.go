@@ -43,8 +43,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get list of tenants
-	var tenants = []string{}
-	tenants, err = listTenants(r.Client, ctx)
+	tenants, err := listTenants(r.Client, ctx)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
