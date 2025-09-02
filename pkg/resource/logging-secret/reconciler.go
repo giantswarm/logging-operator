@@ -8,24 +8,25 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
-
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
+	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging secret: extra logging secret about where and how to send logs
-type Reconciler struct {
-	client.Client
+type Resource struct {
+	Client client.Client
+	Config config.Config
 }
 
 // ReconcileCreate ensures logging-secret is created with the right credentials
-func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-secret create")
 
@@ -38,13 +39,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Retrieve Loki ingress name
-	lokiURL, err := common.ReadProxyIngressURL(ctx, lc, r.Client)
+	lokiURL, err := common.ReadLokiIngressURL(ctx, cluster, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired secret
-	desiredLoggingSecret, err := GenerateLoggingSecret(lc, &loggingCredentialsSecret, lokiURL)
+	desiredLoggingSecret, err := GenerateLoggingSecret(cluster, loggingAgent, &loggingCredentialsSecret, lokiURL, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -82,13 +83,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
-func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-secret delete")
 
 	// Get expected secret.
 	var currentLoggingSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: GetLoggingSecretName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: GetLoggingSecretName(cluster), Namespace: cluster.GetNamespace()}, &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-secret not found, stop here")

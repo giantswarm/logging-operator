@@ -3,40 +3,39 @@ package loggingsecret
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/pkg/errors"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 const (
 	loggingClientSecretName = "logging-secret"
 )
 
-func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func GenerateLoggingSecret(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, loggingCredentialsSecret *v1.Secret, lokiURL string, installationName string, insecureCA bool) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
-	switch lc.GetLoggingAgent() {
+	switch loggingAgent.GetLoggingAgent() {
 	case common.LoggingAgentPromtail:
-		data, err = GeneratePromtailLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = GeneratePromtailLoggingSecret(cluster, loggingCredentialsSecret, lokiURL, installationName, insecureCA)
 		if err != nil {
 			return v1.Secret{}, err
 		}
 	case common.LoggingAgentAlloy:
-		data, err = GenerateAlloyLoggingSecret(lc, loggingCredentialsSecret, lokiURL)
+		data, err = GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL)
 		if err != nil {
 			return v1.Secret{}, err
 		}
 	default:
-		return v1.Secret{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
+		return v1.Secret{}, errors.Errorf("unsupported logging agent %q", loggingAgent.GetLoggingAgent())
 	}
 
 	secret := v1.Secret{
-		ObjectMeta: SecretMeta(lc),
+		ObjectMeta: SecretMeta(cluster),
 		Data:       data,
 	}
 
@@ -44,10 +43,10 @@ func GenerateLoggingSecret(lc loggedcluster.Interface, loggingCredentialsSecret 
 }
 
 // SecretMeta returns metadata for the logging-secret
-func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func SecretMeta(cluster *capi.Cluster) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      GetLoggingSecretName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Name:      GetLoggingSecretName(cluster),
+		Namespace: cluster.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 
@@ -55,6 +54,6 @@ func SecretMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-func GetLoggingSecretName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingClientSecretName)
+func GetLoggingSecretName(cluster *capi.Cluster) string {
+	return fmt.Sprintf("%s-%s", cluster.GetName(), loggingClientSecretName)
 }

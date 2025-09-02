@@ -12,8 +12,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
+	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
 var (
@@ -60,19 +59,17 @@ func TestGenerateGrafanaAgentConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
-			loggedCluster := &capicluster.Object{
-				Object: &capi.Cluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: tc.clusterName,
-					},
-				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-					KubeEventsLogger: "grafana-agent",
+			cluster := &capi.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: tc.clusterName,
 				},
 			}
 
-			config, err := generateGrafanaAgentConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
+			loggingAgent := &common.LoggingAgent{
+				KubeEventsLogger: common.EventsLoggerGrafanaAgent,
+			}
+
+			config, err := generateGrafanaAgentConfig(cluster, loggingAgent, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate grafana-agent config: %v", err)
 			}

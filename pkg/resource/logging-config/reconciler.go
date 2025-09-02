@@ -9,28 +9,29 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // Logging config: extra logging config defining what we want to retrieve.
-type Reconciler struct {
-	client.Client
+type Resource struct {
+	Client                           client.Client
+	Config                           config.Config
 	DefaultWorkloadClusterNamespaces []string
 }
 
 // ReconcileCreate ensures logging-config is created with the right credentials
-func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config create")
 
-	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(lc, r.Client, ctx)
+	observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(ctx, r.Client, cluster)
 	if err != nil {
 		// Handle case where the app is not found.
 		if apimachineryerrors.IsNotFound(err) {
@@ -42,16 +43,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 	}
 
 	// Get list of tenants
-	var tenants = []string{}
-	if lc.IsCAPI() {
-		tenants, err = listTenants(r.Client, ctx)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+	tenants, err := listTenants(r.Client, ctx)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(lc, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants)
+	desiredLoggingConfig, err := GenerateLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -89,13 +87,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 }
 
 // ReconcileDelete ensure logging-config is deleted for the given cluster.
-func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config delete")
 
 	// Get expected configmap.
 	var currentLoggingConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentLoggingConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(cluster), Namespace: cluster.GetNamespace()}, &currentLoggingConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-config not found, stop here")

@@ -5,10 +5,10 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
 
@@ -23,10 +23,10 @@ type extraSecret struct {
 
 // GenerateGrafanaAgentSecret returns a secret for
 // the Loki-multi-tenant-proxy config
-func generateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
-	clusterName := lc.GetClusterName()
+func generateGrafanaAgentSecret(cluster *capi.Cluster, credentialsSecret *v1.Secret, lokiURL string) (map[string][]byte, error) {
+	clusterName := cluster.GetName()
 	writeUser := clusterName
-	writePassword, err := loggingcredentials.GetPassword(lc, credentialsSecret, clusterName)
+	writePassword, err := loggingcredentials.GetPassword(cluster, credentialsSecret, clusterName)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -35,8 +35,8 @@ func generateGrafanaAgentSecret(lc loggedcluster.Interface, credentialsSecret *v
 		ExtraSecret: extraSecret{
 			Name: fmt.Sprintf("%s-%s", clusterName, common.GrafanaAgentExtraSecretName()),
 			Data: map[string]string{
-				common.LoggingURL:      fmt.Sprintf(common.LokiURLFormat, lokiURL),
-				common.LoggingTenantID: lc.GetTenant(),
+				common.LoggingURL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
+				common.LoggingTenantID: common.DefaultWriteTenant,
 				common.LoggingUsername: writeUser,
 				common.LoggingPassword: writePassword,
 			},

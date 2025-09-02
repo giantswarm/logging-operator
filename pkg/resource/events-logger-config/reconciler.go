@@ -8,29 +8,31 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 )
 
-// Reconciler implements a reconciler.Interface to handle
+// Resource implements a resource.Interface to handle
 // EventsLogger config: extra events-logger config defining what we want to retrieve.
-type Reconciler struct {
-	client.Client
+type Resource struct {
+	Client            client.Client
+	Config            config.Config
 	IncludeNamespaces []string
 	ExcludeNamespaces []string
 }
 
 // ReconcileCreate ensures events-logger config is created with the right credentials
-func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-config create")
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(lc, r.IncludeNamespaces, r.ExcludeNamespaces)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -68,13 +70,13 @@ func (r *Reconciler) ReconcileCreate(ctx context.Context, lc loggedcluster.Inter
 
 }
 
-func (r *Reconciler) ReconcileDelete(ctx context.Context, lc loggedcluster.Interface) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-config delete")
 
 	// Get expected configmap.
 	var currentEventsLoggerConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(lc), Namespace: lc.GetAppsNamespace()}, &currentEventsLoggerConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(cluster, loggingAgent), Namespace: cluster.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-config not found, stop here")

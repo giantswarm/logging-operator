@@ -2,23 +2,19 @@ package loggingconfig
 
 import (
 	"bytes"
+	_ "embed"
 	"text/template"
 
-	_ "embed"
-
 	"github.com/Masterminds/sprig/v3"
-	"github.com/blang/semver"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 var (
 	//go:embed promtail/logging-config.promtail.yaml.template
 	promtailLoggingConfig         string
 	promtailLoggingConfigTemplate *template.Template
-
-	supportsStructuredMetadata = semver.MustParse("1.0.0")
 )
 
 func init() {
@@ -27,16 +23,13 @@ func init() {
 
 // GeneratePromtailLoggingConfig returns a configmap for
 // the logging extra-config
-func GeneratePromtailLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version) (string, error) {
+func GeneratePromtailLoggingConfig(cluster *capi.Cluster, installationName string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
-		IsWorkloadCluster          bool
-		SupportsStructuredMetadata bool
+		IsWorkloadCluster bool
 	}{
-		IsWorkloadCluster: common.IsWorkloadCluster(lc),
-		// Promtail in older versions do not support structured metadata.
-		SupportsStructuredMetadata: observabilityBundleVersion.GTE(supportsStructuredMetadata),
+		IsWorkloadCluster: common.IsWorkloadCluster(installationName, cluster.GetName()),
 	}
 
 	err := promtailLoggingConfigTemplate.Execute(&values, data)

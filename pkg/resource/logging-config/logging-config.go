@@ -5,44 +5,42 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/blang/semver"
+	"github.com/giantswarm/observability-operator/api/v1alpha1"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/blang/semver"
-	"github.com/pkg/errors"
-
-	"github.com/giantswarm/observability-operator/api/v1alpha1"
-
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 )
 
 const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string) (v1.ConfigMap, error) {
+func GenerateLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
-	switch lc.GetLoggingAgent() {
+	switch loggingAgent.LoggingAgent {
 	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(lc, observabilityBundleVersion)
+		values, err = GeneratePromtailLoggingConfig(cluster, installationName)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(lc, observabilityBundleVersion, defaultNamespaces, tenants)
+		values, err = GenerateAlloyLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	default:
-		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", lc.GetLoggingAgent())
+		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", loggingAgent.LoggingAgent)
 	}
 
 	configmap := v1.ConfigMap{
-		ObjectMeta: ConfigMeta(lc),
+		ObjectMeta: ConfigMeta(cluster),
 		Data: map[string]string{
 			"values": values,
 		},
@@ -52,10 +50,10 @@ func GenerateLoggingConfig(lc loggedcluster.Interface, observabilityBundleVersio
 }
 
 // ConfigMeta returns metadata for the logging-config
-func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
+func ConfigMeta(cluster *capi.Cluster) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
-		Name:      getLoggingConfigName(lc),
-		Namespace: lc.GetAppsNamespace(),
+		Name:      getLoggingConfigName(cluster),
+		Namespace: cluster.GetNamespace(),
 		Labels:    map[string]string{},
 	}
 
@@ -63,8 +61,8 @@ func ConfigMeta(lc loggedcluster.Interface) metav1.ObjectMeta {
 	return metadata
 }
 
-func getLoggingConfigName(lc loggedcluster.Interface) string {
-	return fmt.Sprintf("%s-%s", lc.GetClusterName(), loggingConfigName)
+func getLoggingConfigName(cluster *capi.Cluster) string {
+	return fmt.Sprintf("%s-%s", cluster.GetName(), loggingConfigName)
 }
 
 func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error) {

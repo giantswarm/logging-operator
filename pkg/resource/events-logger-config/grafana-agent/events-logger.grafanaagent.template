@@ -2,12 +2,10 @@ logging {
 	level  = "info"
 	format = "logfmt"
 }
-
 remote.kubernetes.secret "credentials" {
 	namespace = "kube-system"
 	name = "{{ .SecretName }}"
 }
-
 loki.source.kubernetes_events "local" {
 	{{- if and .IsWorkloadCluster .IncludeNamespaces }}
 	namespaces = ["{{ join "\", \"" .IncludeNamespaces }}"]
@@ -21,7 +19,6 @@ loki.source.kubernetes_events "local" {
 	forward_to = [loki.write.default.receiver]
 	{{- end }}
 }
-
 {{- if and .IsWorkloadCluster .ExcludeNamespaces }}
 // exclude configured namespaces
 loki.process "default" {
@@ -33,17 +30,15 @@ loki.process "default" {
 	}
 }
 {{- end }}
-
 loki.write "default" {
 	endpoint {
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		remote_timeout     = "{{ .RemoteTimeout }}"
 		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
-
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
-
 		tls_config {
 			insecure_skip_verify = {{ .InsecureSkipVerify }}
 		}

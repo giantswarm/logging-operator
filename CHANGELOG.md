@@ -9,7 +9,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactor logging architecture by removing the logged-cluster package, implementing dependency injection for reconcilers, replacing client.Object with explicit *capi.Cluster types, modernizing ToggleAgents to return *common.LoggingAgent directly, and moving agent interface to common package for improved type safety, reduced code duplication, and better separation of concerns.
+- Update config templating to remove trailing spaces and empty lines
+
+## [0.29.0] - 2025-05-28
+
+### Changed
+
+- Introduce the new `remote_timeout` parameter to configure timeouts for remote write operations.
+  This change affects the following agents: `promtail`, `grafana-agent`, `alloy-events`, and `alloy-logs`.
+  The default value has been updated to better support larger installations.
+
+### Removed
+
+- Remove vintage mode from the operator. This includes the vintage MC and WC reconciliers.
+
+## [0.28.0] - 2025-04-23
+
+### Fixed
+
+- Fix network policy to support loading Prometheus Rules for logs (clustering and loki-backend direct access on MCs).
+
+## [0.27.0] - 2025-04-22
+
+### Added
+
+- Add support for loading log-based Prometheus Rules in the Loki Ruler from management and workload clusters.
+
+## [0.26.1] - 2025-03-24
+
+### Fixed
+
+- Fix alloy logs schema violations because cpu limit was not a string.
+
+## [0.26.0] - 2025-03-24
+
+### Changed
+
+- Fine-tune alloy-events and alloy-logs resource usage configuration to avoid causing issues for customer workload and cluster tests.
+
+## [0.25.1] - 2025-03-13
+
+### Changed
+
+- Stop caching helm secrets in the operator to reduce resource usage.
+
+## [0.25.0] - 2025-03-13
+
+### Changed
+
 - Adds support to include and exclude event collection per namespace in workload clusters. If nothing is configured, the event collector will collect all events in the WC.
+
+### Fixed
+
+- Fix incorrect config generation introduced by the tenant governance which defaults to alloy as a logshipper, even on promtail-equiped clusters.
+
+### Removed
+
+- Clean up some legacy paths that are not useful anymore.
 
 ## [0.24.1] - 2025-03-06
 
@@ -483,7 +540,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.24.1...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/giantswarm/logging-operator/compare/v0.28.0...v0.29.0
+[0.28.0]: https://github.com/giantswarm/logging-operator/compare/v0.27.0...v0.28.0
+[0.27.0]: https://github.com/giantswarm/logging-operator/compare/v0.26.1...v0.27.0
+[0.26.1]: https://github.com/giantswarm/logging-operator/compare/v0.26.0...v0.26.1
+[0.26.0]: https://github.com/giantswarm/logging-operator/compare/v0.25.1...v0.26.0
+[0.25.1]: https://github.com/giantswarm/logging-operator/compare/v0.25.0...v0.25.1
+[0.25.0]: https://github.com/giantswarm/logging-operator/compare/v0.24.1...v0.25.0
 [0.24.1]: https://github.com/giantswarm/logging-operator/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/giantswarm/logging-operator/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/giantswarm/logging-operator/compare/v0.22.0...v0.23.0

@@ -7,9 +7,9 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 )
 
@@ -30,10 +30,10 @@ func init() {
 
 // generateGrafanaAgentConfig returns a configmap for
 // the grafana-agent extra-config
-func generateGrafanaAgentConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
+func generateGrafanaAgentConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
-	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(lc, includeNamespaces, excludeNamespaces)
+	grafanaAgentInnerConfig, err := generateGrafanaAgentInnerConfig(cluster, loggingAgent, includeNamespaces, excludeNamespaces, installationName, insecureCA)
 	if err != nil {
 		return "", err
 	}
@@ -52,13 +52,14 @@ func generateGrafanaAgentConfig(lc loggedcluster.Interface, includeNamespaces []
 	return values.String(), nil
 }
 
-func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespaces []string, excludeNamespaces []string) (string, error) {
+func generateGrafanaAgentInnerConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
 		ClusterID          string
 		Installation       string
 		InsecureSkipVerify string
+		RemoteTimeout      string
 		SecretName         string
 		IncludeNamespaces  []string
 		ExcludeNamespaces  []string
@@ -68,17 +69,18 @@ func generateGrafanaAgentInnerConfig(lc loggedcluster.Interface, includeNamespac
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
 	}{
-		ClusterID:          lc.GetClusterName(),
-		Installation:       lc.GetInstallationName(),
-		InsecureSkipVerify: fmt.Sprintf("%t", lc.IsInsecureCA()),
-		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(lc),
+		ClusterID:          cluster.GetName(),
+		Installation:       installationName,
+		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
+		RemoteTimeout:      common.LokiRemoteTimeout.String(),
+		SecretName:         eventsloggersecret.GetEventsLoggerSecretName(cluster, loggingAgent),
 		IncludeNamespaces:  includeNamespaces,
 		ExcludeNamespaces:  excludeNamespaces,
 		LoggingURLKey:      common.LoggingURL,
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(lc),
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
 	}
 
 	err := grafanaAgentTemplate.Execute(&values, data)

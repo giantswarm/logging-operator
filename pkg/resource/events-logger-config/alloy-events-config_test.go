@@ -10,9 +10,6 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/google/go-cmp/cmp"
-
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 )
 
 func TestGenerateAlloyEventsConfig(t *testing.T) {
@@ -55,19 +52,13 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
-			loggedCluster := &capicluster.Object{
-				Object: &capi.Cluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: tc.clusterName,
-					},
-				},
-				Options: loggedcluster.Options{
-					InstallationName: tc.installationName,
-					KubeEventsLogger: "alloy",
+			cluster := &capi.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: tc.clusterName,
 				},
 			}
 
-			config, err := generateAlloyEventsConfig(loggedCluster, tc.includeNamespaces, tc.excludeNamespaces)
+			config, err := generateAlloyEventsConfig(cluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

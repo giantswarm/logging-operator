@@ -1,12 +1,12 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@5.11.5
+  architect: giantswarm/architect@6.4.0
 
 jobs:
   template-chart:
     docker:
-    - image: giantswarm/helm-chart-testing:v3.12.0
+    - image: giantswarm/helm-chart-testing:v3.13.0
     steps:
     - checkout
     - run: |-
@@ -40,11 +40,11 @@ workflows:
         filters:
           tags:
             only: /^v.*/
-
           branches:
             ignore:
             - main
             - master
+
     - architect/push-to-app-catalog:
         context: architect
         executor: app-build-suite
@@ -58,11 +58,11 @@ workflows:
         filters:
           tags:
             only: /^v.*/
-
           branches:
             ignore:
             - main
             - master
+
     - architect/run-tests-with-ats:
         name: run-chart-tests-with-ats
         filters:
@@ -72,20 +72,6 @@ workflows:
             - main
         requires:
         - push-logging-operator-to-app-catalog
-
-    - architect/push-to-app-collection:
-        context: architect
-        name: aws-app-collection
-        app_name: logging-operator
-        app_namespace: monitoring
-        app_collection_repo: aws-app-collection
-        requires:
-        - push-logging-operator-to-app-catalog
-        filters:
-          branches:
-            ignore: /.*/
-          tags:
-            only: /^v.*/
 
     - architect/push-to-app-collection:
         context: architect

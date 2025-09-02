@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	grafanaorganization "github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -29,16 +30,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggedcluster "github.com/giantswarm/logging-operator/pkg/logged-cluster"
-	"github.com/giantswarm/logging-operator/pkg/logged-cluster/capicluster"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 )
 
 // GrafanaOrganizationReconciler reconciles grafanaOrganization CRs
 type GrafanaOrganizationReconciler struct {
-	client.Client
-	Scheme                  *runtime.Scheme
-	LoggingConfigReconciler loggingconfig.Reconciler
+	Client   client.Client
+	Scheme   *runtime.Scheme
+	Resource loggingconfig.Resource
 }
 
 //+kubebuilder:rbac:groups=observability.giantswarm.io,resources=grafanaorganizations,verbs=get;list;watch;update;patch
@@ -47,7 +46,7 @@ type GrafanaOrganizationReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // It is triggered whenever a change happen to a grafanaOrganization CR and
-// calls the logging config reconciler for each cluster so that their tenant
+// calls the logging config resource for each cluster so that their tenant
 // list is always up to date.
 //
 // For more details, check Reconcile and its Result here:
@@ -68,14 +67,20 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	for _, cluster := range clusters.Items {
-		loggedCluster := &capicluster.Object{
-			Object:  &cluster,
-			Options: loggedcluster.O,
-		}
+		if common.IsLoggingEnabled(&cluster, g.Resource.Config.EnableLoggingFlag) {
+			loggingAgentConfig, err := common.ToggleAgents(ctx, g.Client, &cluster, g.Resource.Config)
+			if err != nil {
+				// Handle case where the app is not found.
+				if apimachineryerrors.IsNotFound(err) {
+					logger.Info("observability bundle app not found, requeueing")
+					// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
+					return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
+				}
+				return ctrl.Result{}, errors.WithStack(err)
+			}
 
-		if common.IsLoggingEnabled(loggedCluster) {
 			// Reconcile logging config for each cluster
-			result, err := g.LoggingConfigReconciler.ReconcileCreate(ctx, loggedCluster)
+			result, err := g.Resource.ReconcileCreate(ctx, &cluster, loggingAgentConfig)
 			if err != nil {
 				return result, errors.WithStack(err)
 			}
