@@ -46,6 +46,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		DefaultWorkloadClusterNamespaces []string
 		DefaultWriteTenant               string
 		IsWorkloadCluster                bool
+		PriorityClassName                string
 		SupportPodLogs                   bool
 		SupportVPA                       bool
 	}{
@@ -53,6 +54,7 @@ func GenerateAlloyLoggingConfig(lc loggedcluster.Interface, observabilityBundleV
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               lc.GetTenant(),
 		IsWorkloadCluster:                common.IsWorkloadCluster(lc),
+		PriorityClassName:                common.PriorityClassName,
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA

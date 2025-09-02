@@ -46,6 +46,7 @@ alloy:
         type: RuntimeDefault
   controller:
     type: daemonset
+    priorityClassName: {{ .PriorityClassName }}
     tolerations:
     - effect: NoSchedule
       key: node-role.kubernetes.io/master
