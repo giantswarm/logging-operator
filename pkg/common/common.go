@@ -46,6 +46,8 @@ const (
 	AlloyLogAgentAppName      = "alloy-logs"
 	AlloyLogAgentAppNamespace = "kube-system"
 
+	PriorityClassName = "giantswarm-critical"
+
 	// Alloy app name and namespace when using Alloy as events logger.
 	AlloyEventsLoggerAppName      = "alloy-events"
 	AlloyEventsLoggerAppNamespace = "kube-system"

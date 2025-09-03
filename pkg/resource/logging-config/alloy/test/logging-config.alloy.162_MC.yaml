@@ -363,6 +363,7 @@ alloy:
         type: RuntimeDefault
   controller:
     type: daemonset
+    priorityClassName: giantswarm-critical
     tolerations:
     - effect: NoSchedule
       key: node-role.kubernetes.io/master
