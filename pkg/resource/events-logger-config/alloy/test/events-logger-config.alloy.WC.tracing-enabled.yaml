@@ -54,40 +54,40 @@ alloy:
         	}
         }
         otelcol.processor.k8sattributes "default" {
-          extract {
-            metadata = [
-              "k8s.namespace.name",
-              "k8s.pod.name",
-              "k8s.container.name",
-              "k8s.pod.labels",
-            ]
-            otel_annotations = true
-          }
-          output {
-            traces = [
-                otelcol.processor.filter.giantswarm,
-            ]
-          }
+        	extract {
+        		metadata = [
+        			"k8s.namespace.name",
+        			"k8s.pod.name",
+        			"k8s.container.name",
+        			"k8s.pod.labels",
+        		]
+        		otel_annotations = true
+        	}
+        	output {
+        		traces = [
+        			otelcol.processor.filter.giantswarm,
+        		]
+        	}
         }
         otelcol.processor.filter "giantswarm" {
-            traces = {
-                span = [
-                    `attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] = "giantswarm"`,
-                ]
-            }
-            output {
-                traces = [otelcol.exporter.otlphttp.giantswarm]
-            }
+        	traces = {
+        		span = [
+        			`attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] = "giantswarm"`,
+        		]
+        	}
+        	output {
+        		traces = [otelcol.exporter.otlphttp.giantswarm]
+        	}
         }
         // one OTLP HTTP exporter for traces per tenant
         otelcol.exporter.otlphttp "giantswarm" {
-            client {
-                // TODO Try out /opentelemetry with grpc and not http
-                endpoint = "https://<tempo-url>"
-                headers = {
-                    "X-Scope-OrgID" = "giantswarm",
-                }
-            }
+        	client {
+        		// TODO Try out /opentelemetry with grpc and not http
+        		endpoint = "https://<tempo-url>"
+        		headers = {
+        			"X-Scope-OrgID" = "giantswarm",
+        		}
+        	}
         }
     # -- Extra ports to expose on the Alloy container.
     extraPorts:
