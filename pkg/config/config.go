@@ -4,6 +4,7 @@ package config
 // This replaces the loggedcluster.Options struct
 type Config struct {
 	EnableLoggingFlag       bool
+	EnableTracingFlag       bool
 	DefaultLoggingAgent     string
 	DefaultKubeEventsLogger string
 	InstallationName        string
@@ -11,9 +12,10 @@ type Config struct {
 }
 
 // NewConfig creates a new Config instance
-func NewConfig(enableLogging bool, loggingAgent, eventsLogger, installationName string, insecureCA bool) *Config {
+func NewConfig(enableLogging, enableTracing bool, loggingAgent, eventsLogger, installationName string, insecureCA bool) *Config {
 	return &Config{
 		EnableLoggingFlag:       enableLogging,
+		EnableTracingFlag:       enableTracing,
 		DefaultLoggingAgent:     loggingAgent,
 		DefaultKubeEventsLogger: eventsLogger,
 		InstallationName:        installationName,

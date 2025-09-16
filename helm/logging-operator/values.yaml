@@ -45,6 +45,9 @@ loggingOperator:
   loggingAgent: alloy
   eventsLogger: alloy
 
+tracing:
+  enabled: false
+
 managementCluster:
   name: unknown
   insecureCA: false
