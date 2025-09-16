@@ -75,7 +75,7 @@ alloy:
         otelcol.processor.filter "giantswarm" {
         	traces {
         		span = [
-        			`attributes["giantswarm.tenant"] != "giantswarm"`,
+        			`attributes["giantswarm.tenant"] == "giantswarm"`,
         		]
         	}
         	output {
