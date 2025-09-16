@@ -88,7 +88,7 @@ otelcol.processor.k8sattributes "default" {
 	output {
 		traces = [
 			{{- range .Tenants }}
-			otelcol.processor.filter.{{ . }},
+			otelcol.processor.filter.{{ . }}.input,
 			{{- end }}
 		]
 	}
@@ -96,13 +96,13 @@ otelcol.processor.k8sattributes "default" {
 
 {{- range .Tenants }}
 otelcol.processor.filter "{{ . }}" {
-	traces = {
+	traces {
 		span = [
 			`attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] != "{{ . }}"`,
 		]
 	}
 	output {
-		traces = [otelcol.exporter.otlphttp.{{ . }}]
+		traces = [otelcol.exporter.otlphttp.{{ . }}.input]
 	}
 }
 
