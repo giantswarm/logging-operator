@@ -108,7 +108,6 @@ alloy:
     replicas: 1
   crds:
     create: false
-
 networkPolicy:
   cilium:
     ingress:

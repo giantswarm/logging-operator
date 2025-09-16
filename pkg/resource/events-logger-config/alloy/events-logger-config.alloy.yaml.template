@@ -48,6 +48,7 @@ alloy:
   crds:
     create: false
 
+{{- if .TracingEnabled }}
 networkPolicy:
   cilium:
     ingress:
@@ -56,14 +57,13 @@ networkPolicy:
         # Alloy Control Plane
         - port: "12345"
           protocol: TCP
-        {{- if .TracingEnabled }}
         # OTLP GRPC
         - port: "4317"
           protocol: "TCP"
         # OTLP HTTP
         - port: "4318"
           protocol: "TCP"
-        {{- end }}
+{{- end }}
 
 verticalPodAutoscaler:
   enabled: true
