@@ -109,7 +109,7 @@ otelcol.processor.filter "{{ . }}" {
 otelcol.exporter.otlphttp "{{ . }}" {
 	client {
 		// TODO Try out /opentelemetry with grpc and not http
-		endpoint = "https://{{ .TracingEndpoint }}"
+		endpoint = "https://{{ $.TracingEndpoint }}"
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
