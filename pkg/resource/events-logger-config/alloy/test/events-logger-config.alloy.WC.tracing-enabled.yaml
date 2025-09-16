@@ -17,7 +17,7 @@ alloy:
         	name = "alloy-events"
         }
         loki.source.kubernetes_events "local" {
-        	namespaces = ["namespace1", "namespace2"]
+        	namespaces = []
         	forward_to = [loki.write.default.receiver]
         }
         // Loki target configuration
@@ -36,9 +36,40 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "include-namespaces",
+        		cluster_id   = "test-cluster",
         		installation = "test-installation",
         		scrape_job = "kubernetes-events",
+        	}
+        }
+        // OTLP receiver for traces
+        otelcol.receiver.otlp "traces" {
+        	grpc {
+        		endpoint = "0.0.0.0:4317"
+        	}
+        	http {
+        		endpoint = "0.0.0.0:4318"
+        	}
+        	output {
+        		traces = [otelcol.processor.k8sattributes.default.input]
+        	}
+        }
+        otelcol.processor.k8sattributes "default" {
+          extract {
+            metadata = [
+              "k8s.namespace.name",
+              "k8s.pod.name",
+              "k8s.container.name",
+            ]
+            otel_annotations = true
+          }
+          output {
+            traces = [otelcol.exporter.otlphttp.default.input]
+          }
+        }
+        // OTLP HTTP exporter for traces
+        otelcol.exporter.otlphttp "default" {
+        	client {
+        		endpoint = "https://<tempo-url>"
         	}
         }
     # -- Extra ports to expose on the Alloy container.

@@ -20,28 +20,39 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 		clusterName       string
 		includeNamespaces []string
 		excludeNamespaces []string
+		tracingEnabled    bool
 	}{
 		{
 			goldenFile:       "alloy/test/events-logger-config.alloy.MC.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-installation",
+			tracingEnabled:   false,
 		},
 		{
 			goldenFile:       "alloy/test/events-logger-config.alloy.WC.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-cluster",
+			tracingEnabled:   false,
 		},
 		{
 			goldenFile:        "alloy/test/events-logger-config.alloy.WC.include-namespaces.yaml",
 			installationName:  "test-installation",
 			clusterName:       "include-namespaces",
 			includeNamespaces: []string{"namespace1", "namespace2"},
+			tracingEnabled:    false,
 		},
 		{
 			goldenFile:        "alloy/test/events-logger-config.alloy.WC.exclude-namespaces.yaml",
 			installationName:  "test-installation",
 			clusterName:       "exclude-namespaces",
 			excludeNamespaces: []string{"namespace1", "namespace2"},
+			tracingEnabled:    false,
+		},
+		{
+			goldenFile:       "alloy/test/events-logger-config.alloy.WC.tracing-enabled.yaml",
+			installationName: "test-installation",
+			clusterName:      "test-cluster",
+			tracingEnabled:   true,
 		},
 	}
 
@@ -58,7 +69,7 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 				},
 			}
 
-			config, err := generateAlloyEventsConfig(cluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false, "<tempo-url>")
+			config, err := generateAlloyEventsConfig(cluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false, tc.tracingEnabled, "<tempo-url>")
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

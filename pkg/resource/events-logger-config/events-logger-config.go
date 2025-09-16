@@ -16,7 +16,7 @@ const (
 	grafanaAgentConfigName  = "grafana-agent-config"
 )
 
-func generateEventsLoggerConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tempoURL string) (v1.ConfigMap, error) {
+func generateEventsLoggerConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
@@ -27,7 +27,7 @@ func generateEventsLoggerConfig(cluster *capi.Cluster, loggingAgent *common.Logg
 			return v1.ConfigMap{}, err
 		}
 	case common.EventsLoggerAlloy:
-		values, err = generateAlloyEventsConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tempoURL)
+		values, err = generateAlloyEventsConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tracingEnabled, tempoURL)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}

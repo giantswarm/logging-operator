@@ -58,6 +58,7 @@ loki.write "default" {
 	}
 }
 
+{{- if .TracingEnabled }}
 // OTLP receiver for traces
 otelcol.receiver.otlp "traces" {
 	grpc {
@@ -91,7 +92,7 @@ otelcol.processor.k8sattributes "default" {
 // OTLP HTTP exporter for traces
 otelcol.exporter.otlphttp "default" {
 	client {
-		// TODO Try out /opentelemetry with grpc and not http
 		endpoint = "https://{{ .TracingEndpoint }}"
 	}
 }
+{{- end }}
