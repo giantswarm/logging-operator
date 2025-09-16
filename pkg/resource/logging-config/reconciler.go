@@ -14,9 +14,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	ollyop "github.com/giantswarm/observability-operator/pkg/common/tenancy"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
-	ollyop "github.com/giantswarm/observability-operator/pkg/common/tenancy"
 )
 
 // Resource implements a resource.Interface to handle
