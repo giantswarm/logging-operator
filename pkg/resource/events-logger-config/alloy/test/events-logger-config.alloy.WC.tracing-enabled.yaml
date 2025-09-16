@@ -72,7 +72,7 @@ alloy:
         otelcol.processor.filter "giantswarm" {
         	traces = {
         		span = [
-        			`attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] = "giantswarm"`,
+        			`attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] == "giantswarm"`,
         		]
         	}
         	output {
