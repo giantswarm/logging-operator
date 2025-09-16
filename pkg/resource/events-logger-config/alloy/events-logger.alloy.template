@@ -98,7 +98,7 @@ otelcol.processor.k8sattributes "default" {
 otelcol.processor.filter "{{ . }}" {
 	traces = {
 		span = [
-			`attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] == "{{ . }}"`,
+			`attributes["k8s.pod.labels.observability_giantswarm_io_tenant"] != "{{ . }}"`,
 		]
 	}
 	output {
