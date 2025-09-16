@@ -87,7 +87,7 @@ otelcol.processor.k8sattributes "default" {
 
   output {
     traces = [
-		{{- range .Tenants }} 
+		{{- range .Tenants }}
 		otelcol.processor.filter.{{ . }},
 		{{- end }}
 	]
@@ -102,7 +102,7 @@ otelcol.processor.filter "{{ . }}" {
 		]
 	}
 	output {
-    	traces = [otelcol.exporter.otlphttp.{{ . }}]
+		traces = [otelcol.exporter.otlphttp.{{ . }}]
     }
 }
 
