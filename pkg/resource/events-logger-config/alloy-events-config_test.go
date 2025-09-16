@@ -58,7 +58,7 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 				},
 			}
 
-			config, err := generateAlloyEventsConfig(cluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false, "<tempo-url>")
+			config, err := generateAlloyEventsConfig(cluster, tc.includeNamespaces, tc.excludeNamespaces, tc.installationName, false, "<tempo-url>", []string{"giantswarm"})
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

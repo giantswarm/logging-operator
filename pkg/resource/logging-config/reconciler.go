@@ -16,6 +16,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
+	ollyop "github.com/giantswarm/observability-operator/pkg/common/tenancy"
 )
 
 // Resource implements a resource.Interface to handle
@@ -43,7 +44,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get list of tenants
-	tenants, err := listTenants(r.Client, ctx)
+	tenants, err := ollyop.ListTenants(ctx, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}

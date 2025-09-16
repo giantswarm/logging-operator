@@ -15,6 +15,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
+	ollyop "github.com/giantswarm/observability-operator/pkg/common/tenancy"
 )
 
 // Resource implements a resource.Interface to handle
@@ -38,8 +39,14 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	// Get list of tenants
+	tenants, err := ollyop.ListTenants(ctx, r.Client)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tempoURL)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tempoURL)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
