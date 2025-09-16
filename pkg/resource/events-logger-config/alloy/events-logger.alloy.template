@@ -89,7 +89,7 @@ otelcol.processor.k8sattributes "default" {
     traces = [
 		{{- range .Tenants }} 
 		otelcol.processor.filter.{{ . }},
-		{{- end}}
+		{{- end }}
 	]
   }
 }
