@@ -27,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
+func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tempoURL string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA)
+	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tempoURL)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 	return values.String(), nil
 }
 
-func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tempoURL string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -66,6 +66,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		LoggingUsernameKey string
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
+		TracingEndpoint    string
 	}{
 		ClusterID:          cluster.GetName(),
 		Installation:       installationName,
@@ -80,6 +81,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
 		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
+		TracingEndpoint:    tempoURL,
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)

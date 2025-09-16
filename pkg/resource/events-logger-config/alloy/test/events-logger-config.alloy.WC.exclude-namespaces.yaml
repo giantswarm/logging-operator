@@ -49,6 +49,24 @@ alloy:
         		scrape_job = "kubernetes-events",
         	}
         }
+        // OTLP HTTP exporter for traces
+        otelcol.exporter.otlphttp "default" {
+        	client {
+        		endpoint = "<tempo-url>"
+        	}
+        }
+        // OTLP receiver for traces
+        otelcol.receiver.otlp "traces" {
+        	grpc {
+        		endpoint = "127.0.0.1:4317"
+        	}
+        	http {
+        		endpoint = "127.0.0.1:4318"
+        	}
+        	output {
+        		traces = [otelcol.exporter.otlphttp.default.input]
+        	}
+        }
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
     resources:
       limits:

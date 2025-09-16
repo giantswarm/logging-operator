@@ -26,6 +26,9 @@ const (
 	// Loki Gateway Ingress
 	lokiGatewayIngressNamespace = "loki"
 	lokiGatewayIngressName      = "loki-gateway"
+	// Tempo Gateway Ingress
+	tempoGatewayIngressNamespace = "tempo"
+	tempoGatewayIngressName      = "tempo-gateway"
 	// grafana-agent secret name
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
@@ -125,4 +128,20 @@ func ReadLokiIngressURL(ctx context.Context, cluster *capi.Cluster, client clien
 		return "", fmt.Errorf("loki ingress host not found")
 	}
 	return lokiIngress.Spec.Rules[0].Host, nil
+}
+
+// Read Tempo URL from ingress
+func ReadTempoIngressURL(ctx context.Context, cluster *capi.Cluster, client client.Client) (string, error) {
+	var tempoIngress netv1.Ingress
+
+	var objectKey = types.NamespacedName{Name: tempoGatewayIngressName, Namespace: tempoGatewayIngressNamespace}
+	if err := client.Get(ctx, objectKey, &tempoIngress); err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	// We consider there's only one rule with one URL, because that's how the helm chart does it for the moment.
+	if len(tempoIngress.Spec.Rules) <= 0 {
+		return "", fmt.Errorf("tempo ingress host not found")
+	}
+	return tempoIngress.Spec.Rules[0].Host, nil
 }

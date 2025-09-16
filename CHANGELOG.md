@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `otlp` receiver and exporters to alloy-events.
+
 ## [0.30.0] - 2025-09-03
 
 ### Added
