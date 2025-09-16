@@ -36,9 +36,11 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 	}
 
 	data := struct {
-		AlloyConfig string
+		AlloyConfig    string
+		TracingEnabled bool
 	}{
-		AlloyConfig: alloyConfig,
+		AlloyConfig:    alloyConfig,
+		TracingEnabled: tracingEnabled,
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
@@ -53,37 +55,37 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 	var values bytes.Buffer
 
 	data := struct {
-		ClusterID           string
-		Installation        string
-		InsecureSkipVerify  string
-		MaxBackoffPeriod    string
-		RemoteTimeout       string
-		IncludeNamespaces   []string
-		ExcludeNamespaces   []string
-		SecretName          string
-		LoggingURLKey       string
-		LoggingTenantIDKey  string
-		LoggingUsernameKey  string
-		LoggingPasswordKey  string
-		IsWorkloadCluster   bool
-		TracingEnabled      bool
-		TracingEndpoint     string
+		ClusterID          string
+		Installation       string
+		InsecureSkipVerify string
+		MaxBackoffPeriod   string
+		RemoteTimeout      string
+		IncludeNamespaces  []string
+		ExcludeNamespaces  []string
+		SecretName         string
+		LoggingURLKey      string
+		LoggingTenantIDKey string
+		LoggingUsernameKey string
+		LoggingPasswordKey string
+		IsWorkloadCluster  bool
+		TracingEnabled     bool
+		TracingEndpoint    string
 	}{
-		ClusterID:           cluster.GetName(),
-		Installation:        installationName,
-		InsecureSkipVerify:  fmt.Sprintf("%t", insecureCA),
-		MaxBackoffPeriod:    common.LokiMaxBackoffPeriod.String(),
-		RemoteTimeout:       common.LokiRemoteTimeout.String(),
-		SecretName:          common.AlloyEventsLoggerAppName,
-		IncludeNamespaces:   includeNamespaces,
-		ExcludeNamespaces:   excludeNamespaces,
-		LoggingURLKey:       common.LoggingURL,
-		LoggingTenantIDKey:  common.LoggingTenantID,
-		LoggingUsernameKey:  common.LoggingUsername,
-		LoggingPasswordKey:  common.LoggingPassword,
-		IsWorkloadCluster:   common.IsWorkloadCluster(installationName, cluster.GetName()),
-		TracingEnabled:      tracingEnabled,
-		TracingEndpoint:     tempoURL,
+		ClusterID:          cluster.GetName(),
+		Installation:       installationName,
+		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
+		MaxBackoffPeriod:   common.LokiMaxBackoffPeriod.String(),
+		RemoteTimeout:      common.LokiRemoteTimeout.String(),
+		SecretName:         common.AlloyEventsLoggerAppName,
+		IncludeNamespaces:  includeNamespaces,
+		ExcludeNamespaces:  excludeNamespaces,
+		LoggingURLKey:      common.LoggingURL,
+		LoggingTenantIDKey: common.LoggingTenantID,
+		LoggingUsernameKey: common.LoggingUsername,
+		LoggingPasswordKey: common.LoggingPassword,
+		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
+		TracingEnabled:     tracingEnabled,
+		TracingEndpoint:    tempoURL,
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)
