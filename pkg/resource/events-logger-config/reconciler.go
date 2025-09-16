@@ -33,21 +33,27 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-config create")
 
-	// TODO: Error only if tracing is enabled on the installation
-	// Retrieve Tempo ingress name
-	tempoURL, err := common.ReadTempoIngressURL(ctx, cluster, r.Client)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
+	var tempoURL string
+	var tenants []string
+	var err error
 
-	// Get list of tenants
-	tenants, err := ollyop.ListTenants(ctx, r.Client)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
+	// Only retrieve Tempo ingress if tracing is enabled
+	if r.Config.EnableTracingFlag {
+		tempoURL, err = common.ReadTempoIngressURL(ctx, cluster, r.Client)
+		if err != nil {
+			logger.Info("Failed to read Tempo ingress URL, but tracing is enabled", "error", err)
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+
+		// Get list of tenants
+		tenants, err = ollyop.ListTenants(ctx, r.Client)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tempoURL)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, r.Config.EnableTracingFlag, tempoURL)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

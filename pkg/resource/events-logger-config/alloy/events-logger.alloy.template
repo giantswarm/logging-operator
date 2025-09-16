@@ -58,6 +58,7 @@ loki.write "default" {
 	}
 }
 
+{{- if .TracingEnabled }}
 // OTLP receiver for traces
 otelcol.receiver.otlp "traces" {
 	grpc {
@@ -97,7 +98,7 @@ otelcol.processor.k8sattributes "default" {
 otelcol.processor.filter "{{ . }}" {
 	traces = {
 		span = [
-			`attributes[k8s.pod.labels.observability.giantswarm.io/tenant] = "{{ . }}"`,
+			`attributes[k8s.pod.labels.observability_giantswarm_io_tenant] = "{{ . }}"`,
 		]
 	}
 	output {
@@ -115,4 +116,5 @@ otelcol.exporter.otlphttp "{{ . }}" {
 		}
 	}
 }
+{{- end }}
 {{- end }}

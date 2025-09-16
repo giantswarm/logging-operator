@@ -27,18 +27,20 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tempoURL string, tenants []string) (string, error) {
+func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tempoURL, tenants)
+	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tracingEnabled, tempoURL, tenants)
 	if err != nil {
 		return "", err
 	}
 
 	data := struct {
-		AlloyConfig string
+		AlloyConfig    string
+		TracingEnabled bool
 	}{
-		AlloyConfig: alloyConfig,
+		AlloyConfig:    alloyConfig,
+		TracingEnabled: tracingEnabled,
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
@@ -49,7 +51,7 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 	return values.String(), nil
 }
 
-func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tempoURL string, tenants []string) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -66,6 +68,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		LoggingUsernameKey string
 		LoggingPasswordKey string
 		IsWorkloadCluster  bool
+		TracingEnabled     bool
 		TracingEndpoint    string
 		Tenants            []string
 	}{
@@ -82,6 +85,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
 		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
+		TracingEnabled:     tracingEnabled,
 		TracingEndpoint:    tempoURL,
 		Tenants:            tenants,
 	}

@@ -85,6 +85,7 @@ func main() {
 	var defaultNamespaces StringSliceVar
 	var enableLeaderElection bool
 	var enableLogging bool
+	var enableTracing bool
 	var loggingAgent string
 	var eventsLogger string
 	var includeEventsFromNamespaces StringSliceVar
@@ -99,6 +100,7 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
+	flag.BoolVar(&enableTracing, "enable-tracing", false, "enable/disable tracing support for events logger")
 	flag.StringVar(&loggingAgent, "logging-agent", common.LoggingAgentAlloy, fmt.Sprintf("select logging agent to use (%s or %s)", common.LoggingAgentPromtail, common.LoggingAgentAlloy))
 	flag.StringVar(&eventsLogger, "events-logger", common.EventsLoggerAlloy, fmt.Sprintf("select events logger to use (%s or %s)", common.EventsLoggerAlloy, common.EventsLoggerGrafanaAgent))
 	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
@@ -159,6 +161,7 @@ func main() {
 	// Create Config for dependency injection
 	appConfig := config.Config{
 		EnableLoggingFlag:       enableLogging,
+		EnableTracingFlag:       enableTracing,
 		DefaultLoggingAgent:     loggingAgent,
 		DefaultKubeEventsLogger: eventsLogger,
 		InstallationName:        installationName,
