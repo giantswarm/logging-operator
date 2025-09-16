@@ -85,7 +85,11 @@ otelcol.processor.k8sattributes "default" {
   }
 
   output {
-    traces = [otelcol.exporter.otlphttp.default.input]
+    traces = [
+		{{- range .Tenants }} 
+		otelcol.processor.filter.{{ . }},
+		{{- end}}
+	]
   }
 }
 
@@ -96,10 +100,13 @@ otelcol.processor.filter "{{ . }}" {
 			`attributes[k8s.pod.labels.observability.giantswarm.io/tenant] = "{{ . }}"`,
 		]
 	}
+	output {
+    	traces = [otelcol.exporter.otlphttp.{{ . }}]
+    }
 }
 
 // one OTLP HTTP exporter for traces per tenant
-otelcol.exporter.otlphttp "default" {
+otelcol.exporter.otlphttp "{{ . }}" {
 	client {
 		// TODO Try out /opentelemetry with grpc and not http
 		endpoint = "https://{{ .TracingEndpoint }}"
