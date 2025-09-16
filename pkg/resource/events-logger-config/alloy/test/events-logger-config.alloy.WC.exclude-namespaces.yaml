@@ -49,66 +49,6 @@ alloy:
         		scrape_job = "kubernetes-events",
         	}
         }
-        // OTLP receiver for traces
-        otelcol.receiver.otlp "traces" {
-        	grpc {
-        		endpoint = "0.0.0.0:4317"
-        	}
-        	http {
-        		endpoint = "0.0.0.0:4318"
-        	}
-        	output {
-        		traces = [otelcol.processor.k8sattributes.default.input]
-        	}
-        }
-        otelcol.processor.k8sattributes "default" {
-          extract {
-            metadata = [
-              "k8s.namespace.name",
-              "k8s.pod.name",
-              "k8s.container.name",
-        	  "k8s.pod.labels"
-            ]
-            otel_annotations = true
-          }
-          output {
-            traces = [ 
-        		otelcol.processor.filter.giantswarm,
-        	]
-          }
-        }
-        otelcol.processor.filter "giantswarm" {
-        	traces = {
-        		span = [
-        			`attributes[k8s.pod.labels.observability.giantswarm.io/tenant] = "giantswarm"`,
-        		]
-        	}
-        	output {
-            	traces = [otelcol.exporter.otlphttp.giantswarm]
-            }
-        }
-        // one OTLP HTTP exporter for traces per tenant
-        otelcol.exporter.otlphttp "giantswarm" {
-        	client {
-        		// TODO Try out /opentelemetry with grpc and not http
-        		endpoint = "https://<tempo-url>"
-        		headers = {
-        			"X-Scope-OrgID" = "giantswarm",
-        		}
-        	}
-        }
-    # -- Extra ports to expose on the Alloy container.
-    extraPorts:
-    - name: "otlp"
-      port: 4317
-      targetPort: 4317
-      protocol: "TCP"
-      appProtocol: "grpc"
-    - name: "otlp-http"
-      port: 4318
-      targetPort: 4318
-      protocol: "TCP"
-      appProtocol: "http"
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
     resources:
       limits:
@@ -133,21 +73,6 @@ alloy:
     replicas: 1
   crds:
     create: false
-
-networkPolicy:
-  cilium:
-    ingress:
-    - toPorts:
-      - ports:
-        # Alloy Control Plane
-        - port: "12345"
-          protocol: TCP
-        # OTLP GRPC
-        - port: "4317"
-          protocol: "TCP"
-        # OTLP HTTP
-        - port: "4318"
-          protocol: "TCP"
 
 verticalPodAutoscaler:
   enabled: true
