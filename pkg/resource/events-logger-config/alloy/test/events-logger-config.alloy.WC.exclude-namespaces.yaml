@@ -73,45 +73,6 @@ alloy:
     replicas: 1
   crds:
     create: false
-  extraObjects:
-  - apiVersion: v1
-    kind: Service
-    metadata:
-      annotations:
-        meta.helm.sh/release-name: alloy-events
-        meta.helm.sh/release-namespace: kube-system
-      labels:
-        app.kubernetes.io/component: networking
-        app.kubernetes.io/instance: alloy-events
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: alloy
-        app.kubernetes.io/part-of: alloy
-        application.giantswarm.io/team: atlas
-        giantswarm.io/managed-by: alloy-events
-        giantswarm.io/service-type: managed
-        helm.sh/chart: alloy-1.1.0
-      name: tracing-gateway
-      namespace: kube-system
-    spec:
-      ports:
-      - name: http-metrics
-        port: 12345
-        protocol: TCP
-        targetPort: 12345
-      - appProtocol: grpc
-        name: otlp
-        port: 4317
-        protocol: TCP
-        targetPort: 4317
-      - appProtocol: http
-        name: otlp-http
-        port: 4318
-        protocol: TCP
-        targetPort: 4318
-      selector:
-        app.kubernetes.io/instance: alloy-events
-        app.kubernetes.io/name: alloy
-      type: ClusterIP
 
 verticalPodAutoscaler:
   enabled: true

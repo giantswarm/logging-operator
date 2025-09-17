@@ -167,6 +167,7 @@ alloy:
         app.kubernetes.io/instance: alloy-events
         app.kubernetes.io/name: alloy
       type: ClusterIP
+
 networkPolicy:
   cilium:
     ingress:

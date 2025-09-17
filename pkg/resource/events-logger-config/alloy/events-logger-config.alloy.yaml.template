@@ -47,6 +47,7 @@ alloy:
     replicas: 1
   crds:
     create: false
+{{- if .TracingEnabled }}
   extraObjects:
   - apiVersion: v1
     kind: Service
@@ -87,7 +88,6 @@ alloy:
         app.kubernetes.io/name: alloy
       type: ClusterIP
 
-{{- if .TracingEnabled }}
 networkPolicy:
   cilium:
     ingress:
