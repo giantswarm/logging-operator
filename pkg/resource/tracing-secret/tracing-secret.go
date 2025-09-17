@@ -1,17 +1,12 @@
 package tracingsecret
 
 import (
-	"bytes"
-	_ "embed"
 	"fmt"
-	"html/template"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-
-	"github.com/Masterminds/sprig/v3"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
@@ -21,16 +16,6 @@ const (
 	TracingSecretName = "events-logger-secret" // #nosec G101
 )
 
-var (
-	//go:embed tracing-secret.yaml.template
-	alloySecret         string
-	alloySecretTemplate *template.Template
-)
-
-func init() {
-	alloySecretTemplate = template.Must(template.New("logging-secret.yaml").Funcs(sprig.FuncMap()).Parse(alloySecret))
-}
-
 func generateTracingSecret(cluster *capi.Cluster) (v1.Secret, error) {
 	clusterName := cluster.GetName()
 
@@ -39,23 +24,20 @@ func generateTracingSecret(cluster *capi.Cluster) (v1.Secret, error) {
 		return v1.Secret{}, err
 	}
 
-	templateData := struct {
-		ExtraSecretEnv map[string]string
-	}{
+	templateData := common.AlloySecretTemplateData{
 		ExtraSecretEnv: map[string]string{
 			common.TracingUsername: clusterName,
 			common.TracingPassword: password,
 		},
 	}
 
-	var values bytes.Buffer
-	err = alloySecretTemplate.Execute(&values, templateData)
+	values, err := common.GenerateAlloySecretValues(templateData)
 	if err != nil {
 		return v1.Secret{}, err
 	}
 
 	data := make(map[string][]byte)
-	data["values"] = values.Bytes()
+	data["values"] = values
 
 	secret := v1.Secret{
 		ObjectMeta: secretMeta(cluster),
