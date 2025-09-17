@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `tracing-gateway` service as extraObject in alloy-events config
+- Add authentication between alloy and Tempo.
 
 ## [0.31.0] - 2025-09-17
 
