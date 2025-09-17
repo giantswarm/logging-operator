@@ -137,10 +137,6 @@ alloy:
       namespace: kube-system
     spec:
       ports:
-      - name: http-metrics
-        port: 12345
-        protocol: TCP
-        targetPort: 12345
       - appProtocol: grpc
         name: otlp
         port: 4317
