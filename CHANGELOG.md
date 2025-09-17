@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.31.0] - 2025-09-17
+
 ### Added
 
 - Add `otlp` receiver and exporters to alloy-events.
@@ -551,7 +553,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.30.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.31.0...HEAD
+[0.31.0]: https://github.com/giantswarm/logging-operator/compare/v0.30.0...v0.31.0
 [0.30.0]: https://github.com/giantswarm/logging-operator/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/giantswarm/logging-operator/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/giantswarm/logging-operator/compare/v0.27.0...v0.28.0
