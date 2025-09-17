@@ -37,7 +37,7 @@ func LoggingCredentialsSecretMeta() metav1.ObjectMeta {
 }
 
 // Generate a random 20-characters password
-func generatePassword() (string, error) {
+func GeneratePassword() (string, error) {
 	const length = 20
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -90,7 +90,7 @@ func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret)
 	if _, ok := loggingCredentials.Data[common.ReadUser]; !ok {
 		readUser := userCredentials{}
 
-		password, err := generatePassword()
+		password, err := GeneratePassword()
 		if err != nil {
 			return false, errors.New("Failed generating read password")
 		}
@@ -111,7 +111,7 @@ func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret)
 	if _, ok := loggingCredentials.Data[clusterName]; !ok {
 		clusterUser := userCredentials{}
 
-		password, err := generatePassword()
+		password, err := GeneratePassword()
 		if err != nil {
 			return false, errors.New("Failed generating write password")
 		}

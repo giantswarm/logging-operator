@@ -69,6 +69,9 @@ const (
 	LoggingUsername = "logging-username"
 	LoggingPassword = "logging-password"
 	LokiRulerAPIURL = "ruler-api-url"
+
+	TracingUsername = "tracing-username"
+	TracingPassword = "tracing-password"
 )
 
 func GrafanaAgentExtraSecretName() string {
