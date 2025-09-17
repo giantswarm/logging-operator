@@ -101,7 +101,7 @@ otelcol.processor.k8sattributes "default" {
 otelcol.processor.filter "{{ . }}" {
 	traces {
 		span = [
-			`attributes["giantswarm.tenant"] == "{{ . }}"`,
+			`resource.attributes["giantswarm.tenant"] != "{{ . }}"`,
 		]
 	}
 	output {
