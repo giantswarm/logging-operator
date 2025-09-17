@@ -1,17 +1,13 @@
 package loggingconfig
 
 import (
-	"context"
 	"fmt"
-	"slices"
 
 	"github.com/blang/semver"
-	"github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
@@ -63,28 +59,4 @@ func ConfigMeta(cluster *capi.Cluster) metav1.ObjectMeta {
 
 func getLoggingConfigName(cluster *capi.Cluster) string {
 	return fmt.Sprintf("%s-%s", cluster.GetName(), loggingConfigName)
-}
-
-func listTenants(k8sClient client.Client, ctx context.Context) ([]string, error) {
-	tenants := make([]string, 0)
-	var grafanaOrganizations v1alpha1.GrafanaOrganizationList
-
-	err := k8sClient.List(ctx, &grafanaOrganizations)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, organization := range grafanaOrganizations.Items {
-		if !organization.DeletionTimestamp.IsZero() {
-			continue
-		}
-
-		for _, tenant := range organization.Spec.Tenants {
-			if !slices.Contains(tenants, string(tenant)) {
-				tenants = append(tenants, string(tenant))
-			}
-		}
-	}
-
-	return tenants, nil
 }

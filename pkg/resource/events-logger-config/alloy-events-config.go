@@ -27,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string) (string, error) {
+func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tracingEnabled, tempoURL)
+	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tracingEnabled, tempoURL, tenants)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +51,7 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 	return values.String(), nil
 }
 
-func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
 	var values bytes.Buffer
 
 	data := struct {
@@ -70,6 +70,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		IsWorkloadCluster  bool
 		TracingEnabled     bool
 		TracingEndpoint    string
+		Tenants            []string
 	}{
 		ClusterID:          cluster.GetName(),
 		Installation:       installationName,
@@ -86,6 +87,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
 		TracingEnabled:     tracingEnabled,
 		TracingEndpoint:    tempoURL,
+		Tenants:            tenants,
 	}
 
 	err := alloyEventsTemplate.Execute(&values, data)

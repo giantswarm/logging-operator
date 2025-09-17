@@ -13,6 +13,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	ollyop "github.com/giantswarm/observability-operator/pkg/common/tenancy"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
 )
@@ -32,6 +34,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	logger.Info("events-logger-config create")
 
 	var tempoURL string
+	var tenants []string
 	var err error
 
 	// Only retrieve Tempo ingress if tracing is enabled
@@ -41,10 +44,16 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 			logger.Info("Failed to read Tempo ingress URL, but tracing is enabled", "error", err)
 			return ctrl.Result{}, errors.WithStack(err)
 		}
+
+		// Get list of tenants
+		tenants, err = ollyop.ListTenants(ctx, r.Client)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, r.Config.EnableTracingFlag, tempoURL)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, r.Config.EnableTracingFlag, tempoURL)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

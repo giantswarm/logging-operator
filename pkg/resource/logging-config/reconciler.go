@@ -14,6 +14,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	ollyop "github.com/giantswarm/observability-operator/pkg/common/tenancy"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
 )
@@ -43,7 +45,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get list of tenants
-	tenants, err := listTenants(r.Client, ctx)
+	tenants, err := ollyop.ListTenants(ctx, r.Client)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
