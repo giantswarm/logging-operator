@@ -12,6 +12,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/Masterminds/sprig/v3"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 )
