@@ -41,7 +41,7 @@ alloy:
         		scrape_job = "kubernetes-events",
         	}
         }
-        otelcol.auth.basic "tracing credentials" {
+        otelcol.auth.basic "tracing_credentials" {
         	username = nonsensitive(remote.kubernetes.secret.credentials.data["tracing-username"])
         	password = remote.kubernetes.secret.credentials.data["tracing-password"]
         }
