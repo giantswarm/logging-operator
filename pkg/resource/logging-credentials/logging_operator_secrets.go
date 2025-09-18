@@ -18,6 +18,8 @@ const (
 	//#nosec G101
 	LoggingCredentialsName      = "logging-credentials"
 	LoggingCredentialsNamespace = "monitoring"
+	TracingCredentialsName      = "tracing-credentials"
+	TracingCredentialsNamespace = "monitoring"
 )
 
 type userCredentials struct {
@@ -36,8 +38,19 @@ func LoggingCredentialsSecretMeta() metav1.ObjectMeta {
 	return metadata
 }
 
+func TracingCredentialsSecretMeta() metav1.ObjectMeta {
+	metadata := metav1.ObjectMeta{
+		Name:      TracingCredentialsName,
+		Namespace: TracingCredentialsNamespace,
+		Labels:    map[string]string{},
+	}
+
+	common.AddCommonLabels(metadata.Labels)
+	return metadata
+}
+
 // Generate a random 20-characters password
-func GeneratePassword() (string, error) {
+func generatePassword() (string, error) {
 	const length = 20
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -60,6 +73,15 @@ func GeneratePassword() (string, error) {
 func GenerateLoggingCredentialsBasicSecret(cluster *capi.Cluster) *v1.Secret {
 	secret := v1.Secret{
 		ObjectMeta: LoggingCredentialsSecretMeta(),
+		Data:       map[string][]byte{},
+	}
+
+	return &secret
+}
+
+func GenerateTracingCredentialsBasicSecret(cluster *capi.Cluster) *v1.Secret {
+	secret := v1.Secret{
+		ObjectMeta: TracingCredentialsSecretMeta(),
 		Data:       map[string][]byte{},
 	}
 
@@ -90,7 +112,7 @@ func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret)
 	if _, ok := loggingCredentials.Data[common.ReadUser]; !ok {
 		readUser := userCredentials{}
 
-		password, err := GeneratePassword()
+		password, err := generatePassword()
 		if err != nil {
 			return false, errors.New("Failed generating read password")
 		}
@@ -111,7 +133,7 @@ func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret)
 	if _, ok := loggingCredentials.Data[clusterName]; !ok {
 		clusterUser := userCredentials{}
 
-		password, err := GeneratePassword()
+		password, err := generatePassword()
 		if err != nil {
 			return false, errors.New("Failed generating write password")
 		}
@@ -130,6 +152,54 @@ func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret)
 	return secretUpdated, nil
 }
 
+// AddTracingCredentials - Add credentials to TracingCredentials secret if needed
+func AddTracingCredentials(cluster *capi.Cluster, tracingCredentials *v1.Secret) (bool, error) {
+	var secretUpdated = false
+
+	// Always check credentials for "readuser"
+	if _, ok := tracingCredentials.Data[common.ReadUser]; !ok {
+		readUser := userCredentials{}
+
+		password, err := generatePassword()
+		if err != nil {
+			return false, errors.New("Failed generating read password")
+		}
+
+		readUser.Password = password
+
+		v, err := yaml.Marshal(readUser)
+		if err != nil {
+			return false, errors.New("Failed creating read user")
+		}
+
+		tracingCredentials.Data[common.ReadUser] = []byte(v)
+		secretUpdated = true
+	}
+
+	// Check credentials for [clustername]
+	clusterName := cluster.GetName()
+	if _, ok := tracingCredentials.Data[clusterName]; !ok {
+		clusterUser := userCredentials{}
+
+		password, err := generatePassword()
+		if err != nil {
+			return false, errors.New("Failed generating write password")
+		}
+
+		clusterUser.Password = password
+
+		v, err := yaml.Marshal(clusterUser)
+		if err != nil {
+			return false, errors.New("Failed creating write user")
+		}
+
+		tracingCredentials.Data[clusterName] = []byte(v)
+		secretUpdated = true
+	}
+
+	return secretUpdated, nil
+}
+
 // RemoveLoggingCredentials - Remove credentials from LoggingCredentials secret
 func RemoveLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret) bool {
 	var secretUpdated = false
@@ -139,6 +209,21 @@ func RemoveLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secr
 
 	if _, ok := loggingCredentials.Data[clusterName]; ok {
 		delete(loggingCredentials.Data, clusterName)
+		secretUpdated = true
+	}
+
+	return secretUpdated
+}
+
+// RemoveTracingCredentials - Remove credentials from TracingCredentials secret
+func RemoveTracingCredentials(cluster *capi.Cluster, tracingCredentials *v1.Secret) bool {
+	var secretUpdated = false
+
+	// Check credentials for [clustername]
+	clusterName := cluster.GetName()
+
+	if _, ok := tracingCredentials.Data[clusterName]; ok {
+		delete(tracingCredentials.Data, clusterName)
 		secretUpdated = true
 	}
 

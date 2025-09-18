@@ -53,7 +53,6 @@ import (
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
 	lokiingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/loki-ingress-auth-secret"
-	tracingsecret "github.com/giantswarm/logging-operator/pkg/resource/tracing-secret"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -209,10 +208,6 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	tracingsecret := tracingsecret.Resource{
-		Client: mgr.GetClient(),
-	}
-
 	if err = (&controller.CapiClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -226,7 +221,6 @@ func main() {
 			&loggingConfig,
 			&eventsLoggerSecret,
 			&eventsLoggerConfig,
-			&tracingsecret,
 		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")

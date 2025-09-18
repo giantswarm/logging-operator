@@ -36,6 +36,13 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	var tracingCredentialsSecret v1.Secret
+	err = r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.TracingCredentialsSecretMeta().Name, Namespace: loggingcredentials.TracingCredentialsSecretMeta().Namespace},
+		&tracingCredentialsSecret)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Retrieve Loki ingress name
 	lokiURL, err := common.ReadLokiIngressURL(ctx, cluster, r.Client)
 	if err != nil {
@@ -43,7 +50,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get desired secret
-	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, loggingAgent, &eventsLoggerCredentialsSecret, lokiURL)
+	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, loggingAgent, &eventsLoggerCredentialsSecret, lokiURL, &tracingCredentialsSecret)
 	if err != nil {
 		logger.Error(err, "failed generating events logger secret")
 		return ctrl.Result{}, errors.WithStack(err)

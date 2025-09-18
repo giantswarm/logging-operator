@@ -18,7 +18,7 @@ const (
 	grafanaAgentSecretName = "grafana-agent-secret" // #nosec G101
 )
 
-func generateEventsLoggerSecret(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, loggingCredentialsSecret *v1.Secret, lokiURL string) (v1.Secret, error) {
+func generateEventsLoggerSecret(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, loggingCredentialsSecret *v1.Secret, lokiURL string, tracingCredentialsSecret *v1.Secret) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
@@ -30,7 +30,7 @@ func generateEventsLoggerSecret(cluster *capi.Cluster, loggingAgent *common.Logg
 		}
 	case common.EventsLoggerAlloy:
 		// In the case of Alloy being the events logger, we reuse the secret generation from the logging-secret package
-		data, err = loggingsecret.GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL)
+		data, err = loggingsecret.GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL, true, tracingCredentialsSecret)
 		if err != nil {
 			return v1.Secret{}, err
 		}

@@ -30,6 +30,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 
 	// Start with some empty secret
 	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
+	tracingCredentialsSecret := GenerateTracingCredentialsBasicSecret(cluster)
 
 	// Retrieve existing secret if it exists
 	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta().Name, Namespace: LoggingCredentialsSecretMeta().Namespace}, loggingCredentialsSecret)
@@ -41,8 +42,22 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		}
 	}
 
+	err = r.Client.Get(ctx, types.NamespacedName{Name: TracingCredentialsSecretMeta().Name, Namespace: TracingCredentialsSecretMeta().Namespace}, tracingCredentialsSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("tracing credentials secret not found, initializing one")
+		} else {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
+
 	// update the secret's contents if needed
-	secretUpdated, err := AddLoggingCredentials(cluster, loggingCredentialsSecret)
+	loggingSecretUpdated, err := AddLoggingCredentials(cluster, loggingCredentialsSecret)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	tracingSecretUpdated, err := AddTracingCredentials(cluster, tracingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -51,12 +66,24 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	if !reflect.DeepEqual(loggingCredentialsSecret.Labels, LoggingCredentialsSecretMeta().Labels) {
 		logger.Info("loggingCredentials - metatada update required")
 		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta()
-		secretUpdated = true
+		loggingSecretUpdated = true
 	}
 
-	if !secretUpdated {
+	if !reflect.DeepEqual(tracingCredentialsSecret.Labels, TracingCredentialsSecretMeta().Labels) {
+		logger.Info("tracingCredentials - metatada update required")
+		tracingCredentialsSecret.ObjectMeta = TracingCredentialsSecretMeta()
+		tracingSecretUpdated = true
+	}
+
+	if !loggingSecretUpdated {
 		// If there were no changes, we're done here.
 		logger.Info("loggingCredentials - up to date")
+		return ctrl.Result{}, nil
+	}
+
+	if !tracingSecretUpdated {
+		// If there were no changes, we're done here.
+		logger.Info("tracingCredentials - up to date")
 		return ctrl.Result{}, nil
 	}
 
@@ -67,6 +94,15 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingCredentials - Secret does not exist, creating it")
 			err = r.Client.Create(ctx, loggingCredentialsSecret)
+		}
+	}
+
+	logger.Info("tracingCredentials - Updating secret")
+	err = r.Client.Update(ctx, tracingCredentialsSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("tracingCredentials - Secret does not exist, creating it")
+			err = r.Client.Create(ctx, tracingCredentialsSecret)
 		}
 	}
 
@@ -82,6 +118,7 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 
 	// Start with some empty secret
 	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
+	tracingCredentialsSecret := GenerateTracingCredentialsBasicSecret(cluster)
 
 	// Retrieve existing secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsSecretMeta().Name, Namespace: LoggingCredentialsSecretMeta().Namespace}, loggingCredentialsSecret)
@@ -94,19 +131,41 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 		}
 	}
 
+	err = r.Client.Get(ctx, types.NamespacedName{Name: TracingCredentialsSecretMeta().Name, Namespace: TracingCredentialsSecretMeta().Namespace}, tracingCredentialsSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("tracing credentials secret not found, initializing one")
+		} else {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
+	}
+
 	// update the secret's contents if needed
-	secretUpdated := RemoveLoggingCredentials(cluster, loggingCredentialsSecret)
+	loggingSecretUpdated := RemoveLoggingCredentials(cluster, loggingCredentialsSecret)
+	tracingSecretUpdated := RemoveTracingCredentials(cluster, tracingCredentialsSecret)
 
 	// Check if metadata has been updated
 	if !reflect.DeepEqual(loggingCredentialsSecret.Labels, LoggingCredentialsSecretMeta().Labels) {
 		logger.Info("loggingCredentials - metatada update required")
 		loggingCredentialsSecret.ObjectMeta = LoggingCredentialsSecretMeta()
-		secretUpdated = true
+		loggingSecretUpdated = true
 	}
 
-	if !secretUpdated {
+	if !reflect.DeepEqual(tracingCredentialsSecret.Labels, TracingCredentialsSecretMeta().Labels) {
+		logger.Info("tracingCredentials - metatada update required")
+		tracingCredentialsSecret.ObjectMeta = TracingCredentialsSecretMeta()
+		tracingSecretUpdated = true
+	}
+
+	if !loggingSecretUpdated {
 		// If there were no changes, we're done here.
 		logger.Info("loggingCredentials - up to date")
+		return ctrl.Result{}, nil
+	}
+
+	if !tracingSecretUpdated {
+		// If there were no changes, we're done here.
+		logger.Info("tracingCredentials - up to date")
 		return ctrl.Result{}, nil
 	}
 
@@ -117,6 +176,15 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingCredentials - Secret does not exist, creating it")
 			err = r.Client.Create(ctx, loggingCredentialsSecret)
+		}
+	}
+
+	logger.Info("tracingCredentials - Updating secret")
+	err = r.Client.Update(ctx, tracingCredentialsSecret)
+	if err != nil {
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("tracingCredentials - Secret does not exist, creating it")
+			err = r.Client.Create(ctx, tracingCredentialsSecret)
 		}
 	}
 
