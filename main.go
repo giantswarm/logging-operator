@@ -53,6 +53,7 @@ import (
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
 	lokiingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/loki-ingress-auth-secret"
+	tempoingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/tempo-ingress-auth-secret"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -186,6 +187,10 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
+	tempoIngressAuthSecret := tempoingressauthsecret.Resource{
+		Client: mgr.GetClient(),
+	}
+
 	loggingSecret := loggingsecret.Resource{
 		Client: mgr.GetClient(),
 		Config: appConfig,
@@ -221,6 +226,7 @@ func main() {
 			&loggingConfig,
 			&eventsLoggerSecret,
 			&eventsLoggerConfig,
+			&tempoIngressAuthSecret,
 		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
