@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	TracingSecretName = "events-logger-secret" // #nosec G101
+	TracingSecretName = "tracing-secret" // #nosec G101
 )
 
 func generateTracingSecret(cluster *capi.Cluster) (v1.Secret, error) {
@@ -47,7 +47,7 @@ func generateTracingSecret(cluster *capi.Cluster) (v1.Secret, error) {
 	return secret, nil
 }
 
-// SecretMeta returns metadata for the events-logger-secret
+// SecretMeta returns metadata for the tracing secret
 func secretMeta(cluster *capi.Cluster) metav1.ObjectMeta {
 	metadata := metav1.ObjectMeta{
 		Name:      GetTracingSecretName(cluster),

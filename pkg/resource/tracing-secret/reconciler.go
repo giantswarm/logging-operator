@@ -18,7 +18,7 @@ import (
 )
 
 // Resource implements a resource.Interface to handle
-// Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
+// Tracing secret: extra tracing secret about where and how to send traces
 type Resource struct {
 	Client client.Client
 }
@@ -29,9 +29,9 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	logger.Info("create tracing secret")
 
 	// Retrieve secret containing credentials
-	var eventsLoggerCredentialsSecret v1.Secret
+	var tracingCredentialsSecret v1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta().Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta().Namespace},
-		&eventsLoggerCredentialsSecret)
+		&tracingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -45,8 +45,8 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 
 	// Check if secret already exists.
 	logger.Info("getting tracing secret", "namespace", desiredTracingSecret.GetNamespace(), "name", desiredTracingSecret.GetName())
-	var currentEventsLoggerSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredTracingSecret.GetName(), Namespace: desiredTracingSecret.GetNamespace()}, &currentEventsLoggerSecret)
+	var currentTracingSecret v1.Secret
+	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredTracingSecret.GetName(), Namespace: desiredTracingSecret.GetNamespace()}, &currentTracingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("tracing secret not found, creating")
@@ -59,7 +59,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		}
 	}
 
-	if !needUpdate(currentEventsLoggerSecret, desiredTracingSecret) {
+	if !needUpdate(currentTracingSecret, desiredTracingSecret) {
 		logger.Info("tracing secret up to date")
 		return ctrl.Result{}, nil
 	}
@@ -80,8 +80,8 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 	logger.Info("delete tracing secret")
 
 	// Get expected secret.
-	var currentEventsLoggerSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: GetTracingSecretName(cluster), Namespace: cluster.GetNamespace()}, &currentEventsLoggerSecret)
+	var currentTracingSecret v1.Secret
+	err := r.Client.Get(ctx, types.NamespacedName{Name: GetTracingSecretName(cluster), Namespace: cluster.GetNamespace()}, &currentTracingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("tracing secret not found, stop here")
@@ -91,8 +91,8 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Delete secret.
-	logger.Info("tracing secret deleting", "namespace", currentEventsLoggerSecret.GetNamespace(), "name", currentEventsLoggerSecret.GetName())
-	err = r.Client.Delete(ctx, &currentEventsLoggerSecret)
+	logger.Info("tracing secret deleting", "namespace", currentTracingSecret.GetNamespace(), "name", currentTracingSecret.GetName())
+	err = r.Client.Delete(ctx, &currentTracingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			// Do no throw error in case it was not found, as this means
