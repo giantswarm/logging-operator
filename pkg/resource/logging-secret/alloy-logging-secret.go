@@ -35,7 +35,7 @@ func GenerateAlloyLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.Sec
 	}
 
 	if tracingEnabled {
-		tracingPassword, err := loggingcredentials.GetPassword(cluster, tracingCredentialsSecret, common.TracingUsername)
+		tracingPassword, err := loggingcredentials.GetPassword(cluster, tracingCredentialsSecret, clusterName)
 		if err != nil {
 			return nil, err
 		}

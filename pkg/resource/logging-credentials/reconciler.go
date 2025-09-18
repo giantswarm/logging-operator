@@ -75,39 +75,42 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		tracingSecretUpdated = true
 	}
 
-	if !loggingSecretUpdated {
-		// If there were no changes, we're done here.
-		logger.Info("loggingCredentials - up to date")
-		return ctrl.Result{}, nil
-	}
-
-	if !tracingSecretUpdated {
-		// If there were no changes, we're done here.
-		logger.Info("tracingCredentials - up to date")
+	if !loggingSecretUpdated && !tracingSecretUpdated {
+		// If there were no changes to either secret, we're done here.
+		logger.Info("loggingCredentials and tracingCredentials - up to date")
 		return ctrl.Result{}, nil
 	}
 
 	// commit our changes
-	logger.Info("loggingCredentials - Updating secret")
-	err = r.Client.Update(ctx, loggingCredentialsSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("loggingCredentials - Secret does not exist, creating it")
-			err = r.Client.Create(ctx, loggingCredentialsSecret)
-			if err != nil {
+	if loggingSecretUpdated {
+		logger.Info("loggingCredentials - Updating secret")
+		err = r.Client.Update(ctx, loggingCredentialsSecret)
+		if err != nil {
+			if apimachineryerrors.IsNotFound(err) {
+				logger.Info("loggingCredentials - Secret does not exist, creating it")
+				err = r.Client.Create(ctx, loggingCredentialsSecret)
+				if err != nil {
+					return ctrl.Result{}, errors.WithStack(err)
+				}
+			} else {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
 		}
 	}
 
-	logger.Info("tracingCredentials - Updating secret")
-	err = r.Client.Update(ctx, tracingCredentialsSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("tracingCredentials - Secret does not exist, creating it")
-			err = r.Client.Create(ctx, tracingCredentialsSecret)
+	if tracingSecretUpdated {
+		logger.Info("tracingCredentials - Updating secret")
+		err = r.Client.Update(ctx, tracingCredentialsSecret)
+		if err != nil {
+			if apimachineryerrors.IsNotFound(err) {
+				logger.Info("tracingCredentials - Secret does not exist, creating it")
+				err = r.Client.Create(ctx, tracingCredentialsSecret)
+				if err != nil {
+					return ctrl.Result{}, errors.WithStack(err)
+				}
+			} else {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
 		}
 	}
 
@@ -162,39 +165,42 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 		tracingSecretUpdated = true
 	}
 
-	if !loggingSecretUpdated {
-		// If there were no changes, we're done here.
-		logger.Info("loggingCredentials - up to date")
-		return ctrl.Result{}, nil
-	}
-
-	if !tracingSecretUpdated {
-		// If there were no changes, we're done here.
-		logger.Info("tracingCredentials - up to date")
+	if !loggingSecretUpdated && !tracingSecretUpdated {
+		// If there were no changes to either secret, we're done here.
+		logger.Info("loggingCredentials and tracingCredentials - up to date")
 		return ctrl.Result{}, nil
 	}
 
 	// commit our changes
-	logger.Info("loggingCredentials - Updating secret")
-	err = r.Client.Update(ctx, loggingCredentialsSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("loggingCredentials - Secret does not exist, creating it")
-			err = r.Client.Create(ctx, loggingCredentialsSecret)
-			if err != nil {
+	if loggingSecretUpdated {
+		logger.Info("loggingCredentials - Updating secret")
+		err = r.Client.Update(ctx, loggingCredentialsSecret)
+		if err != nil {
+			if apimachineryerrors.IsNotFound(err) {
+				logger.Info("loggingCredentials - Secret does not exist, creating it")
+				err = r.Client.Create(ctx, loggingCredentialsSecret)
+				if err != nil {
+					return ctrl.Result{}, errors.WithStack(err)
+				}
+			} else {
 				return ctrl.Result{}, errors.WithStack(err)
 			}
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
 		}
 	}
 
-	logger.Info("tracingCredentials - Updating secret")
-	err = r.Client.Update(ctx, tracingCredentialsSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("tracingCredentials - Secret does not exist, creating it")
-			err = r.Client.Create(ctx, tracingCredentialsSecret)
+	if tracingSecretUpdated {
+		logger.Info("tracingCredentials - Updating secret")
+		err = r.Client.Update(ctx, tracingCredentialsSecret)
+		if err != nil {
+			if apimachineryerrors.IsNotFound(err) {
+				logger.Info("tracingCredentials - Secret does not exist, creating it")
+				err = r.Client.Create(ctx, tracingCredentialsSecret)
+				if err != nil {
+					return ctrl.Result{}, errors.WithStack(err)
+				}
+			} else {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
 		}
 	}
 
