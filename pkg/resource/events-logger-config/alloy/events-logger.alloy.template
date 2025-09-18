@@ -59,7 +59,7 @@ loki.write "default" {
 }
 
 {{- if .TracingEnabled }}
-otelcol.auth.basic "tracingCredentials" {
+otelcol.auth.basic "tracing credentials" {
 	username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .TracingUsernameKey }}"])
 	password = remote.kubernetes.secret.credentials.data["{{ .TracingPasswordKey }}"]
 }
@@ -122,7 +122,7 @@ otelcol.exporter.otlphttp "{{ . }}" {
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
-		auth = otelcol.auth.basic.tracingCredentials
+		auth = otelcol.auth.basic.tracing_credentials.handler
 	}
 }
 {{- end }}

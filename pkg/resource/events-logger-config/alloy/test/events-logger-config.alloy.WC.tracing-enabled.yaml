@@ -41,7 +41,7 @@ alloy:
         		scrape_job = "kubernetes-events",
         	}
         }
-        otelcol.auth.basic "tracingCredentials" {
+        otelcol.auth.basic "tracing credentials" {
         	username = nonsensitive(remote.kubernetes.secret.credentials.data["tracing-username"])
         	password = remote.kubernetes.secret.credentials.data["tracing-password"]
         }
@@ -94,7 +94,7 @@ alloy:
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
         		}
-        		auth = otelcol.auth.basic.tracingCredentials
+        		auth = otelcol.auth.basic.tracing_credentials.handler
         	}
         }
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
