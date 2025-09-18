@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
@@ -67,13 +68,20 @@ func GetObservabilityBundleAppVersion(ctx context.Context, client client.Client,
 func ToggleAgents(ctx context.Context, client client.Client, cluster *capi.Cluster, cfg config.Config) (*LoggingAgent, error) {
 	logger := log.FromContext(ctx)
 
-	observabilityBundleVersion, err := GetObservabilityBundleAppVersion(ctx, client, cluster)
-	if err != nil {
-		return nil, err
-	}
 	agent := &LoggingAgent{
 		LoggingAgent:     cfg.DefaultLoggingAgent,
 		KubeEventsLogger: cfg.DefaultKubeEventsLogger,
+	}
+
+	observabilityBundleVersion, err := GetObservabilityBundleAppVersion(ctx, client, cluster)
+	if err != nil {
+		// Only return default configuration if the observability bundle app is not found
+		// For all other errors, return the error to the caller
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("observability bundle app not found, using default configuration", "error", err)
+			return agent, nil
+		}
+		return nil, err
 	}
 
 	// Enforce promtail as logging agent when observability-bundle version < 1.6.0 because this needs alloy 0.4.0.

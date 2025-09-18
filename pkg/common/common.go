@@ -81,13 +81,19 @@ func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 	//   - cluster is not being deleted
 	//   - global logging flag is enabled
 
-	labels := cluster.GetLabels()
+	// If the cluster is being deleted, always return false to trigger reconcileDelete
+	// The delete logic will clean up everything regardless of previous logging state
+	if !cluster.GetDeletionTimestamp().IsZero() {
+		return false
+	}
 
-	// If logging is disabled at the installation level, we return false
+	// If logging is disabled at the installation level, return false
 	if !enableLoggingFlag {
 		return false
 	}
 
+	// Check cluster-specific logging label
+	labels := cluster.GetLabels()
 	loggingLabelValue, ok := labels[key.LoggingLabel]
 	if !ok {
 		return LoggingEnabledDefault
@@ -97,7 +103,7 @@ func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 	if err != nil {
 		return LoggingEnabledDefault
 	}
-	return loggingEnabled && cluster.GetDeletionTimestamp().IsZero()
+	return loggingEnabled
 }
 
 func AddCommonLabels(labels map[string]string) {
