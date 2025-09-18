@@ -70,6 +70,8 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		IsWorkloadCluster  bool
 		TracingEnabled     bool
 		TracingEndpoint    string
+		TracingUsernameKey string
+		TracingPasswordKey string
 		Tenants            []string
 	}{
 		ClusterID:          cluster.GetName(),
@@ -87,6 +89,8 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
 		TracingEnabled:     tracingEnabled,
 		TracingEndpoint:    tempoURL,
+		TracingUsernameKey: common.TracingUsername,
+		TracingPasswordKey: common.TracingPassword,
 		Tenants:            tenants,
 	}
 
