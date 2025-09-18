@@ -15,10 +15,9 @@ import (
 )
 
 const (
-	//#nosec G101
-	LoggingCredentialsName      = "logging-credentials"
+	LoggingCredentialsName      = "logging-credentials" // #nosec G101
 	LoggingCredentialsNamespace = "monitoring"
-	TracingCredentialsName      = "tracing-credentials"
+	TracingCredentialsName      = "tracing-credentials" // #nosec G101
 	TracingCredentialsNamespace = "monitoring"
 )
 
