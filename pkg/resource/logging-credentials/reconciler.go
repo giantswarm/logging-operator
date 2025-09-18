@@ -94,6 +94,11 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingCredentials - Secret does not exist, creating it")
 			err = r.Client.Create(ctx, loggingCredentialsSecret)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+		} else {
+			return ctrl.Result{}, errors.WithStack(err)
 		}
 	}
 
@@ -176,6 +181,11 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("loggingCredentials - Secret does not exist, creating it")
 			err = r.Client.Create(ctx, loggingCredentialsSecret)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+		} else {
+			return ctrl.Result{}, errors.WithStack(err)
 		}
 	}
 
