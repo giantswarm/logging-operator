@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix ongoing reconciliation issues where the logging-operator is always running on creation mode, even when a cluster is being deleted.
+
 ## [0.31.0] - 2025-09-17
 
 ### Added
