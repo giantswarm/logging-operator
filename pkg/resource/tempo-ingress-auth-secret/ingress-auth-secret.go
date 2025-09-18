@@ -7,9 +7,10 @@ import (
 
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
+	"github.com/pkg/errors"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
-	"github.com/pkg/errors"
 )
 
 const (
