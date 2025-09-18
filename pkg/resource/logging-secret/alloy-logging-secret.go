@@ -2,6 +2,7 @@ package loggingsecret
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"text/template"
 
@@ -15,7 +16,7 @@ import (
 )
 
 var (
-	//go:embed alloy/logging-secret.yaml.template
+	//go:embed alloy/alloy-secret.yaml.template
 	alloySecret         string
 	alloySecretTemplate *template.Template
 )
