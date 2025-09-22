@@ -98,7 +98,7 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingConfigName(cluster), Namespace: cluster.GetNamespace()}, &currentLoggingConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("logging-config not found, stop here")
+			logger.Info("logging-config not found, nothing to delete")
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, errors.WithStack(err)
