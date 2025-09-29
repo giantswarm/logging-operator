@@ -92,18 +92,6 @@ alloy:
         		}
         	}
         }
-    # -- Extra ports to expose on the Alloy container.
-    extraPorts:
-    - name: "otlp"
-      port: 4317
-      targetPort: 4317
-      protocol: "TCP"
-      appProtocol: "grpc"
-    - name: "otlp-http"
-      port: 4318
-      targetPort: 4318
-      protocol: "TCP"
-      appProtocol: "http"
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
     resources:
       limits:
@@ -128,6 +116,42 @@ alloy:
     replicas: 1
   crds:
     create: false
+  extraObjects:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        meta.helm.sh/release-name: alloy-events
+        meta.helm.sh/release-namespace: kube-system
+      labels:
+        app.kubernetes.io/component: networking
+        app.kubernetes.io/instance: alloy-events
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: alloy
+        app.kubernetes.io/part-of: alloy
+        application.giantswarm.io/team: atlas
+        giantswarm.io/managed-by: alloy-events
+        giantswarm.io/service-type: managed
+        helm.sh/chart: alloy-1.1.0
+      name: otlp-gateway
+      namespace: kube-system
+    spec:
+      ports:
+      - appProtocol: grpc
+        name: otlp
+        port: 4317
+        protocol: TCP
+        targetPort: 4317
+      - appProtocol: http
+        name: otlp-http
+        port: 4318
+        protocol: TCP
+        targetPort: 4318
+      selector:
+        app.kubernetes.io/instance: alloy-events
+        app.kubernetes.io/name: alloy
+      type: ClusterIP
+
 networkPolicy:
   cilium:
     ingress:
