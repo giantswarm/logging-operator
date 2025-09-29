@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.32.0] - 2025-09-29
+
 ### Added
 
 - Add `tracing-gateway` service as extraObject in alloy-events config
@@ -563,7 +565,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.31.1...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.32.0...HEAD
+[0.32.0]: https://github.com/giantswarm/logging-operator/compare/v0.31.1...v0.32.0
 [0.31.1]: https://github.com/giantswarm/logging-operator/compare/v0.31.0...v0.31.1
 [0.31.0]: https://github.com/giantswarm/logging-operator/compare/v0.30.0...v0.31.0
 [0.30.0]: https://github.com/giantswarm/logging-operator/compare/v0.29.0...v0.30.0
