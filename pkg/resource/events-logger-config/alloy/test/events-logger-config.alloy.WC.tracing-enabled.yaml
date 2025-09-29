@@ -133,7 +133,7 @@ alloy:
         giantswarm.io/managed-by: alloy-events
         giantswarm.io/service-type: managed
         helm.sh/chart: alloy-1.1.0
-      name: tracing-gateway
+      name: otlp-gateway
       namespace: kube-system
     spec:
       ports:
