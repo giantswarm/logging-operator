@@ -155,26 +155,6 @@ func AddLoggingCredentials(cluster *capi.Cluster, loggingCredentials *v1.Secret)
 func AddTracingCredentials(cluster *capi.Cluster, tracingCredentials *v1.Secret) (bool, error) {
 	var secretUpdated = false
 
-	// Always check credentials for "readuser"
-	if _, ok := tracingCredentials.Data[common.ReadUser]; !ok {
-		readUser := userCredentials{}
-
-		password, err := generatePassword()
-		if err != nil {
-			return false, errors.New("Failed generating read password")
-		}
-
-		readUser.Password = password
-
-		v, err := yaml.Marshal(readUser)
-		if err != nil {
-			return false, errors.New("Failed creating read user")
-		}
-
-		tracingCredentials.Data[common.ReadUser] = []byte(v)
-		secretUpdated = true
-	}
-
 	// Check credentials for [clustername]
 	clusterName := cluster.GetName()
 	if _, ok := tracingCredentials.Data[clusterName]; !ok {
