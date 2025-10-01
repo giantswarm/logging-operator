@@ -66,10 +66,13 @@ const (
 
 	LoggingURL      = "logging-url"
 	LoggingTenantID = "logging-tenant-id"
-	LoggingUsername = "logging-username"
-	LoggingPassword = "logging-password"
 	LokiRulerAPIURL = "ruler-api-url"
 
+	// Logging credentials keys for Alloy config
+	LoggingUsername = "logging-username"
+	LoggingPassword = "logging-password"
+
+	// Tracing credentials keys for Alloy config
 	TracingUsername = "tracing-username"
 	TracingPassword = "tracing-password"
 )
