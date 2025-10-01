@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	lokiIngressAuthSecretName       = "loki-ingress-auth" //#nosec G101
-	lokiIngressAuthSecretNamespace  = "loki"
+	lokiIngressAuthSecretName      = "loki-ingress-auth" //#nosec G101
+	lokiIngressAuthSecretNamespace = "loki"
+	// The Tempo Ingress resource is defined here: https://github.com/giantswarm/shared-configs/blob/main/default/apps/tempo/configmap-values.yaml.template#L9
 	tempoIngressAuthSecretName      = "tempo-ingress-auth" //#nosec G101
 	tempoIngressAuthSecretNamespace = "tempo"
 )
