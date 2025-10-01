@@ -18,10 +18,9 @@ import (
 )
 
 const (
-	//#nosec G101
-	lokiIngressAuthSecretName       = "loki-ingress-auth"
+	lokiIngressAuthSecretName       = "loki-ingress-auth" //#nosec G101
 	lokiIngressAuthSecretNamespace  = "loki"
-	tempoIngressAuthSecretName      = "tempo-ingress-auth"
+	tempoIngressAuthSecretName      = "tempo-ingress-auth" //#nosec G101
 	tempoIngressAuthSecretNamespace = "tempo"
 )
 
