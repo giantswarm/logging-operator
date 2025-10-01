@@ -56,20 +56,22 @@ func generatePassword() (string, error) {
 	return string(pass), nil
 }
 
-// GenerateObservabilityBundleConfigMap returns a configmap for
-// the observabilitybundle application to enable logging.
-func GenerateCredentialsBasicSecrets(cluster *capi.Cluster) (*v1.Secret, *v1.Secret) {
+func GenerateLoggingCredentialsBasicSecret(cluster *capi.Cluster) *v1.Secret {
 	loggingSecret := v1.Secret{
 		ObjectMeta: CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace),
 		Data:       map[string][]byte{},
 	}
 
+	return &loggingSecret
+}
+
+func GenerateTracingCredentialsBasicSecret(cluster *capi.Cluster) *v1.Secret {
 	tracingSecret := v1.Secret{
 		ObjectMeta: CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace),
 		Data:       map[string][]byte{},
 	}
 
-	return &loggingSecret, &tracingSecret
+	return &tracingSecret
 }
 
 func GetPassword(cluster *capi.Cluster, credentialsSecret *v1.Secret, username string) (string, error) {

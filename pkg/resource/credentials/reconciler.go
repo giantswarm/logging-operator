@@ -15,12 +15,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 )
 
 // Resource implements a resource.Interface to handle
 // Logging Credentials: store and maintain logging credentials
 type Resource struct {
 	Client client.Client
+	Config config.Config
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
@@ -28,20 +30,24 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	logger := log.FromContext(ctx)
 
 	logger.Info("credentials checking secret for logging", "namespace", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Name)
-	logger.Info("credentials checking secret for tracing", "namespace", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Name)
 
 	// Start with some empty secret
-	loggingCredentialsSecret, tracingCredentialsSecret := GenerateCredentialsBasicSecrets(cluster)
-
+	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
 	_, err := r.createCredentialsSecret(ctx, cluster, loggingCredentialsSecret, LoggingCredentialsName, LoggingCredentialsNamespace)
 	if err != nil {
 		logger.Error(err, "failed to create or update logging credentials secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
-	_, err = r.createCredentialsSecret(ctx, cluster, tracingCredentialsSecret, TracingCredentialsName, TracingCredentialsNamespace)
-	if err != nil {
-		logger.Error(err, "failed to create or update tracing credentials secret")
-		return ctrl.Result{}, errors.WithStack(err)
+
+	if r.Config.EnableTracingFlag {
+		logger.Info("credentials checking secret for tracing", "namespace", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Name)
+
+		tracingCredentialsSecret := GenerateTracingCredentialsBasicSecret(cluster)
+		_, err = r.createCredentialsSecret(ctx, cluster, tracingCredentialsSecret, TracingCredentialsName, TracingCredentialsNamespace)
+		if err != nil {
+			logger.Error(err, "failed to create or update tracing credentials secret")
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	// Will return Secret's update error if any
@@ -53,20 +59,25 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, l
 	logger := log.FromContext(ctx)
 
 	logger.Info("credentials secret delete logging", "namespace", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Name)
-	logger.Info("credentials secret delete for tracing", "namespace", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Name)
 
 	// Start with some empty secret
-	loggingCredentialsSecret, tracingCredentialsSecret := GenerateCredentialsBasicSecrets(cluster)
+	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
 
 	_, err := r.deleteCredentialsSecret(ctx, cluster, loggingCredentialsSecret, LoggingCredentialsName, LoggingCredentialsNamespace)
 	if err != nil {
 		logger.Error(err, "failed to delete logging credentials secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
-	_, err = r.deleteCredentialsSecret(ctx, cluster, tracingCredentialsSecret, TracingCredentialsName, TracingCredentialsNamespace)
-	if err != nil {
-		logger.Error(err, "failed to delete tracing credentials secret")
-		return ctrl.Result{}, errors.WithStack(err)
+
+	if r.Config.EnableTracingFlag {
+		logger.Info("credentials secret delete for tracing", "namespace", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Name)
+
+		tracingCredentialsSecret := GenerateTracingCredentialsBasicSecret(cluster)
+		_, err = r.deleteCredentialsSecret(ctx, cluster, tracingCredentialsSecret, TracingCredentialsName, TracingCredentialsNamespace)
+		if err != nil {
+			logger.Error(err, "failed to delete tracing credentials secret")
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	// Will return Secret's update error if any

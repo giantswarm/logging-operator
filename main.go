@@ -180,6 +180,7 @@ func main() {
 
 	loggingSecrets := credentials.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
 	ingressAuthSecret := ingressauthsecret.Resource{
