@@ -8,7 +8,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 // ingressAuthSecretMetadata returns metadata for the ingresses auth secret metadata
@@ -44,7 +44,7 @@ func generateIngressAuthSecret(cluster *capi.Cluster, credentialsSecret *v1.Secr
 	users := make(map[string]string)
 	// Loop on write users
 	for _, user := range listUsers(credentialsSecret) {
-		writePassword, err := loggingcredentials.GetPassword(cluster, credentialsSecret, user)
+		writePassword, err := credentials.GetPassword(cluster, credentialsSecret, user)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}

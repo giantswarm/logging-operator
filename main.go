@@ -46,11 +46,11 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/resource"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	ingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/ingress-auth-secret"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
 	//+kubebuilder:scaffold:imports
@@ -178,7 +178,7 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingSecrets := loggingcredentials.Resource{
+	loggingSecrets := credentials.Resource{
 		Client: mgr.GetClient(),
 	}
 

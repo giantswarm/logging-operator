@@ -12,7 +12,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 var (
@@ -29,13 +29,13 @@ func GenerateAlloyLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.Sec
 	clusterName := cluster.GetName()
 	var values bytes.Buffer
 
-	writePassword, err := loggingcredentials.GetPassword(cluster, credentialsSecret, clusterName)
+	writePassword, err := credentials.GetPassword(cluster, credentialsSecret, clusterName)
 	if err != nil {
 		return nil, err
 	}
 
 	if tracingEnabled {
-		tracingPassword, err := loggingcredentials.GetPassword(cluster, tracingCredentialsSecret, clusterName)
+		tracingPassword, err := credentials.GetPassword(cluster, tracingCredentialsSecret, clusterName)
 		if err != nil {
 			return nil, err
 		}

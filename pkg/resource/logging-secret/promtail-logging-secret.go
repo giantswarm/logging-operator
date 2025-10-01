@@ -9,7 +9,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 type values struct {
@@ -60,7 +60,7 @@ func GeneratePromtailLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.
 
 	writeUser := clusterName
 
-	writePassword, err := loggingcredentials.GetPassword(cluster, credentialsSecret, clusterName)
+	writePassword, err := credentials.GetPassword(cluster, credentialsSecret, clusterName)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

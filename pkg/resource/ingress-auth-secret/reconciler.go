@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 const (
@@ -46,13 +46,13 @@ func (r *Resource) createOrUpdateSecret(ctx context.Context, cluster *capi.Clust
 
 	// Retrieve currently generated credentials
 	var loggingObjectKey = types.NamespacedName{
-		Name:      loggingcredentials.LoggingCredentialsSecretMeta().Name,
-		Namespace: loggingcredentials.LoggingCredentialsSecretMeta().Namespace,
+		Name:      credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Name,
+		Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace,
 	}
 
 	var tracingObjectKey = types.NamespacedName{
-		Name:      loggingcredentials.TracingCredentialsSecretMeta().Name,
-		Namespace: loggingcredentials.TracingCredentialsSecretMeta().Namespace,
+		Name:      credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name,
+		Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace,
 	}
 
 	loggingSecret := ingressAuthSecret(lokiIngressAuthSecretName, lokiIngressAuthSecretNamespace)

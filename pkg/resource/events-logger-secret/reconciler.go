@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 // Resource implements a resource.Interface to handle
@@ -30,14 +30,14 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 
 	// Retrieve secret containing credentials
 	var eventsLoggerCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta().Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta().Namespace},
+	err := r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace},
 		&eventsLoggerCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	var tracingCredentialsSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.TracingCredentialsSecretMeta().Name, Namespace: loggingcredentials.TracingCredentialsSecretMeta().Namespace},
+	err = r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace},
 		&tracingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
