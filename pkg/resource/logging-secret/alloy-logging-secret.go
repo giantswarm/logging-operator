@@ -34,47 +34,31 @@ func GenerateAlloyLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.Sec
 		return nil, err
 	}
 
+	templateData := struct {
+		ExtraSecretEnv map[string]string
+	}{
+		ExtraSecretEnv: map[string]string{
+			common.LoggingURL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
+			common.LoggingTenantID: common.DefaultWriteTenant,
+			common.LoggingUsername: clusterName,
+			common.LoggingPassword: writePassword,
+			common.LokiRulerAPIURL: fmt.Sprintf(common.LokiBaseURLFormat, lokiURL),
+		},
+	}
+
 	if tracingEnabled {
 		tracingPassword, err := credentials.GetPassword(cluster, tracingCredentialsSecret, clusterName)
 		if err != nil {
 			return nil, err
 		}
 
-		templateData := struct {
-			ExtraSecretEnv map[string]string
-		}{
-			ExtraSecretEnv: map[string]string{
-				common.LoggingURL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
-				common.LoggingTenantID: common.DefaultWriteTenant,
-				common.LoggingUsername: clusterName,
-				common.LoggingPassword: writePassword,
-				common.LokiRulerAPIURL: fmt.Sprintf(common.LokiBaseURLFormat, lokiURL),
-				common.TracingUsername: clusterName,
-				common.TracingPassword: tracingPassword,
-			},
-		}
+		templateData.ExtraSecretEnv[common.TracingUsername] = clusterName
+		templateData.ExtraSecretEnv[common.TracingPassword] = tracingPassword
+	}
 
-		err = alloySecretTemplate.Execute(&values, templateData)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		templateData := struct {
-			ExtraSecretEnv map[string]string
-		}{
-			ExtraSecretEnv: map[string]string{
-				common.LoggingURL:      fmt.Sprintf(common.LokiPushURLFormat, lokiURL),
-				common.LoggingTenantID: common.DefaultWriteTenant,
-				common.LoggingUsername: clusterName,
-				common.LoggingPassword: writePassword,
-				common.LokiRulerAPIURL: fmt.Sprintf(common.LokiBaseURLFormat, lokiURL),
-			},
-		}
-
-		err = alloySecretTemplate.Execute(&values, templateData)
-		if err != nil {
-			return nil, err
-		}
+	err = alloySecretTemplate.Execute(&values, templateData)
+	if err != nil {
+		return nil, err
 	}
 
 	data := make(map[string][]byte)
