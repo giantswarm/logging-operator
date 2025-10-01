@@ -39,7 +39,7 @@ func listUsers(credentialsSecret *v1.Secret) []string {
 	return usersList
 }
 
-// generateLokiIngressAuthSecret returns a secret for the loki ingress auth
+// generateIngressAuthSecret returns a secret for the loki ingress auth
 func generateIngressAuthSecret(cluster *capi.Cluster, credentialsSecret *v1.Secret) (map[string]string, error) {
 	users := make(map[string]string)
 	// Loop on write users

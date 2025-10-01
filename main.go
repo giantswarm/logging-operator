@@ -178,13 +178,14 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingSecrets := credentials.Resource{
+	credentialSecrets := credentials.Resource{
 		Client: mgr.GetClient(),
 		Config: appConfig,
 	}
 
 	ingressAuthSecret := ingressauthsecret.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
 	loggingSecret := loggingsecret.Resource{
@@ -217,7 +218,7 @@ func main() {
 		Resources: []resource.Interface{
 			&agentsToggle,
 			&loggingWiring,
-			&loggingSecrets,
+			&credentialSecrets,
 			&ingressAuthSecret,
 			&loggingSecret,
 			&loggingConfig,

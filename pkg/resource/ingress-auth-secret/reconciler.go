@@ -14,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	"github.com/giantswarm/logging-operator/pkg/config"
 	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
@@ -29,6 +30,7 @@ const (
 // loki ingress auth secret: a secret for the loki ingress that adds support for basic auth for the write path
 type Resource struct {
 	Client client.Client
+	Config config.Config
 }
 
 // ReconcileCreate ensures loki ingress auth map is created with the right credentials on CAPI
@@ -50,23 +52,27 @@ func (r *Resource) createOrUpdateSecret(ctx context.Context, cluster *capi.Clust
 		Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace,
 	}
 
-	var tracingObjectKey = types.NamespacedName{
-		Name:      credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name,
-		Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace,
-	}
-
 	loggingSecret := ingressAuthSecret(lokiIngressAuthSecretName, lokiIngressAuthSecretNamespace)
-	tracingSecret := ingressAuthSecret(tempoIngressAuthSecretName, tempoIngressAuthSecretNamespace)
 
 	_, err := r.generateAuthSecret(ctx, cluster, &loggingSecret, loggingObjectKey)
 	if err != nil {
 		logger.Error(err, "failed to generate loki ingress auth secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
-	_, err = r.generateAuthSecret(ctx, cluster, &tracingSecret, tracingObjectKey)
-	if err != nil {
-		logger.Error(err, "failed to generate Tempo ingress auth secret")
-		return ctrl.Result{}, errors.WithStack(err)
+
+	if r.Config.EnableTracingFlag {
+		var tracingObjectKey = types.NamespacedName{
+			Name:      credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name,
+			Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace,
+		}
+
+		tracingSecret := ingressAuthSecret(tempoIngressAuthSecretName, tempoIngressAuthSecretNamespace)
+
+		_, err = r.generateAuthSecret(ctx, cluster, &tracingSecret, tracingObjectKey)
+		if err != nil {
+			logger.Error(err, "failed to generate Tempo ingress auth secret")
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	return ctrl.Result{}, nil
