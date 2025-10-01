@@ -14,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
+	config "github.com/giantswarm/logging-operator/pkg/config"
 	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
@@ -21,6 +22,7 @@ import (
 // Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
 type Resource struct {
 	Client client.Client
+	Config config.Config
 }
 
 // ReconcileCreate ensures events-logger-secret is created with the right credentials
@@ -37,10 +39,13 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	var tracingCredentialsSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace},
-		&tracingCredentialsSecret)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
+	if r.Config.EnableTracingFlag {
+		// Retrieve secret containing tracing credentials
+		err = r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace},
+			&tracingCredentialsSecret)
+		if err != nil {
+			return ctrl.Result{}, errors.WithStack(err)
+		}
 	}
 
 	// Retrieve Loki ingress name
@@ -50,7 +55,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get desired secret
-	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, loggingAgent, &eventsLoggerCredentialsSecret, lokiURL, &tracingCredentialsSecret)
+	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, loggingAgent, &eventsLoggerCredentialsSecret, lokiURL, r.Config.EnableTracingFlag, &tracingCredentialsSecret)
 	if err != nil {
 		logger.Error(err, "failed generating events logger secret")
 		return ctrl.Result{}, errors.WithStack(err)

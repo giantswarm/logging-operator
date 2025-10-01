@@ -206,6 +206,7 @@ func main() {
 
 	eventsLoggerSecret := eventsloggersecret.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
 	if err = (&controller.CapiClusterReconciler{
