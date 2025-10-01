@@ -48,12 +48,11 @@ import (
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
+	ingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/ingress-auth-secret"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
-	lokiingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/loki-ingress-auth-secret"
-	tempoingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/tempo-ingress-auth-secret"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -183,11 +182,7 @@ func main() {
 		Client: mgr.GetClient(),
 	}
 
-	lokiIngressAuthSecret := lokiingressauthsecret.Resource{
-		Client: mgr.GetClient(),
-	}
-
-	tempoIngressAuthSecret := tempoingressauthsecret.Resource{
+	ingressAuthSecret := ingressauthsecret.Resource{
 		Client: mgr.GetClient(),
 	}
 
@@ -221,12 +216,11 @@ func main() {
 			&agentsToggle,
 			&loggingWiring,
 			&loggingSecrets,
-			&lokiIngressAuthSecret,
+			&ingressAuthSecret,
 			&loggingSecret,
 			&loggingConfig,
 			&eventsLoggerSecret,
 			&eventsLoggerConfig,
-			&tempoIngressAuthSecret,
 		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")

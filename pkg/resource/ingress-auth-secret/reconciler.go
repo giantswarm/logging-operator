@@ -55,43 +55,45 @@ func (r *Resource) createOrUpdateSecret(ctx context.Context, cluster *capi.Clust
 		Namespace: loggingcredentials.TracingCredentialsSecretMeta().Namespace,
 	}
 
-	var loggingCredentials v1.Secret
-	if err := r.Client.Get(ctx, loggingObjectKey, &loggingCredentials); err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	var tracingCredentials v1.Secret
-	if err := r.Client.Get(ctx, tracingObjectKey, &tracingCredentials); err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	loggingSecret := ingressAuthSecret(lokiIngressAuthSecretName, lokiIngressAuthSecretNamespace)
 	tracingSecret := ingressAuthSecret(tempoIngressAuthSecretName, tempoIngressAuthSecretNamespace)
 
-	for i, secret := range []v1.Secret{loggingSecret, tracingSecret} {
-		_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &secret, func() error {
-			var credentials v1.Secret
+	_, err := r.generateAuthSecret(ctx, cluster, &loggingSecret, loggingObjectKey)
+	if err != nil {
+		logger.Error(err, "failed to generate loki ingress auth secret")
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+	_, err = r.generateAuthSecret(ctx, cluster, &tracingSecret, tracingObjectKey)
+	if err != nil {
+		logger.Error(err, "failed to generate Tempo ingress auth secret")
+		return ctrl.Result{}, errors.WithStack(err)
+	}
 
-			if i == 0 {
-				credentials = loggingCredentials
-			} else {
-				credentials = tracingCredentials
-			}
+	return ctrl.Result{}, nil
+}
 
-			// Generate loki ingress auth secret
-			data, err := generateIngressAuthSecret(cluster, &credentials)
-			if err != nil {
-				logger.Error(err, "failed to generate loki ingress auth secret")
-				return errors.WithStack(err)
-			}
-			secret.StringData = data
+func (r *Resource) generateAuthSecret(ctx context.Context, cluster *capi.Cluster, credentialsSecret *v1.Secret, secretKey types.NamespacedName) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
 
-			return nil
-		})
+	var secretCredentials v1.Secret
+	if err := r.Client.Get(ctx, secretKey, &secretCredentials); err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
+	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &secretCredentials, func() error {
+		// Generate loki ingress auth secret
+		data, err := generateIngressAuthSecret(cluster, credentialsSecret)
 		if err != nil {
-			logger.Error(err, "failed to create loki ingress auth secret")
-			return ctrl.Result{}, errors.WithStack(err)
+			logger.Error(err, "failed to generate loki ingress auth secret")
+			return errors.WithStack(err)
 		}
+		credentialsSecret.StringData = data
+
+		return nil
+	})
+	if err != nil {
+		logger.Error(err, "failed to create loki ingress auth secret")
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	return ctrl.Result{}, nil
