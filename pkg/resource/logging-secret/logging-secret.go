@@ -26,7 +26,7 @@ func GenerateLoggingSecret(cluster *capi.Cluster, loggingAgent *common.LoggingAg
 			return v1.Secret{}, err
 		}
 	case common.LoggingAgentAlloy:
-		data, err = GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL)
+		data, err = GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL, false, nil)
 		if err != nil {
 			return v1.Secret{}, err
 		}

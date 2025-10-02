@@ -15,7 +15,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 // Resource implements a resource.Interface to handle
@@ -32,7 +32,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 
 	// Retrieve secret containing credentials
 	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: loggingcredentials.LoggingCredentialsSecretMeta().Name, Namespace: loggingcredentials.LoggingCredentialsSecretMeta().Namespace},
+	err := r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace},
 		&loggingCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
