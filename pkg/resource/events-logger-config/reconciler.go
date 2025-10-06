@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,6 +18,10 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
+)
+
+var (
+	supportTracing = semver.MustParse("1.11.0")
 )
 
 // Resource implements a resource.Interface to handle
@@ -36,24 +41,40 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	var tempoURL string
 	var tenants []string
 	var err error
+	var tracingEnabled bool
 
-	// Only retrieve Tempo ingress if tracing is enabled
+	// Only retrieve Tempo ingress if tracing is enabled AND observability bundle version >= 1.11.0 (release v30+)
 	if r.Config.EnableTracingFlag {
-		tempoURL, err = common.ReadTempoIngressURL(ctx, cluster, r.Client)
+		// Get observability bundle version
+		observabilityBundleVersion, err := common.GetObservabilityBundleAppVersion(ctx, r.Client, cluster)
 		if err != nil {
-			logger.Info("Failed to read Tempo ingress URL, but tracing is enabled", "error", err)
+			logger.Info("Failed to get observability bundle version", "error", err)
 			return ctrl.Result{}, errors.WithStack(err)
 		}
 
-		// Get list of tenants
-		tenants, err = ollyop.ListTenants(ctx, r.Client)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
+		// Check if version >= 1.11.0
+		if observabilityBundleVersion.GE(supportTracing) {
+			tracingEnabled = true
+
+			tempoURL, err = common.ReadTempoIngressURL(ctx, cluster, r.Client)
+			if err != nil {
+				logger.Info("Failed to read Tempo ingress URL, but tracing is enabled", "error", err)
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+
+			// Get list of tenants
+			tenants, err = ollyop.ListTenants(ctx, r.Client)
+			if err != nil {
+				return ctrl.Result{}, errors.WithStack(err)
+			}
+		} else {
+			logger.Info("Tracing is enabled but observability bundle version is too old", "version", observabilityBundleVersion.String(), "required", ">=1.11.0")
+			tracingEnabled = false
 		}
 	}
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, r.Config.EnableTracingFlag, tempoURL)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tracingEnabled, tempoURL)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
