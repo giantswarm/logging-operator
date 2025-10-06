@@ -26,7 +26,9 @@ const (
 	// Loki Gateway Ingress
 	lokiGatewayIngressNamespace = "loki"
 	lokiGatewayIngressName      = "loki-gateway"
-	// Tempo Gateway Ingress
+	// Tempo Ingress used to send traces to Tempo
+	// Ingress resources are defined here: https://github.com/giantswarm/tempo-app/blob/main/helm/tempo/templates/ingress.yaml
+	// Configuration for ingresses are here: https://github.com/giantswarm/shared-configs/blob/main/default/apps/tempo/configmap-values.yaml.template#L144-L157
 	tempoIngressNamespace = "tempo"
 	tempoIngressName      = "tempo"
 	// grafana-agent secret name
