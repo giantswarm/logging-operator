@@ -59,6 +59,11 @@ loki.write "default" {
 }
 
 {{- if .TracingEnabled }}
+otelcol.auth.basic "tracing_credentials" {
+	username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .TracingUsernameKey }}"])
+	password = remote.kubernetes.secret.credentials.data["{{ .TracingPasswordKey }}"]
+}
+
 // OTLP receiver for traces
 otelcol.receiver.otlp "traces" {
 	grpc {
@@ -117,6 +122,7 @@ otelcol.exporter.otlp "{{ . }}" {
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
+		auth = otelcol.auth.basic.tracing_credentials.handler
 	}
 }
 

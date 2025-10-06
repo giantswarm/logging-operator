@@ -46,13 +46,13 @@ import (
 	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/resource"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
+	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
+	ingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/ingress-auth-secret"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
-	loggingcredentials "github.com/giantswarm/logging-operator/pkg/resource/logging-credentials"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
-	lokiingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/loki-ingress-auth-secret"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -178,12 +178,14 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}
 
-	loggingSecrets := loggingcredentials.Resource{
+	credentialSecrets := credentials.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
-	lokiIngressAuthSecret := lokiingressauthsecret.Resource{
+	ingressAuthSecret := ingressauthsecret.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
 	loggingSecret := loggingsecret.Resource{
@@ -206,6 +208,7 @@ func main() {
 
 	eventsLoggerSecret := eventsloggersecret.Resource{
 		Client: mgr.GetClient(),
+		Config: appConfig,
 	}
 
 	if err = (&controller.CapiClusterReconciler{
@@ -215,8 +218,8 @@ func main() {
 		Resources: []resource.Interface{
 			&agentsToggle,
 			&loggingWiring,
-			&loggingSecrets,
-			&lokiIngressAuthSecret,
+			&credentialSecrets,
+			&ingressAuthSecret,
 			&loggingSecret,
 			&loggingConfig,
 			&eventsLoggerSecret,

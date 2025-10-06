@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add authentication between alloy and Tempo.
+
 ### Changed
 
 - Change alloy-events otel exporter to use gRPC instead of HTTP
@@ -16,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `tracing-gateway` service as extraObject in alloy-events config
+- Add `otlp-gateway` service as extraObject in alloy-events config.
 
 ## [0.31.1] - 2025-09-18
 

@@ -68,9 +68,15 @@ const (
 
 	LoggingURL      = "logging-url"
 	LoggingTenantID = "logging-tenant-id"
+	LokiRulerAPIURL = "ruler-api-url"
+
+	// Logging credentials keys for Alloy config
 	LoggingUsername = "logging-username"
 	LoggingPassword = "logging-password"
-	LokiRulerAPIURL = "ruler-api-url"
+
+	// Tracing credentials keys for Alloy config
+	TracingUsername = "tracing-username"
+	TracingPassword = "tracing-password"
 )
 
 func GrafanaAgentExtraSecretName() string {
