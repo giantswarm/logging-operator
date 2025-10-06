@@ -79,14 +79,13 @@ alloy:
         		]
         	}
         	output {
-        		traces = [otelcol.exporter.otlphttp.giantswarm.input]
+        		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
         // one OTLP HTTP exporter for traces per tenant
-        otelcol.exporter.otlphttp "giantswarm" {
+        otelcol.exporter.otlp "giantswarm" {
         	client {
-        		// TODO Try out /opentelemetry with grpc and not http
-        		endpoint = "https://<tempo-url>"
+        		endpoint = "<tempo-url>:443"
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
         		}
