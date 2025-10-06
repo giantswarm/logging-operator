@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"net"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -54,6 +55,12 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
 	var values bytes.Buffer
 
+	// endpoint must be in host:port format which is required by the gRPC exporter.
+	// Direclty adding port 443 here as tempoURL is an ingress host
+	// which does not contain any port and exposes port 443.
+	// see https://kubernetes.io/docs/reference/generated/kubernetes-api
+	endpoint := net.JoinHostPort(tempoURL, "443")
+
 	data := struct {
 		ClusterID          string
 		Installation       string
@@ -88,7 +95,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		LoggingPasswordKey: common.LoggingPassword,
 		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
 		TracingEnabled:     tracingEnabled,
-		TracingEndpoint:    tempoURL,
+		TracingEndpoint:    endpoint,
 		TracingUsernameKey: common.TracingUsername,
 		TracingPasswordKey: common.TracingPassword,
 		Tenants:            tenants,

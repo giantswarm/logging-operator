@@ -110,20 +110,21 @@ otelcol.processor.filter "{{ . }}" {
 		]
 	}
 	output {
-		traces = [otelcol.exporter.otlphttp.{{ . }}.input]
+		traces = [otelcol.exporter.otlp.{{ . }}.input]
 	}
+
 }
 
 // one OTLP HTTP exporter for traces per tenant
-otelcol.exporter.otlphttp "{{ . }}" {
+otelcol.exporter.otlp "{{ . }}" {
 	client {
-		// TODO Try out /opentelemetry with grpc and not http
-		endpoint = "https://{{ $.TracingEndpoint }}"
+		endpoint = "{{ $.TracingEndpoint }}"
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
 		auth = otelcol.auth.basic.tracing_credentials.handler
 	}
 }
+
 {{- end }}
 {{- end }}

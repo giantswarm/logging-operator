@@ -26,9 +26,11 @@ const (
 	// Loki Gateway Ingress
 	lokiGatewayIngressNamespace = "loki"
 	lokiGatewayIngressName      = "loki-gateway"
-	// Tempo Gateway Ingress
-	tempoGatewayIngressNamespace = "tempo"
-	tempoGatewayIngressName      = "tempo-gateway"
+	// Tempo Ingress used to send traces to Tempo
+	// Ingress resources are defined here: https://github.com/giantswarm/tempo-app/blob/main/helm/tempo/templates/ingress.yaml
+	// Configuration for ingresses are here: https://github.com/giantswarm/shared-configs/blob/main/default/apps/tempo/configmap-values.yaml.template#L144-L157
+	tempoIngressNamespace = "tempo"
+	tempoIngressName      = "tempo"
 	// grafana-agent secret name
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
@@ -146,7 +148,7 @@ func ReadLokiIngressURL(ctx context.Context, cluster *capi.Cluster, client clien
 func ReadTempoIngressURL(ctx context.Context, cluster *capi.Cluster, client client.Client) (string, error) {
 	var tempoIngress netv1.Ingress
 
-	var objectKey = types.NamespacedName{Name: tempoGatewayIngressName, Namespace: tempoGatewayIngressNamespace}
+	var objectKey = types.NamespacedName{Name: tempoIngressName, Namespace: tempoIngressNamespace}
 	if err := client.Get(ctx, objectKey, &tempoIngress); err != nil {
 		return "", errors.WithStack(err)
 	}
