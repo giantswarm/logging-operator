@@ -115,7 +115,7 @@ otelcol.processor.filter "{{ . }}" {
 
 }
 
-// one OTLP HTTP exporter for traces per tenant
+// one OTLP gRPC exporter for traces per tenant
 otelcol.exporter.otlp "{{ . }}" {
 	client {
 		endpoint = "{{ $.TracingEndpoint }}"
