@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Change alloy-events otel exporter to use gRPC instead of HTTP
+- Enable tracing only on v30+ clusters because older clusters runs alloy <= 1.5 which does not support some new otel configurations.
 
 ## [0.32.0] - 2025-09-29
 
