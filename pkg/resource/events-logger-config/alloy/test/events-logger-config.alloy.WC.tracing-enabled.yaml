@@ -86,7 +86,7 @@ alloy:
         		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
-        // one OTLP HTTP exporter for traces per tenant
+        // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
         		endpoint = "<tempo-url>:443"
