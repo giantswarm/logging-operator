@@ -86,11 +86,11 @@ func (r *Resource) generateAuthSecret(ctx context.Context, cluster *capi.Cluster
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
-	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &secretCredentials, func() error {
-		// Generate loki ingress auth secret
-		data, err := generateIngressAuthSecret(cluster, credentialsSecret)
+	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, credentialsSecret, func() error {
+		// Generate ingress auth secret
+		data, err := generateIngressAuthSecret(cluster, &secretCredentials)
 		if err != nil {
-			logger.Error(err, "failed to generate loki ingress auth secret")
+			logger.Error(err, "failed to generate ingress auth secret")
 			return errors.WithStack(err)
 		}
 		credentialsSecret.StringData = data
@@ -98,7 +98,7 @@ func (r *Resource) generateAuthSecret(ctx context.Context, cluster *capi.Cluster
 		return nil
 	})
 	if err != nil {
-		logger.Error(err, "failed to create loki ingress auth secret")
+		logger.Error(err, "failed to create ingress auth secret")
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
