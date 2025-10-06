@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Change alloy-events otel exporter to use gRPC instead of HTTP
+
 ## [0.32.0] - 2025-09-29
 
 ### Added

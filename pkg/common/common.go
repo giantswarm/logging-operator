@@ -27,8 +27,8 @@ const (
 	lokiGatewayIngressNamespace = "loki"
 	lokiGatewayIngressName      = "loki-gateway"
 	// Tempo Gateway Ingress
-	tempoGatewayIngressNamespace = "tempo"
-	tempoGatewayIngressName      = "tempo-gateway"
+	tempoIngressNamespace = "tempo"
+	tempoIngressName      = "tempo"
 	// grafana-agent secret name
 	//#nosec G101
 	grafanaAgentExtraSecretName = "grafana-agent-secret"
@@ -140,7 +140,7 @@ func ReadLokiIngressURL(ctx context.Context, cluster *capi.Cluster, client clien
 func ReadTempoIngressURL(ctx context.Context, cluster *capi.Cluster, client client.Client) (string, error) {
 	var tempoIngress netv1.Ingress
 
-	var objectKey = types.NamespacedName{Name: tempoGatewayIngressName, Namespace: tempoGatewayIngressNamespace}
+	var objectKey = types.NamespacedName{Name: tempoIngressName, Namespace: tempoIngressNamespace}
 	if err := client.Get(ctx, objectKey, &tempoIngress); err != nil {
 		return "", errors.WithStack(err)
 	}
