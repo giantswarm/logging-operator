@@ -45,9 +45,22 @@ alloy:
         otelcol.receiver.otlp "traces" {
         	grpc {
         		endpoint = "0.0.0.0:4317"
+        		include_metadata = true
         	}
         	http {
         		endpoint = "0.0.0.0:4318"
+        		include_metadata = true
+        	}
+        	output {
+        		traces = [otelcol.processor.attributes.tenant_from_header.input]
+        	}
+        }
+        // Extract tenant from X-Scope-OrgID header if present
+        otelcol.processor.attributes "tenant_from_header" {
+        	action {
+        		key = "giantswarm.tenant_from_header"
+        		action = "upsert"
+        		from_attribute = "http.header.x-scope-orgid"
         	}
         	output {
         		traces = [otelcol.processor.k8sattributes.default.input]
@@ -62,9 +75,48 @@ alloy:
         		]
         		label {
         			key = "observability.giantswarm.io/tenant"
-        			tag_name = "giantswarm.tenant"
+        			tag_name = "giantswarm.tenant_from_label"
         		}
         		otel_annotations = true
+        	}
+        	output {
+        		traces = [otelcol.processor.attributes.tenant_resolution.input]
+        	}
+        }
+        // Resolve final tenant with priority: X-Scope-OrgID header -> pod label -> drop if none
+        otelcol.processor.attributes "tenant_resolution" {
+        	// Start with header value if present
+        	action {
+        		key = "giantswarm.tenant"
+        		action = "upsert"
+        		from_attribute = "giantswarm.tenant_from_header"
+        	}
+        	// If no tenant from header, use pod label (insert only sets if attribute doesn't exist)
+        	action {
+        		key = "giantswarm.tenant"
+        		action = "insert"
+        		from_attribute = "giantswarm.tenant_from_label"
+        	}
+        	// Clean up temporary attributes
+        	action {
+        		key = "giantswarm.tenant_from_header"
+        		action = "delete"
+        	}
+        	action {
+        		key = "giantswarm.tenant_from_label"
+        		action = "delete"
+        	}
+        	output {
+        		traces = [otelcol.processor.filter.tenant_gate.input]
+        	}
+        }
+        // Drop traces that don't have a tenant assigned
+        otelcol.processor.filter "tenant_gate" {
+        	traces {
+        		span = [
+        			`resource.attributes["giantswarm.tenant"] == nil`,
+        			`resource.attributes["giantswarm.tenant"] == ""`,
+        		]
         	}
         	output {
         		traces = [
@@ -77,6 +129,16 @@ alloy:
         		span = [
         			`resource.attributes["giantswarm.tenant"] != "giantswarm"`,
         		]
+        	}
+        	output {
+        		traces = [otelcol.processor.attributes.cleanup_tenant_giantswarm.input]
+        	}
+        }
+        // Remove the giantswarm.tenant attribute before sending to exporter
+        otelcol.processor.attributes "cleanup_tenant_giantswarm" {
+        	action {
+        		key = "giantswarm.tenant"
+        		action = "delete"
         	}
         	output {
         		traces = [otelcol.exporter.otlphttp.giantswarm.input]
