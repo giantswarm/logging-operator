@@ -85,14 +85,14 @@ alloy:
         	trace_statements {
         		context = "resource"
         		statements = [
-        			`set(attributes["giantswarm.cluster.id"], "test-cluster")`,
-        			`set(attributes["giantswarm.cluster.type"], "workload_cluster")`,
-        			`set(attributes["giantswarm.cluster.customer"], "test-customer")`,
-        			`set(attributes["giantswarm.cluster.installation"], "test-installation")`,
-        			`set(attributes["giantswarm.cluster.organization"], "test-organization")`,
-        			`set(attributes["giantswarm.cluster.pipeline"], "test-pipeline")`,
-        			`set(attributes["giantswarm.cluster.provider"], "test-provider")`,
-        			`set(attributes["giantswarm.cluster.region"], "test-region")`,
+        			`set(resource.attributes["giantswarm.cluster.id"], "test-cluster")`,
+        			`set(resource.attributes["giantswarm.cluster.type"], "workload_cluster")`,
+        			`set(resource.attributes["giantswarm.cluster.customer"], "test-customer")`,
+        			`set(resource.attributes["giantswarm.cluster.installation"], "test-installation")`,
+        			`set(resource.attributes["giantswarm.cluster.organization"], "test-organization")`,
+        			`set(resource.attributes["giantswarm.cluster.pipeline"], "test-pipeline")`,
+        			`set(resource.attributes["giantswarm.cluster.provider"], "test-provider")`,
+        			`set(resource.attributes["giantswarm.cluster.region"], "test-region")`,
         		]
         	}
         	output {
@@ -117,7 +117,7 @@ alloy:
         	trace_statements {
         		context = "resource"
         		statements = [
-        			`delete_key(attributes, "giantswarm.tenant")`,
+        			`delete_key(resource.attributes, "giantswarm.tenant")`,
         		]
         	}
         	output {

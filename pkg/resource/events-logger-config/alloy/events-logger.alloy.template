@@ -75,7 +75,6 @@ otelcol.receiver.otlp "traces" {
 	grpc {
 		endpoint = "0.0.0.0:4317"
 	}
-
 	http {
 		endpoint = "0.0.0.0:4318"
 	}
@@ -110,14 +109,14 @@ otelcol.processor.transform "default" {
 	trace_statements {
 		context = "resource"
 		statements = [
-			`set(attributes["giantswarm.cluster.id"], "{{ .ClusterID }}")`,
-			`set(attributes["giantswarm.cluster.type"], "{{ .ClusterType }}")`,
-			`set(attributes["giantswarm.cluster.customer"], "{{ .Customer }}")`,
-			`set(attributes["giantswarm.cluster.installation"], "{{ .Installation }}")`,
-			`set(attributes["giantswarm.cluster.organization"], "{{ .Organization }}")`,
-			`set(attributes["giantswarm.cluster.pipeline"], "{{ .Pipeline }}")`,
-			`set(attributes["giantswarm.cluster.provider"], "{{ .Provider }}")`,
-			`set(attributes["giantswarm.cluster.region"], "{{ .Region }}")`,
+			`set(resource.attributes["giantswarm.cluster.id"], "{{ .ClusterID }}")`,
+			`set(resource.attributes["giantswarm.cluster.type"], "{{ .ClusterType }}")`,
+			`set(resource.attributes["giantswarm.cluster.customer"], "{{ .Customer }}")`,
+			`set(resource.attributes["giantswarm.cluster.installation"], "{{ .Installation }}")`,
+			`set(resource.attributes["giantswarm.cluster.organization"], "{{ .Organization }}")`,
+			`set(resource.attributes["giantswarm.cluster.pipeline"], "{{ .Pipeline }}")`,
+			`set(resource.attributes["giantswarm.cluster.provider"], "{{ .Provider }}")`,
+			`set(resource.attributes["giantswarm.cluster.region"], "{{ .Region }}")`,
 		]
 	}
 
@@ -150,7 +149,7 @@ otelcol.processor.transform "cleanup_{{ . }}" {
 	trace_statements {
 		context = "resource"
 		statements = [
-			`delete_key(attributes, "giantswarm.tenant")`,
+			`delete_key(resource.attributes, "giantswarm.tenant")`,
 		]
 	}
 
