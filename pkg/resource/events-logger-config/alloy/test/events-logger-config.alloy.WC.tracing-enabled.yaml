@@ -77,43 +77,23 @@ alloy:
         		otel_annotations = true
         	}
         	output {
-        		traces = [otelcol.processor.resource.default.input]
+        		traces = [otelcol.processor.transform.default.input]
         	}
         }
-        otelcol.processor.resource "default" {
-        	attributes {
-        		upsert {
-        			key = "giantswarm.cluster.id"
-        			value = "test-cluster"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.type"
-        			value = "workload_cluster"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.customer"
-        			value = "test-customer"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.installation"
-        			value = "test-installation"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.organization"
-        			value = "test-organization"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.pipeline"
-        			value = "test-pipeline"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.provider"
-        			value = "test-provider"
-        		}
-        		upsert {
-        			key = "giantswarm.cluster.region"
-        			value = "test-region"
-        		}
+        otelcol.processor.transform "default" {
+        	error_mode = "ignore"
+        	trace_statements {
+        		context = "resource"
+        		statements = [
+        			`set(attributes["giantswarm.cluster.id"], "test-cluster")`,
+        			`set(attributes["giantswarm.cluster.type"], "workload_cluster")`,
+        			`set(attributes["giantswarm.cluster.customer"], "test-customer")`,
+        			`set(attributes["giantswarm.cluster.installation"], "test-installation")`,
+        			`set(attributes["giantswarm.cluster.organization"], "test-organization")`,
+        			`set(attributes["giantswarm.cluster.pipeline"], "test-pipeline")`,
+        			`set(attributes["giantswarm.cluster.provider"], "test-provider")`,
+        			`set(attributes["giantswarm.cluster.region"], "test-region")`,
+        		]
         	}
         	output {
         		traces = [
@@ -128,15 +108,17 @@ alloy:
         		]
         	}
         	output {
-        		traces = [otelcol.processor.resource.cleanup_giantswarm.input]
+        		traces = [otelcol.processor.transform.cleanup_giantswarm.input]
         	}
         }
-        // Remove giantswarm.tenant attribute after filtering
-        otelcol.processor.resource "cleanup_giantswarm" {
-        	attributes {
-        		delete {
-        			key = "giantswarm.tenant"
-        		}
+        // Remove giantswarm.tenant resource attribute after filtering
+        otelcol.processor.transform "cleanup_giantswarm" {
+        	error_mode = "ignore"
+        	trace_statements {
+        		context = "resource"
+        		statements = [
+        			`delete_key(attributes, "giantswarm.tenant")`,
+        		]
         	}
         	output {
         		traces = [otelcol.exporter.otlp.giantswarm.input]

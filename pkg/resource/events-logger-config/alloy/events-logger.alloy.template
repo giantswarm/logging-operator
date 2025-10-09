@@ -100,44 +100,25 @@ otelcol.processor.k8sattributes "default" {
 	}
 
 	output {
-		traces = [otelcol.processor.resource.default.input]
+		traces = [otelcol.processor.transform.default.input]
 	}
 }
 
-otelcol.processor.resource "default" {
-	attributes {
-		upsert {
-			key = "giantswarm.cluster.id"
-			value = "{{ .ClusterID }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.type"
-			value = "{{ .ClusterType }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.customer"
-			value = "{{ .Customer }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.installation"
-			value = "{{ .Installation }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.organization"
-			value = "{{ .Organization }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.pipeline"
-			value = "{{ .Pipeline }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.provider"
-			value = "{{ .Provider }}"
-		}
-		upsert {
-			key = "giantswarm.cluster.region"
-			value = "{{ .Region }}"
-		}
+otelcol.processor.transform "default" {
+	error_mode = "ignore"
+
+	trace_statements {
+		context = "resource"
+		statements = [
+			`set(attributes["giantswarm.cluster.id"], "{{ .ClusterID }}")`,
+			`set(attributes["giantswarm.cluster.type"], "{{ .ClusterType }}")`,
+			`set(attributes["giantswarm.cluster.customer"], "{{ .Customer }}")`,
+			`set(attributes["giantswarm.cluster.installation"], "{{ .Installation }}")`,
+			`set(attributes["giantswarm.cluster.organization"], "{{ .Organization }}")`,
+			`set(attributes["giantswarm.cluster.pipeline"], "{{ .Pipeline }}")`,
+			`set(attributes["giantswarm.cluster.provider"], "{{ .Provider }}")`,
+			`set(attributes["giantswarm.cluster.region"], "{{ .Region }}")`,
+		]
 	}
 
 	output {
@@ -157,17 +138,20 @@ otelcol.processor.filter "{{ . }}" {
 		]
 	}
 	output {
-		traces = [otelcol.processor.resource.cleanup_{{ . }}.input]
+		traces = [otelcol.processor.transform.cleanup_{{ . }}.input]
 	}
 
 }
 
-// Remove giantswarm.tenant attribute after filtering
-otelcol.processor.resource "cleanup_{{ . }}" {
-	attributes {
-		delete {
-			key = "giantswarm.tenant"
-		}
+// Remove giantswarm.tenant resource attribute after filtering
+otelcol.processor.transform "cleanup_{{ . }}" {
+	error_mode = "ignore"
+
+	trace_statements {
+		context = "resource"
+		statements = [
+			`delete_key(attributes, "giantswarm.tenant")`,
+		]
 	}
 
 	output {
