@@ -52,9 +52,15 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}",
-		installation = "{{ .Installation }}",
-		scrape_job = "kubernetes-events",
+		cluster_id       = "{{ .ClusterID }}",
+		cluster_type     = "{{ .ClusterType }}",
+		customer         = "{{ .Customer }}",
+		installation     = "{{ .Installation }}",
+		organization     = "{{ .Organization }}",
+		pipeline         = "{{ .Pipeline }}",
+		provider         = "{{ .Provider }}",
+		region           = "{{ .Region }}",
+		scrape_job       = "kubernetes-events",
 	}
 }
 
@@ -69,7 +75,6 @@ otelcol.receiver.otlp "traces" {
 	grpc {
 		endpoint = "0.0.0.0:4317"
 	}
-
 	http {
 		endpoint = "0.0.0.0:4318"
 	}
@@ -94,6 +99,28 @@ otelcol.processor.k8sattributes "default" {
 	}
 
 	output {
+		traces = [otelcol.processor.transform.default.input]
+	}
+}
+
+otelcol.processor.transform "default" {
+	error_mode = "ignore"
+
+	trace_statements {
+		context = "resource"
+		statements = [
+			`set(resource.attributes["giantswarm.cluster.id"], "{{ .ClusterID }}")`,
+			`set(resource.attributes["giantswarm.cluster.type"], "{{ .ClusterType }}")`,
+			`set(resource.attributes["giantswarm.cluster.customer"], "{{ .Customer }}")`,
+			`set(resource.attributes["giantswarm.cluster.installation"], "{{ .Installation }}")`,
+			`set(resource.attributes["giantswarm.cluster.organization"], "{{ .Organization }}")`,
+			`set(resource.attributes["giantswarm.cluster.pipeline"], "{{ .Pipeline }}")`,
+			`set(resource.attributes["giantswarm.cluster.provider"], "{{ .Provider }}")`,
+			`set(resource.attributes["giantswarm.cluster.region"], "{{ .Region }}")`,
+		]
+	}
+
+	output {
 		traces = [
 			{{- range .Tenants }}
 			otelcol.processor.filter.{{ . }}.input,
@@ -110,9 +137,25 @@ otelcol.processor.filter "{{ . }}" {
 		]
 	}
 	output {
-		traces = [otelcol.exporter.otlp.{{ . }}.input]
+		traces = [otelcol.processor.transform.cleanup_{{ . }}.input]
 	}
 
+}
+
+// Remove giantswarm.tenant resource attribute after filtering
+otelcol.processor.transform "cleanup_{{ . }}" {
+	error_mode = "ignore"
+
+	trace_statements {
+		context = "resource"
+		statements = [
+			`delete_key(resource.attributes, "giantswarm.tenant")`,
+		]
+	}
+
+	output {
+		traces = [otelcol.exporter.otlp.{{ . }}.input]
+	}
 }
 
 // one OTLP gRPC exporter for traces per tenant

@@ -50,6 +50,9 @@ tracing:
 
 managementCluster:
   name: unknown
+  customer: unknown
+  pipeline: unknown
+  region: unknown
   insecureCA: false
 
 profiling:

@@ -36,9 +36,15 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "test-installation",
-        		installation = "test-installation",
-        		scrape_job = "kubernetes-events",
+        		cluster_id       = "test-installation",
+        		cluster_type     = "workload_cluster",
+        		customer         = "test-customer",
+        		installation     = "test-installation",
+        		organization     = "test-organization",
+        		pipeline         = "test-pipeline",
+        		provider         = "test-provider",
+        		region           = "test-region",
+        		scrape_job       = "kubernetes-events",
         	}
         }
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
