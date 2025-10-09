@@ -73,38 +73,54 @@ discovery.relabel "kubernetes_pods" {
 	targets = discovery.kubernetes.kubernetes_pods.targets
 {{- end }}
 
+	// Convert __meta_kubernetes_pod_label_* to clean label names (works for discovery.kubernetes path)
+	rule {
+		action = "labelmap"
+		regex  = "__meta_kubernetes_pod_label_(.+)"
+	}
+
+	// Combine app.kubernetes.io/name and app.kubernetes.io/component to create service name
+	// e.g., "mimir" + "distributor" -> "mimir-distributor" to align with Tempo service.name
+	rule {
+		source_labels = ["app_kubernetes_io_name", "app_kubernetes_io_component"]
+		separator     = "-"
+		regex         = "^(.+)-(.+)$"
+		target_label  = "service"
+	}
+
 	rule {
 		source_labels = ["__meta_kubernetes_pod_controller_name"]
 		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
 		target_label  = "__tmp_controller_name"
 	}
 
+	// Fallback: use the first available label if component combination doesn't work
 	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
+		source_labels = ["app_kubernetes_io_name", "app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
 		regex         = "^;*([^;]+)(;.*)?$"
 		target_label  = "app"
 	}
 
 	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_instance", "__meta_kubernetes_pod_label_instance"]
+		source_labels = ["app_kubernetes_io_instance", "instance"]
 		regex         = "^;*([^;]+)(;.*)?$"
 		target_label  = "instance"
 	}
 
 	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component", "__meta_kubernetes_pod_label_component"]
+		source_labels = ["app_kubernetes_io_component", "component"]
 		regex         = "^;*([^;]+)(;.*)?$"
 		target_label  = "component"
 	}
 
 	rule {
-		target_label = "scrape_job"
-		replacement  = "kubernetes-pods"
+		source_labels = ["__meta_kubernetes_pod_node_name"]
+		target_label  = "node"
 	}
 
 	rule {
-		source_labels = ["__meta_kubernetes_pod_node_name"]
-		target_label  = "node"
+		target_label = "scrape_job"
+		replacement  = "kubernetes-pods"
 	}
 
 	{{- if .SupportPodLogs }}
@@ -125,24 +141,7 @@ discovery.relabel "kubernetes_pods" {
 		regex         = ".+/.+:(.+)"
 		target_label  = "container"
 	}
-	{{- else }}
-	rule {
-		source_labels = ["__meta_kubernetes_namespace"]
-		target_label  = "namespace"
-	}
 
-	rule {
-		source_labels = ["__meta_kubernetes_pod_name"]
-		target_label  = "pod"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_container_name"]
-		target_label  = "container"
-	}
-	{{- end }}
-
-	{{- if .SupportPodLogs }}
 	// Keep only log lines with tenants specified in the regex.
 	// Log lines are dropped later in the loki.process stage.drop step.
 	rule {
@@ -158,6 +157,21 @@ discovery.relabel "kubernetes_pods" {
 	}
 
 	{{- else }}
+	rule {
+		source_labels = ["__meta_kubernetes_namespace"]
+		target_label  = "namespace"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_name"]
+		target_label  = "pod"
+	}
+
+	rule {
+		source_labels = ["__meta_kubernetes_pod_container_name"]
+		target_label  = "container"
+	}
+
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
