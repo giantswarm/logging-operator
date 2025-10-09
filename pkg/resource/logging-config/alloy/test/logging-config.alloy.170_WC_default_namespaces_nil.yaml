@@ -319,8 +319,14 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "test-cluster",
-        		installation = "test-installation",
+        		cluster_id       = "test-cluster",
+        		cluster_type     = "workload_cluster",
+        		customer         = "test-customer",
+        		installation     = "test-installation",
+        		organization     = "test-organization",
+        		pipeline         = "test-pipeline",
+        		provider         = "test-provider",
+        		region           = "test-region",
         	}
         }
     clustering:

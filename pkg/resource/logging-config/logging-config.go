@@ -16,18 +16,18 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
+func (r *Resource) GenerateLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, tenants []string, clusterLabels common.ClusterLabels) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
 	switch loggingAgent.LoggingAgent {
 	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(cluster, installationName)
+		values, err = GeneratePromtailLoggingConfig(cluster, r.Config.InstallationName)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}
 	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA)
+		values, err = GenerateAlloyLoggingConfig(loggingAgent, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, clusterLabels, r.Config.InsecureCA)
 		if err != nil {
 			return v1.ConfigMap{}, err
 		}

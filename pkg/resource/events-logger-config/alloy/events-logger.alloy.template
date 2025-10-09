@@ -52,9 +52,15 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}",
-		installation = "{{ .Installation }}",
-		scrape_job = "kubernetes-events",
+		cluster_id       = "{{ .ClusterID }}",
+		cluster_type     = "{{ .ClusterType }}",
+		customer         = "{{ .Customer }}",
+		installation     = "{{ .Installation }}",
+		organization     = "{{ .Organization }}",
+		pipeline         = "{{ .Pipeline }}",
+		provider         = "{{ .Provider }}",
+		region           = "{{ .Region }}",
+		scrape_job       = "kubernetes-events",
 	}
 }
 
@@ -94,6 +100,47 @@ otelcol.processor.k8sattributes "default" {
 	}
 
 	output {
+		traces = [otelcol.processor.resource.default.input]
+	}
+}
+
+otelcol.processor.resource "default" {
+	attributes {
+		upsert {
+			key = "giantswarm.cluster.id"
+			value = "{{ .ClusterID }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.type"
+			value = "{{ .ClusterType }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.customer"
+			value = "{{ .Customer }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.installation"
+			value = "{{ .Installation }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.organization"
+			value = "{{ .Organization }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.pipeline"
+			value = "{{ .Pipeline }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.provider"
+			value = "{{ .Provider }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.region"
+			value = "{{ .Region }}"
+		}
+	}
+
+	output {
 		traces = [
 			{{- range .Tenants }}
 			otelcol.processor.filter.{{ . }}.input,
@@ -110,9 +157,22 @@ otelcol.processor.filter "{{ . }}" {
 		]
 	}
 	output {
-		traces = [otelcol.exporter.otlp.{{ . }}.input]
+		traces = [otelcol.processor.resource.cleanup_{{ . }}.input]
 	}
 
+}
+
+// Remove giantswarm.tenant attribute after filtering
+otelcol.processor.resource "cleanup_{{ . }}" {
+	attributes {
+		delete {
+			key = "giantswarm.tenant"
+		}
+	}
+
+	output {
+		traces = [otelcol.exporter.otlp.{{ . }}.input]
+	}
 }
 
 // one OTLP gRPC exporter for traces per tenant

@@ -7,9 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-
 	"github.com/blang/semver"
 	"github.com/google/go-cmp/cmp"
 
@@ -90,18 +87,29 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
-			cluster := &capi.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: tc.clusterName,
-				},
-			}
-
 			loggingAgent := &common.LoggingAgent{
 				LoggingAgent:     common.LoggingAgentAlloy,
 				KubeEventsLogger: common.EventsLoggerAlloy,
 			}
 
-			config, err := GenerateAlloyLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
+			// Create ClusterLabels for the test
+			clusterLabels := common.ClusterLabels{
+				ClusterID: tc.clusterName,
+				ClusterType: func() string {
+					if tc.clusterName == tc.installationName {
+						return "management_cluster"
+					}
+					return "workload_cluster"
+				}(),
+				Customer:     "test-customer",
+				Installation: tc.installationName,
+				Organization: "test-organization",
+				Pipeline:     "test-pipeline",
+				Provider:     "test-provider",
+				Region:       "test-region",
+			}
+
+			config, err := GenerateAlloyLoggingConfig(loggingAgent, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, clusterLabels, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

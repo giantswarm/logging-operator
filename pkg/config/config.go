@@ -9,16 +9,8 @@ type Config struct {
 	DefaultKubeEventsLogger string
 	InstallationName        string
 	InsecureCA              bool
-}
-
-// NewConfig creates a new Config instance
-func NewConfig(enableLogging, enableTracing bool, loggingAgent, eventsLogger, installationName string, insecureCA bool) *Config {
-	return &Config{
-		EnableLoggingFlag:       enableLogging,
-		EnableTracingFlag:       enableTracing,
-		DefaultLoggingAgent:     loggingAgent,
-		DefaultKubeEventsLogger: eventsLogger,
-		InstallationName:        installationName,
-		InsecureCA:              insecureCA,
-	}
+	// Static cluster configuration (from command line flags)
+	Customer string
+	Pipeline string
+	Region   string
 }

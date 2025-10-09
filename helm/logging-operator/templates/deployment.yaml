@@ -36,6 +36,9 @@ spec:
           - -enable-tracing={{ .Values.tracing.enabled }}
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}
+          - -customer={{ .Values.managementCluster.customer }}
+          - -pipeline={{ .Values.managementCluster.pipeline }}
+          - -region={{ .Values.managementCluster.region }}
           - -logging-agent={{ .Values.loggingOperator.loggingAgent }}
           - -events-logger={{ .Values.loggingOperator.eventsLogger }}
           - -default-namespaces={{ .Values.loggingOperator.defaultNamespaces }}
