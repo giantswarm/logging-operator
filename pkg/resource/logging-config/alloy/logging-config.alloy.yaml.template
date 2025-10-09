@@ -170,6 +170,8 @@ podLogs:
         - {{ . }}
         {{- end }}
     relabelings:
+    - action: labelmap
+      regex: "__meta_kubernetes_pod_label_(.+)"
     - action: replace
       targetLabel: "giantswarm_observability_tenant"
       replacement: {{ .DefaultWriteTenant }}
@@ -189,6 +191,8 @@ podLogs:
         - {{ . }}
         {{- end }}
     relabelings:
+    - action: labelmap
+      regex: "__meta_kubernetes_pod_label_(.+)"
     - action: replace
       sourceLabels: ["__meta_kubernetes_pod_label_observability_giantswarm_io_tenant"]
       targetLabel: "giantswarm_observability_tenant"
@@ -204,5 +208,7 @@ podLogs:
     - action: replace
       targetLabel: "giantswarm_observability_tenant"
       replacement: {{ .DefaultWriteTenant }}
+    - action: labelmap
+      regex: "__meta_kubernetes_pod_label_(.+)"
 {{- end }}
 {{- end }}
