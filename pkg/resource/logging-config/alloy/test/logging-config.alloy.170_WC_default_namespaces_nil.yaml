@@ -77,15 +77,16 @@ alloy:
         		}
         	}
         }
-        // Kubernetes pods logs
+        // Native podlogs collection (preferred method for scalability)
         loki.source.podlogs "kubernetes_pods" {
-        	forward_to      = [loki.relabel.kubernetes_pods.receiver]
-        	// namespace_selector is a workaround for broken cluster mode in alloy 1.5.0
+        	forward_to = [loki.relabel.kubernetes_pods.receiver]
+        	// Workaround for broken cluster mode in Alloy 1.5.0
+        	// Uses a non-existent key to effectively select all namespaces
         	namespace_selector {
         		match_expression {
-        			key = "nonexisting"
+        			key      = "nonexisting"
         			operator = "NotIn"
-        			values = ["nonexistant"]
+        			values   = ["nonexistant"]
         		}
         	}
         	clustering {
@@ -93,35 +94,47 @@ alloy:
         	}
         }
         loki.relabel "kubernetes_pods" {
-        	forward_to      = [loki.process.kubernetes_pods.receiver]
-        	// Convert __meta_kubernetes_pod_label_* to clean label names (works for discovery.kubernetes path)
+        	forward_to = [loki.process.kubernetes_pods.receiver]
         	rule {
-        		action = "labelmap"
-        		regex  = "__meta_kubernetes_pod_label_(.+)"
+        		target_label = "scrape_job"
+        		replacement  = "kubernetes-pods"
         	}
-        	// Combine app.kubernetes.io/name and app.kubernetes.io/component to create service name
-        	// e.g., "mimir" + "distributor" -> "mimir-distributor" to align with Tempo service.name
+        	// Extract namespace, pod, and container from the structured instance label
+        	// Format: "namespace/pod:container" (e.g., "kube-system/mimir-distributor-abc123:mimir")
         	rule {
-        		source_labels = ["app_kubernetes_io_name", "app_kubernetes_io_component"]
-        		separator     = "-"
-        		regex         = "^(.+)-(.+)$"
-        		target_label  = "service"
+        		source_labels = ["instance"]
+        		regex         = "([^/]+)/.+"
+        		target_label  = "namespace"
         	}
         	rule {
-        		source_labels = ["__meta_kubernetes_pod_controller_name"]
-        		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
-        		target_label  = "__tmp_controller_name"
+        		source_labels = ["instance"]
+        		regex         = "[^/]+/([^:]+):.+"
+        		target_label  = "pod"
         	}
-        	// Fallback: use the first available label if component combination doesn't work
         	rule {
-        		source_labels = ["app_kubernetes_io_name", "app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
+        		source_labels = ["instance"]
+        		regex         = "[^/]+/[^:]+:(.+)"
+        		target_label  = "container"
+        	}
+        	// Extract tenant ID for authorized tenants only - logs from unauthorized
+        	// tenants will be dropped later in the processing pipeline
+        	// Configured tenants: giantswarm
+        	rule {
+        		source_labels = ["giantswarm_observability_tenant"]
+        		regex         = "^(giantswarm)$"
+        		target_label  = "__tenant_id__"
+        	}
+        	// Remove the source tenant label to keep Loki labels clean
+        	rule {
+        		regex  = "giantswarm_observability_tenant"
+        		action = "labeldrop"
+        	}
+        	// Extract and normalize standard k8s labels with priority-based fallbacks
+        	// Priority: app.kubernetes.io/name > app > pod name (pod logs then file-based discovery)
+        	rule {
+        		source_labels = ["app_kubernetes_io_name", "app", "pod", "__meta_kubernetes_pod_name"]
         		regex         = "^;*([^;]+)(;.*)?$"
         		target_label  = "app"
-        	}
-        	rule {
-        		source_labels = ["app_kubernetes_io_instance", "instance"]
-        		regex         = "^;*([^;]+)(;.*)?$"
-        		target_label  = "instance"
         	}
         	rule {
         		source_labels = ["app_kubernetes_io_component", "component"]
@@ -129,56 +142,44 @@ alloy:
         		target_label  = "component"
         	}
         	rule {
-        		source_labels = ["__meta_kubernetes_pod_node_name"]
-        		target_label  = "node"
+        		source_labels = ["app_kubernetes_io_version", "version"]
+        		regex         = "^;*([^;]+)(;.*)?$"
+        		target_label  = "version"
+        	}
+        	// Create unified service name by combining app + component to align Loki and Tempo signals
+        	// Only creates service label when BOTH app and component are non-empty
+        	// Handles app names with hyphens like "alertmanager-to-github" or "background-controller"
+        	// Examples: "mimir" + "distributor" → "mimir-distributor" (matches Tempo service.name)
+        	//           "alertmanager-to-github" + "webhook" → "alertmanager-to-github-webhook"
+        	rule {
+        		source_labels = ["app", "component"]
+        		regex         = "^(.+);(.+)$"
+        		replacement   = "${1}-${2}"
+        		target_label  = "service"
         	}
         	rule {
-        		target_label = "scrape_job"
-        		replacement  = "kubernetes-pods"
-        	}
-        	rule {
-        		source_labels = ["instance"]
-        		regex         = "(.+)/.+"
-        		target_label  = "namespace"
-        	}
-        	rule {
-        		source_labels = ["instance"]
-        		regex         = ".+/(.+):.+"
-        		target_label  = "pod"
-        	}
-        	rule {
-        		source_labels = ["instance"]
-        		regex         = ".+/.+:(.+)"
-        		target_label  = "container"
-        	}
-        	// Keep only log lines with tenants specified in the regex.
-        	// Log lines are dropped later in the loki.process stage.drop step.
-        	rule {
-        		source_labels = ["giantswarm_observability_tenant"]
-        		regex         = "^(giantswarm)$"
-        		target_label  = "__tenant_id__"
-        	}
-        	// We drop the label to not have it ingested in loki
-        	rule {
-        		regex = "giantswarm_observability_tenant"
+        		regex  = "app_kubernetes_io_(component|name|version)"
         		action = "labeldrop"
         	}
         }
         loki.process "kubernetes_pods" {
         	forward_to = [loki.write.default.receiver]
+        	// Parse container runtime interface (CRI) log format
         	stage.cri { }
-        	// Drop log lines that do not contain a tenant id
+        	// Multi-tenant filtering: drop logs without valid tenant authorization
         	stage.drop {
         		drop_counter_reason = "no_tenant_id"
         		source              = "__tenant_id__"
         		expression          = "^$"
         	}
+        	// Move high-cardinality metadata to structured metadata instead of labels
         	stage.structured_metadata {
         		values = {
         			"filename" = "",
         			"stream" = "",
         		}
         	}
+        	// Clean up temporary labels used only for processing
         	stage.label_drop {
         		values = [
         			"filename",
