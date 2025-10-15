@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Loki service port in the MC from 8080 to 80.
+
 ## [0.34.0] - 2025-10-15
 
 ### Changed

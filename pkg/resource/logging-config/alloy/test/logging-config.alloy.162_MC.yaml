@@ -310,7 +310,7 @@ alloy:
         // Loki target configuration
         loki.write "default" {
         	endpoint {
-        		url                = "http://loki-gateway.loki.svc:8080/loki/api/v1/push"
+        		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
         		max_backoff_period = "10m0s"
         		remote_timeout     = "1m0s"
         		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
