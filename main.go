@@ -92,6 +92,9 @@ func main() {
 	var excludeEventsFromNamespaces StringSliceVar
 	var installationName string
 	var insecureCA bool
+	var customer string
+	var pipeline string
+	var region string
 	var metricsAddr string
 	var profilesAddr string
 	var probeAddr string
@@ -107,6 +110,9 @@ func main() {
 	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
+	flag.StringVar(&customer, "customer", "", "Customer name")
+	flag.StringVar(&pipeline, "pipeline", "", "Pipeline name")
+	flag.StringVar(&region, "region", "", "Region name")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&profilesAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -166,6 +172,9 @@ func main() {
 		DefaultKubeEventsLogger: eventsLogger,
 		InstallationName:        installationName,
 		InsecureCA:              insecureCA,
+		Customer:                customer,
+		Pipeline:                pipeline,
+		Region:                  region,
 	}
 
 	agentsToggle := agentstoggle.Resource{
