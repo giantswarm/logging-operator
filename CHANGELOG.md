@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update egress field from alloy-events and alloy-logs cilium network policy in their respective templates.
+
 ## [0.34.1] - 2025-10-15
 
 ### Fixed

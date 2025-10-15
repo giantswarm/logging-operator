@@ -30,7 +30,18 @@ networkPolicy:
           protocol: UDP
         - port: "53"
           protocol: TCP
-    # Allow direct access to loki-backend and nginx
+    # Allow direct access to loki-backend, loki-gateway and nginx
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/component: gateway
+          app.kubernetes.io/name: loki
+          io.kubernetes.pod.namespace: loki
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+        - port: "8080"
+          protocol: TCP
     - toEndpoints:
       - matchLabels:
           app.kubernetes.io/component: backend
