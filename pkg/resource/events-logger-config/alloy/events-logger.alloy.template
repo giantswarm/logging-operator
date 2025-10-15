@@ -37,15 +37,19 @@ loki.process "default" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
 		remote_timeout     = "{{ .RemoteTimeout }}"
 		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
+		{{- if .IsWorkloadCluster }}
+		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
+		{{- else }}
+		url                = "http://loki-gateway.loki.svc:8080/loki/api/v1/push"
+		{{- end }}
 
 		tls_config {
 			insecure_skip_verify = {{ .InsecureSkipVerify }}
@@ -118,11 +122,18 @@ otelcol.processor.filter "{{ . }}" {
 // one OTLP gRPC exporter for traces per tenant
 otelcol.exporter.otlp "{{ . }}" {
 	client {
+
+		{{- if $.IsWorkloadCluster }}
+		auth     = otelcol.auth.basic.tracing_credentials.handler
 		endpoint = "{{ $.TracingEndpoint }}"
+		{{- else }}
+		endpoint = "tempo-distributor.tempo.svc:4317"
+		{{- end }}
+
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
-		auth = otelcol.auth.basic.tracing_credentials.handler
+
 	}
 }
 

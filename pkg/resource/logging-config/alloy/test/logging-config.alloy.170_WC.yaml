@@ -306,14 +306,14 @@ alloy:
         // Loki target configuration
         loki.write "default" {
         	endpoint {
-        		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
-        		max_backoff_period = "10m0s"
-        		remote_timeout     = "1m0s"
-        		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         		basic_auth {
         			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         			password = remote.kubernetes.secret.credentials.data["logging-password"]
         		}
+        		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
+        		max_backoff_period = "10m0s"
+        		remote_timeout     = "1m0s"
+        		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         		tls_config {
         			insecure_skip_verify = false
         		}
