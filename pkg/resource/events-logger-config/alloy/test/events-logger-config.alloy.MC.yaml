@@ -3,6 +3,53 @@
 # - configMap is generated from events-logger.alloy.template and passed as a string
 #   here and will be created by Alloy's chart.
 # - Alloy runs as a deployment, with only 1 replica.
+networkPolicy:
+  cilium:
+    egress:
+    - toEntities:
+      - kube-apiserver
+      - world
+    # Allow direct access to loki-gateway
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/component: gateway
+          app.kubernetes.io/name: loki
+          io.kubernetes.pod.namespace: loki
+      toPorts:
+      - ports:
+        - port: "8080"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s-app: coredns
+      - matchLabels:
+          k8s-app: k8s-dns-node-cache
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+        - port: "1053"
+          protocol: ANY
+        rules:
+          dns:
+          - matchPattern: '*'
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: ANY
+        - port: "443"
+          protocol: ANY
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: alloy-events
+          app.kubernetes.io/name: alloy
+      toPorts:
+      - ports:
+        - port: "12345"
+          protocol: TCP
 alloy:
   alloy:
     configMap:
