@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.34.1] - 2025-10-15
+
+### Fixed
+
+- Fix Loki service port in the MC from 8080 to 80.
+
 ## [0.34.0] - 2025-10-15
 
 ### Changed
@@ -582,7 +588,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.1...HEAD
+[0.34.1]: https://github.com/giantswarm/logging-operator/compare/v0.34.0...v0.34.1
 [0.34.0]: https://github.com/giantswarm/logging-operator/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/giantswarm/logging-operator/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/giantswarm/logging-operator/compare/v0.31.1...v0.32.0

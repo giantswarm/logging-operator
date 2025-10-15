@@ -379,7 +379,7 @@ loki.write "default" {
 		}
 		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		{{- else }}
-		url                = "http://loki-gateway.loki.svc:8080/loki/api/v1/push"
+		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
 		{{- end }}
 
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"

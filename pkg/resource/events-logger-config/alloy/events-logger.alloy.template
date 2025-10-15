@@ -48,7 +48,7 @@ loki.write "default" {
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
 		{{- else }}
-		url                = "http://loki-gateway.loki.svc:8080/loki/api/v1/push"
+		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
 		{{- end }}
 
 		tls_config {
