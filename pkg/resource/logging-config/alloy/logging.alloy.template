@@ -372,15 +372,19 @@ loki.source.file "kubernetes_audit" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
-		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		remote_timeout     = "{{ .RemoteTimeout }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
-
+		{{- if .IsWorkloadCluster }}
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
+		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		{{- else }}
+		url                = "http://loki-gateway.loki.svc:8080/loki/api/v1/push"
+		{{- end }}
+
+		max_backoff_period = "{{ .MaxBackoffPeriod }}"
+		remote_timeout     = "{{ .RemoteTimeout }}"
+		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		tls_config {
 			insecure_skip_verify = {{ .InsecureSkipVerify }}
