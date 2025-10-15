@@ -48,6 +48,12 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 			tracingEnabled:    false,
 		},
 		{
+			goldenFile:       "alloy/test/events-logger-config.alloy.MC.tracing-enabled.yaml",
+			installationName: "test-installation",
+			clusterName:      "test-installation",
+			tracingEnabled:   true,
+		},
+		{
 			goldenFile:       "alloy/test/events-logger-config.alloy.WC.tracing-enabled.yaml",
 			installationName: "test-installation",
 			clusterName:      "test-cluster",
