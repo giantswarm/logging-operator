@@ -21,7 +21,7 @@ networkPolicy:
           protocol: TCP
         - port: "4318"
           protocol: TCP
-    [[- end ]]
+    {{- end }}
     # Allow direct access to loki-gateway
     - toEndpoints:
       - matchLabels:

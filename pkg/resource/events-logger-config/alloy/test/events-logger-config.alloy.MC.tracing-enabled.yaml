@@ -9,6 +9,16 @@ networkPolicy:
     - toEntities:
       - kube-apiserver
       - world
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: tempo
+          io.kubernetes.pod.namespace: tempo
+      toPorts:
+      - ports:
+        - port: "4317"
+          protocol: TCP
+        - port: "4318"
+          protocol: TCP
     # Allow direct access to loki-gateway
     - toEndpoints:
       - matchLabels:
