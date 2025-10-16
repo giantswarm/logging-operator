@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.34.4] - 2025-10-16
+
+### Fixed
+
+- Fix issue with multiple networkPolicies field.
+
 ## [0.34.3] - 2025-10-16
 
 ### Changed
@@ -600,7 +606,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.3...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...HEAD
+[0.34.4]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...v0.34.4
+[0.34.4]: https://github.com/giantswarm/logging-operator/compare/v0.34.3...v0.34.4
 [0.34.3]: https://github.com/giantswarm/logging-operator/compare/v0.34.2...v0.34.3
 [0.34.2]: https://github.com/giantswarm/logging-operator/compare/v0.34.1...v0.34.2
 [0.34.1]: https://github.com/giantswarm/logging-operator/compare/v0.34.0...v0.34.1
