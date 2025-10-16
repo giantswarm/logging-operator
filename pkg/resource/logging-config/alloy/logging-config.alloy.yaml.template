@@ -6,7 +6,7 @@
 #   from every machine in the cluster.
 # - Running as root user is required in order to be able to read log files within
 #   /var/log/journal and /run/log/journal directories.
-# - NODENAME env var is used as additional label for kubernetes_audit logs.
+# - NODE_NAME env var is used as additional label for kubernetes_audit logs.
 networkPolicy:
   cilium:
     egress:
@@ -62,15 +62,6 @@ networkPolicy:
         - port: "443"
           protocol: ANY
     {{- end }}
-    # Allow clustering
-    - toEndpoints:
-      - matchLabels:
-          app.kubernetes.io/instance: alloy-logs
-          app.kubernetes.io/name: alloy
-      toPorts:
-      - ports:
-        - port: "12345"
-          protocol: TCP
   endpointSelector:
     matchLabels:
       app.kubernetes.io/instance: alloy-logs
@@ -82,13 +73,8 @@ alloy:
       create: true
       content: |-
         {{ .AlloyConfig | nindent 8 | replace "        \n" "" | trim }}
-    {{- if .SupportPodLogs }}
-    clustering:
-      enabled: true
-      name: alloy-logs
-    {{- end }}
     extraEnv:
-    - name: NODENAME
+    - name: NODE_NAME
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
@@ -138,7 +124,10 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
-
+  {{- if .AlloyImageTag }}
+  image:
+    tag: {{ .AlloyImageTag }}
+  {{- end }}
 {{- if .SupportVPA }}
 verticalPodAutoscaler:
   enabled: true

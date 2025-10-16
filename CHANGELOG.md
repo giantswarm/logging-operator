@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix alloy clustering issues on big clusters by relying on the node_filter instead of clustering for pod logs support.
+
 ## [0.34.2] - 2025-10-15
 
 ### Changed
