@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.34.3] - 2025-10-16
+
 ### Changed
 
 - Update egress field from alloy-events cilium network policy to allow requests to Tempo.
@@ -598,7 +600,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.2...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.3...HEAD
+[0.34.3]: https://github.com/giantswarm/logging-operator/compare/v0.34.2...v0.34.3
 [0.34.2]: https://github.com/giantswarm/logging-operator/compare/v0.34.1...v0.34.2
 [0.34.1]: https://github.com/giantswarm/logging-operator/compare/v0.34.0...v0.34.1
 [0.34.0]: https://github.com/giantswarm/logging-operator/compare/v0.33.0...v0.34.0
