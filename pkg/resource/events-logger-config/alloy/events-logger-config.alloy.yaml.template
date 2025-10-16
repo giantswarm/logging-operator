@@ -52,8 +52,7 @@ networkPolicy:
       - ports:
         - port: "12345"
           protocol: TCP
-    {{- end }}
-    {{- if and .TracingEnabled (not .IsWorkloadCluster) }}
+    {{- if .TracingEnabled }}
     # Allow direct access to tempo
     - toEndpoints:
       - matchLabels:
@@ -65,6 +64,7 @@ networkPolicy:
           protocol: TCP
         - port: "4318"
           protocol: TCP
+    {{- end }}
     {{- end }}
     {{- if .TracingEnabled }}
     ingress:
