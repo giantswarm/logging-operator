@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.34.4] - 2025-10-16
 
-## [0.34.4] - 2025-10-16
+### Fixed
+
+- Fix issue with multiple networkPolicies field.
 
 ## [0.34.3] - 2025-10-16
 
