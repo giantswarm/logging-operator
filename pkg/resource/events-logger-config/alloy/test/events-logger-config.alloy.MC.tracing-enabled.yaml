@@ -9,6 +9,7 @@ networkPolicy:
     - toEntities:
       - kube-apiserver
       - world
+    # Allow direct access to tempo
     - toEndpoints:
       - matchLabels:
           app.kubernetes.io/name: tempo

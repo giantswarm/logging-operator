@@ -11,6 +11,7 @@ networkPolicy:
       - kube-apiserver
       - world
     {{- if .TracingEnabled }}
+    # Allow direct access to tempo
     - toEndpoints:
       - matchLabels:
           app.kubernetes.io/name: tempo
