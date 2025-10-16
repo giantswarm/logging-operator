@@ -3,6 +3,20 @@
 # - configMap is generated from events-logger.alloy.template and passed as a string
 #   here and will be created by Alloy's chart.
 # - Alloy runs as a deployment, with only 1 replica.
+networkPolicy:
+  cilium:
+    ingress:
+    - toPorts:
+      - ports:
+        # Alloy Control Plane
+        - port: "12345"
+          protocol: TCP
+        # OTLP GRPC
+        - port: "4317"
+          protocol: "TCP"
+        # OTLP HTTP
+        - port: "4318"
+          protocol: "TCP"
 alloy:
   alloy:
     configMap:
@@ -155,21 +169,6 @@ alloy:
         app.kubernetes.io/instance: alloy-events
         app.kubernetes.io/name: alloy
       type: ClusterIP
-
-networkPolicy:
-  cilium:
-    ingress:
-    - toPorts:
-      - ports:
-        # Alloy Control Plane
-        - port: "12345"
-          protocol: TCP
-        # OTLP GRPC
-        - port: "4317"
-          protocol: "TCP"
-        # OTLP HTTP
-        - port: "4318"
-          protocol: "TCP"
 
 verticalPodAutoscaler:
   enabled: true
