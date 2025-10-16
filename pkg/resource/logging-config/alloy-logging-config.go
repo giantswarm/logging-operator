@@ -3,6 +3,7 @@ package loggingconfig
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"slices"
 	"text/template"
 
@@ -21,6 +22,9 @@ var (
 	//go:embed alloy/logging-config.alloy.yaml.template
 	alloyLoggingConfig         string
 	alloyLoggingConfigTemplate *template.Template
+
+	alloyNodeFilterFixedObservabilityBundleAppVersion = semver.MustParse("2.3.1")
+	alloyNodeFilterImageVersion                       = semver.MustParse("1.11.2")
 
 	supportPodLogs = semver.MustParse("1.7.0")
 	supportVPA     = supportPodLogs
@@ -43,6 +47,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, loggingAgent *common.Logg
 
 	data := struct {
 		AlloyConfig                      string
+		AlloyImageTag                    *string
 		DefaultWorkloadClusterNamespaces []string
 		DefaultWriteTenant               string
 		IsWorkloadCluster                bool
@@ -59,6 +64,12 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, loggingAgent *common.Logg
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
 		// Observability bundle in older versions do not support VPA
 		SupportVPA: observabilityBundleVersion.GE(supportVPA),
+	}
+
+	if observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
+		// Use fixed image version
+		imageTag := fmt.Sprintf("v%s", alloyNodeFilterImageVersion.String())
+		data.AlloyImageTag = &imageTag
 	}
 
 	err = alloyLoggingConfigTemplate.Execute(&values, data)

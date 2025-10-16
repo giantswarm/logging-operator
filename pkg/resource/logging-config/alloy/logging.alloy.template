@@ -39,16 +39,9 @@ loki.rules.kubernetes "{{ . }}" {
 {{- if .SupportPodLogs }}
 loki.source.podlogs "kubernetes_pods" {
 	forward_to      = [loki.relabel.kubernetes_pods.receiver]
-	// namespace_selector is a workaround for broken cluster mode in alloy 1.5.0
-	namespace_selector {
-		match_expression {
-			key = "nonexisting"
-			operator = "NotIn"
-			values = ["nonexistant"]
-		}
-	}
-	clustering {
+	node_filter {
 		enabled = true
+		node_name = env("NODE_NAME")
 	}
 }
 
@@ -321,7 +314,7 @@ local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apiserver/audit.log",
-		node   = coalesce(env("NODENAME"), "unknown"),
+		node   = coalesce(env("NODE_NAME"), "unknown"),
 		scrape_job  = "audit-logs",
 	}]
 }
