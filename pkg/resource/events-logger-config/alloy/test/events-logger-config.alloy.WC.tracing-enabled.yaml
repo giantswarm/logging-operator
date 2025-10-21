@@ -90,6 +90,7 @@ alloy:
         		]
         	}
         }
+        // one OTLP gRPC exporter for traces per tenant
         otelcol.processor.filter "giantswarm" {
         	traces {
         		span = [
@@ -100,11 +101,13 @@ alloy:
         		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
-        // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
         		auth     = otelcol.auth.basic.tracing_credentials.handler
         		endpoint = "<tempo-url>:443"
+        		tls {
+        			insecure_skip_verify = false
+        		}
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
         		}

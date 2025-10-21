@@ -106,6 +106,7 @@ otelcol.processor.k8sattributes "default" {
 	}
 }
 
+// one OTLP gRPC exporter for traces per tenant
 {{- range .Tenants }}
 otelcol.processor.filter "{{ . }}" {
 	traces {
@@ -116,24 +117,27 @@ otelcol.processor.filter "{{ . }}" {
 	output {
 		traces = [otelcol.exporter.otlp.{{ . }}.input]
 	}
-
 }
 
-// one OTLP gRPC exporter for traces per tenant
 otelcol.exporter.otlp "{{ . }}" {
 	client {
-
 		{{- if $.IsWorkloadCluster }}
 		auth     = otelcol.auth.basic.tracing_credentials.handler
 		endpoint = "{{ $.TracingEndpoint }}"
+		tls {
+			insecure_skip_verify = false
+		}
 		{{- else }}
+		tls {
+			// Because we use GRPC (without host), the component tries to use HTTPS by default. We switch it off on MCs.
+			insecure = true
+		}
 		endpoint = "tempo-distributor.tempo.svc:4317"
 		{{- end }}
 
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
-
 	}
 }
 

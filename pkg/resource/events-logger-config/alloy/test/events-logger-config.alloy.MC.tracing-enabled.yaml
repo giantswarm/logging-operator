@@ -142,6 +142,7 @@ alloy:
         		]
         	}
         }
+        // one OTLP gRPC exporter for traces per tenant
         otelcol.processor.filter "giantswarm" {
         	traces {
         		span = [
@@ -152,9 +153,12 @@ alloy:
         		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
-        // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
+        		tls {
+        			// Because we use GRPC (without host), the component tries to use HTTPS by default. We switch it off on MCs.
+        			insecure = true
+        		}
         		endpoint = "tempo-distributor.tempo.svc:4317"
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
