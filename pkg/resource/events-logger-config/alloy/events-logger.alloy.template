@@ -129,7 +129,7 @@ otelcol.exporter.otlp "{{ . }}" {
 		}
 		{{- else }}
 		tls {
-			// Because we use GRPC (without host), the component tries to use HTTPS by default. We switch it off on MCs.
+			// Use insecure connection since this exporter uses a (direct) internal Tempo endpoint which is not behind a TLS reverse proxy.
 			insecure = true
 		}
 		endpoint = "tempo-distributor.tempo.svc:4317"
