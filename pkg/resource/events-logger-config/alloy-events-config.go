@@ -42,7 +42,7 @@ func generateAlloyEventsConfig(includeNamespaces, excludeNamespaces []string, in
 	}{
 		AlloyConfig:       alloyConfig,
 		TracingEnabled:    tracingEnabled,
-		IsWorkloadCluster: common.IsWorkloadCluster(installationName, cluster.GetName()),
+		IsWorkloadCluster: common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
