@@ -3,6 +3,84 @@
 # - configMap is generated from events-logger.alloy.template and passed as a string
 #   here and will be created by Alloy's chart.
 # - Alloy runs as a deployment, with only 1 replica.
+{{- if or .TracingEnabled (not .IsWorkloadCluster) }}
+networkPolicy:
+  cilium:
+    {{- if not .IsWorkloadCluster }}
+    egress:
+    - toEntities:
+      - kube-apiserver
+      - world
+    # Allow direct access to loki-gateway
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/component: gateway
+          app.kubernetes.io/name: loki
+          io.kubernetes.pod.namespace: loki
+      toPorts:
+      - ports:
+        - port: "8080"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s-app: coredns
+      - matchLabels:
+          k8s-app: k8s-dns-node-cache
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+        - port: "1053"
+          protocol: ANY
+        rules:
+          dns:
+          - matchPattern: '*'
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: ANY
+        - port: "443"
+          protocol: ANY
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: alloy-events
+          app.kubernetes.io/name: alloy
+      toPorts:
+      - ports:
+        - port: "12345"
+          protocol: TCP
+    {{- if .TracingEnabled }}
+    # Allow direct access to tempo
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: tempo
+          io.kubernetes.pod.namespace: tempo
+      toPorts:
+      - ports:
+        - port: "4317"
+          protocol: TCP
+        - port: "4318"
+          protocol: TCP
+    {{- end }}
+    {{- end }}
+    {{- if .TracingEnabled }}
+    ingress:
+    - toPorts:
+      - ports:
+        # Alloy Control Plane
+        - port: "12345"
+          protocol: TCP
+        # OTLP GRPC
+        - port: "4317"
+          protocol: "TCP"
+        # OTLP HTTP
+        - port: "4318"
+          protocol: "TCP"
+    {{- end }}
+{{- end }}
 alloy:
   alloy:
     configMap:
@@ -69,21 +147,6 @@ alloy:
         app.kubernetes.io/instance: alloy-events
         app.kubernetes.io/name: alloy
       type: ClusterIP
-
-networkPolicy:
-  cilium:
-    ingress:
-    - toPorts:
-      - ports:
-        # Alloy Control Plane
-        - port: "12345"
-          protocol: TCP
-        # OTLP GRPC
-        - port: "4317"
-          protocol: "TCP"
-        # OTLP HTTP
-        - port: "4318"
-          protocol: "TCP"
 {{- end }}
 
 verticalPodAutoscaler:

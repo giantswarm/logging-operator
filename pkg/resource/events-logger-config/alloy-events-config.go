@@ -36,11 +36,13 @@ func generateAlloyEventsConfig(includeNamespaces, excludeNamespaces []string, in
 	}
 
 	data := struct {
-		AlloyConfig    string
-		TracingEnabled bool
+		AlloyConfig       string
+		TracingEnabled    bool
+		IsWorkloadCluster bool
 	}{
-		AlloyConfig:    alloyConfig,
-		TracingEnabled: tracingEnabled,
+		AlloyConfig:       alloyConfig,
+		TracingEnabled:    tracingEnabled,
+		IsWorkloadCluster: common.IsWorkloadCluster(installationName, cluster.GetName()),
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
