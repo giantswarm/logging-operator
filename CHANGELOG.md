@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Remove unused `/var/log/journal` log collection as our clusters nodes store journal logs in memory (in `/run/log/journal`). 
+- Remove unused `/var/log/journal` log collection as our clusters nodes store journal logs in memory (in `/run/log/journal`).
 
 ## [0.34.5] - 2025-10-22
 
