@@ -142,6 +142,7 @@ alloy:
         		]
         	}
         }
+        // one OTLP gRPC exporter for traces per tenant
         otelcol.processor.filter "giantswarm" {
         	traces {
         		span = [
@@ -152,9 +153,12 @@ alloy:
         		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
-        // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
+        		tls {
+        			// Use insecure connection since this exporter uses a (direct) internal Tempo endpoint which is not behind a TLS reverse proxy.
+        			insecure = true
+        		}
         		endpoint = "tempo-distributor.tempo.svc:4317"
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
