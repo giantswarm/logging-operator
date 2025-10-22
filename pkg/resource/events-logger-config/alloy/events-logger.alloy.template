@@ -133,6 +133,7 @@ otelcol.processor.transform "default" {
 	}
 }
 
+// one OTLP gRPC exporter for traces per tenant
 {{- range .Tenants }}
 otelcol.processor.filter "{{ . }}" {
 	traces {
@@ -143,7 +144,6 @@ otelcol.processor.filter "{{ . }}" {
 	output {
 		traces = [otelcol.processor.transform.cleanup_{{ . }}.input]
 	}
-
 }
 
 // Remove giantswarm.tenant resource attribute after filtering
@@ -162,21 +162,25 @@ otelcol.processor.transform "cleanup_{{ . }}" {
 	}
 }
 
-// one OTLP gRPC exporter for traces per tenant
 otelcol.exporter.otlp "{{ . }}" {
 	client {
-
 		{{- if $.IsWorkloadCluster }}
 		auth     = otelcol.auth.basic.tracing_credentials.handler
 		endpoint = "{{ $.TracingEndpoint }}"
+		tls {
+			insecure_skip_verify = false
+		}
 		{{- else }}
+		tls {
+			// Use insecure connection since this exporter uses a (direct) internal Tempo endpoint which is not behind a TLS reverse proxy.
+			insecure = true
+		}
 		endpoint = "tempo-distributor.tempo.svc:4317"
 		{{- end }}
 
 		headers = {
 			"X-Scope-OrgID" = "{{ . }}",
 		}
-
 	}
 }
 
