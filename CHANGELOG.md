@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Align labels accross signals.
+
 ## [0.34.5] - 2025-10-22
 
 ### Fixed

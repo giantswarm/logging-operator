@@ -50,9 +50,15 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "test-cluster",
-        		installation = "test-installation",
-        		scrape_job = "kubernetes-events",
+        		cluster_id       = "test-cluster",
+        		cluster_type     = "workload_cluster",
+        		customer         = "test-customer",
+        		installation     = "test-installation",
+        		organization     = "test-organization",
+        		pipeline         = "test-pipeline",
+        		provider         = "test-provider",
+        		region           = "test-region",
+        		scrape_job       = "kubernetes-events",
         	}
         }
         otelcol.auth.basic "tracing_credentials" {
@@ -85,6 +91,25 @@ alloy:
         		otel_annotations = true
         	}
         	output {
+        		traces = [otelcol.processor.transform.default.input]
+        	}
+        }
+        otelcol.processor.transform "default" {
+        	error_mode = "ignore"
+        	trace_statements {
+        		context = "resource"
+        		statements = [
+        			`set(resource.attributes["giantswarm.cluster.id"], "test-cluster")`,
+        			`set(resource.attributes["giantswarm.cluster.type"], "workload_cluster")`,
+        			`set(resource.attributes["giantswarm.cluster.customer"], "test-customer")`,
+        			`set(resource.attributes["giantswarm.cluster.installation"], "test-installation")`,
+        			`set(resource.attributes["giantswarm.cluster.organization"], "test-organization")`,
+        			`set(resource.attributes["giantswarm.cluster.pipeline"], "test-pipeline")`,
+        			`set(resource.attributes["giantswarm.cluster.provider"], "test-provider")`,
+        			`set(resource.attributes["giantswarm.cluster.region"], "test-region")`,
+        		]
+        	}
+        	output {
         		traces = [
         			otelcol.processor.filter.giantswarm.input,
         		]
@@ -95,6 +120,19 @@ alloy:
         	traces {
         		span = [
         			`resource.attributes["giantswarm.tenant"] != "giantswarm"`,
+        		]
+        	}
+        	output {
+        		traces = [otelcol.processor.transform.cleanup_giantswarm.input]
+        	}
+        }
+        // Remove giantswarm.tenant resource attribute after filtering
+        otelcol.processor.transform "cleanup_giantswarm" {
+        	error_mode = "ignore"
+        	trace_statements {
+        		context = "resource"
+        		statements = [
+        			`delete_key(resource.attributes, "giantswarm.tenant")`,
         		]
         	}
         	output {
