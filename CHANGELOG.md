@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove unused `/var/log/journal` log collection as our clusters nodes store journal logs in memory (in `/run/log/journal`).
 
+### Fixed
+
+- Increase alloy-events cpu requests and limits to prevent throttling happening with trace ingestion.
+
 ## [0.34.5] - 2025-10-22
 
 ### Fixed

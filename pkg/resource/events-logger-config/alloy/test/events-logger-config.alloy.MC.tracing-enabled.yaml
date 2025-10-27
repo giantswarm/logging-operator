@@ -166,12 +166,13 @@ alloy:
         	}
         }
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
+    # We also updated the alloy-events CPU request and limits here https://github.com/giantswarm/giantswarm/issues/34619 to avoid CPU throttling
     resources:
       limits:
-        cpu: 50m
+        cpu: 500m
         memory: 256Mi
       requests:
-        cpu: 25m
+        cpu: 50m
         memory: 128Mi
     securityContext:
       allowPrivilegeEscalation: false
