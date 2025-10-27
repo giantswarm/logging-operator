@@ -5,7 +5,7 @@
 # - Alloy runs as a daemonset, with required tolerations in order to scrape logs
 #   from every machine in the cluster.
 # - Running as root user is required in order to be able to read log files within
-#   /var/log/journal and /run/log/journal directories.
+#   /run/log/journal directories.
 # - NODENAME env var is used as additional label for kubernetes_audit logs.
 networkPolicy:
   cilium:
@@ -226,49 +226,6 @@ alloy:
         	path           = "/run/log/journal"
         	relabel_rules  = discovery.relabel.systemd_journal_run.rules
         	forward_to     = [loki.process.systemd_journal_run.receiver]
-        	labels         = {
-        		scrape_job = "system-logs",
-        	}
-        }
-        // journald logs from /var/log/journal
-        loki.process "systemd_journal_var" {
-        	forward_to = [loki.write.default.receiver]
-        	stage.json {
-        		expressions = {
-        			SYSLOG_IDENTIFIER = "SYSLOG_IDENTIFIER",
-        		}
-        	}
-        	stage.drop {
-        		source = "SYSLOG_IDENTIFIER"
-        		value  = "audit"
-        	}
-        }
-        discovery.relabel "systemd_journal_var" {
-        	targets = []
-        	rule {
-        		source_labels = ["__journal__systemd_unit"]
-        		target_label  = "__tmp_systemd_unit"
-        	}
-        	rule {
-        		source_labels = ["__journal__systemd_unit", "__journal_syslog_identifier"]
-        		regex         = ";(.+)"
-        		target_label  = "__tmp_systemd_unit"
-        	}
-        	rule {
-        		source_labels = ["__tmp_systemd_unit"]
-        		target_label  = "systemd_unit"
-        	}
-        	rule {
-        		source_labels = ["__journal__hostname"]
-        		target_label  = "node"
-        	}
-        }
-        loki.source.journal "systemd_journal_var" {
-        	format_as_json = true
-        	max_age        = "12h0m0s"
-        	path           = "/var/log/journal"
-        	relabel_rules  = discovery.relabel.systemd_journal_var.rules
-        	forward_to     = [loki.process.systemd_journal_var.receiver]
         	labels         = {
         		scrape_job = "system-logs",
         	}
