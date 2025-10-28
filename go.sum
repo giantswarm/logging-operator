@@ -50,8 +50,8 @@ github.com/giantswarm/apiextensions-application v0.6.2 h1:XL86OrpprWl5Wp38EUvUXt
 github.com/giantswarm/apiextensions-application v0.6.2/go.mod h1:8ylqSmDSzFblCppRQTFo8v9s/F6MX6RTusVVoDDfWso=
 github.com/giantswarm/k8smetadata v0.25.0 h1:6mKmmm4xHPuBvxDMAkIhU5oj6KJkJSaR2s5esIsnHs4=
 github.com/giantswarm/k8smetadata v0.25.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
-github.com/giantswarm/observability-operator v0.45.1 h1:BzPWsMqfGTtEStFhJBAb9pSKUDD8TJDwPbOlOciw2cI=
-github.com/giantswarm/observability-operator v0.45.1/go.mod h1:u3PLfnFko7dg2pfA7bRFHbih/Mr2ZBtgnj0IWADJnpg=
+github.com/giantswarm/observability-operator v0.46.1 h1:fPiwX4Ay4kxQUGV8qJAC9qkgjl0Gd9tkD70aF1cgt2E=
+github.com/giantswarm/observability-operator v0.46.1/go.mod h1:0hapt22VWTcte2MqRQvgLLS/zzeC/qVk6EcXOwB5ItQ=
 github.com/gkampitakis/ciinfo v0.3.2 h1:JcuOPk8ZU7nZQjdUhctuhQofk7BGHuIy0c9Ez8BNhXs=
 github.com/gkampitakis/ciinfo v0.3.2/go.mod h1:1NIwaOcFChN4fa/B0hEBdAb6npDlFL8Bwx4dfRLRqAo=
 github.com/gkampitakis/go-diff v1.3.2 h1:Qyn0J9XJSDTgnsgHRdz9Zp24RaJeKMUHg2+PDZZdC4M=
