@@ -6,7 +6,10 @@
 #   from every machine in the cluster.
 # - Running as root user is required in order to be able to read log files within
 #   /run/log/journal directories.
-# - NODENAME env var is used as additional label for kubernetes_audit logs.
+# - NODE_NAME env var is used as additional label for kubernetes_audit logs.
+global:
+  image:
+    registry: docker.io
 networkPolicy:
   cilium:
     egress:
@@ -334,4 +337,5 @@ alloy:
       - name: alloy-tmp
         emptyDir: {}
   image:
-    tag: v1.11.2
+    repository: grafana/alloy-dev
+    tag: v1.12.0-devel-0a5259d
