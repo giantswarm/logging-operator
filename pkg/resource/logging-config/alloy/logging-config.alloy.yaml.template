@@ -5,8 +5,8 @@
 # - Alloy runs as a daemonset, with required tolerations in order to scrape logs
 #   from every machine in the cluster.
 # - Running as root user is required in order to be able to read log files within
-#   /var/log/journal and /run/log/journal directories.
-# - NODE_NAME env var is used as additional label for kubernetes_audit logs.
+#   /run/log/journal directories.
+# - NODENAME env var is used as additional label for kubernetes_audit logs.
 networkPolicy:
   cilium:
     egress:

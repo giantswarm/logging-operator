@@ -3,6 +3,20 @@
 # - configMap is generated from events-logger.alloy.template and passed as a string
 #   here and will be created by Alloy's chart.
 # - Alloy runs as a deployment, with only 1 replica.
+networkPolicy:
+  cilium:
+    ingress:
+    - toPorts:
+      - ports:
+        # Alloy Control Plane
+        - port: "12345"
+          protocol: TCP
+        # OTLP GRPC
+        - port: "4317"
+          protocol: "TCP"
+        # OTLP HTTP
+        - port: "4318"
+          protocol: "TCP"
 alloy:
   alloy:
     configMap:
@@ -76,6 +90,7 @@ alloy:
         		]
         	}
         }
+        // one OTLP gRPC exporter for traces per tenant
         otelcol.processor.filter "giantswarm" {
         	traces {
         		span = [
@@ -86,23 +101,26 @@ alloy:
         		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
-        // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
         		auth     = otelcol.auth.basic.tracing_credentials.handler
         		endpoint = "<tempo-url>:443"
+        		tls {
+        			insecure_skip_verify = false
+        		}
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
         		}
         	}
         }
     # We decided to configure the alloy-events resources as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
+    # We also updated the alloy-events CPU request and limits here https://github.com/giantswarm/giantswarm/issues/34619 to avoid CPU throttling
     resources:
       limits:
-        cpu: 50m
+        cpu: 500m
         memory: 256Mi
       requests:
-        cpu: 25m
+        cpu: 50m
         memory: 128Mi
     securityContext:
       allowPrivilegeEscalation: false
@@ -155,21 +173,6 @@ alloy:
         app.kubernetes.io/instance: alloy-events
         app.kubernetes.io/name: alloy
       type: ClusterIP
-
-networkPolicy:
-  cilium:
-    ingress:
-    - toPorts:
-      - ports:
-        # Alloy Control Plane
-        - port: "12345"
-          protocol: TCP
-        # OTLP GRPC
-        - port: "4317"
-          protocol: "TCP"
-        # OTLP HTTP
-        - port: "4318"
-          protocol: "TCP"
 
 verticalPodAutoscaler:
   enabled: true

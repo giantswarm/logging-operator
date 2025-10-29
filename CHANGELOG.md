@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix alloy clustering issues on big clusters by relying on the node_filter instead of clustering for pod logs support.
 
+## [0.35.0] - 2025-10-27
+
+### Removed
+
+- Remove unused `/var/log/journal` log collection as our clusters nodes store journal logs in memory (in `/run/log/journal`).
+
+### Fixed
+
+- Increase alloy-events cpu requests and limits to prevent throttling happening with trace ingestion.
+
+## [0.34.5] - 2025-10-22
+
+### Fixed
+
+- Fix TLS handshake issues.
+
+## [0.34.4] - 2025-10-16
+
+### Fixed
+
+- Fix issue with multiple networkPolicies field.
+
+## [0.34.3] - 2025-10-16
+
+### Changed
+
+- Update egress field from alloy-events cilium network policy to allow requests to Tempo.
+.
 ## [0.34.2] - 2025-10-15
 
 ### Changed
@@ -598,7 +626,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.34.2...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.35.0...HEAD
+[0.35.0]: https://github.com/giantswarm/logging-operator/compare/v0.34.5...v0.35.0
+[0.34.5]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...v0.34.5
+[0.34.4]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...v0.34.4
+[0.34.4]: https://github.com/giantswarm/logging-operator/compare/v0.34.3...v0.34.4
+[0.34.3]: https://github.com/giantswarm/logging-operator/compare/v0.34.2...v0.34.3
 [0.34.2]: https://github.com/giantswarm/logging-operator/compare/v0.34.1...v0.34.2
 [0.34.1]: https://github.com/giantswarm/logging-operator/compare/v0.34.0...v0.34.1
 [0.34.0]: https://github.com/giantswarm/logging-operator/compare/v0.33.0...v0.34.0
