@@ -26,7 +26,7 @@ type Resource struct {
 }
 
 // ReconcileCreate ensures events-logger-secret is created with the right credentials
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-secret create")
 
@@ -55,7 +55,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get desired secret
-	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, loggingAgent, &eventsLoggerCredentialsSecret, lokiURL, r.Config.EnableTracingFlag, &tracingCredentialsSecret)
+	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, &eventsLoggerCredentialsSecret, lokiURL, r.Config.EnableTracingFlag, &tracingCredentialsSecret)
 	if err != nil {
 		logger.Error(err, "failed generating events logger secret")
 		return ctrl.Result{}, errors.WithStack(err)
@@ -93,13 +93,13 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-secret delete")
 
 	// Get expected secret.
 	var currentEventsLoggerSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: GetEventsLoggerSecretName(cluster, loggingAgent), Namespace: cluster.GetNamespace()}, &currentEventsLoggerSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerSecretName(cluster), Namespace: cluster.GetNamespace()}, &currentEventsLoggerSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-secret not found, stop here")

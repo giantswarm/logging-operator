@@ -23,7 +23,7 @@ check_daemonset_status() {
     && echo "Error: $2 app deployed but some daemonset's pods aren't in a ready state" || echo "$2 app is deployed and all daemonset's pods are ready"
 }
 
-# Helper function - checks the existence of the grafana-agent and logging cms and secrets
+# Helper function - checks the existence of the logging configmaps and secrets
 check_configs() {
   echo "Checking if the corresponding $1-$2 has been created"
   local config
@@ -73,15 +73,10 @@ main() {
   tsh kube login "$1"-loggingoperatortest
   tsh kube login "$1"
 
-  promtail="$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-promtail)"
   alloy="$(kubectl get apps -n org-giantswarm | grep loggingoperatortest-alloy-logs)"
 
-  # We need either promtail or alloy to be running on the workload cluster
-  if [[ -n "$promtail" ]]; then
-    kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-promtail --timeout=10m
-    sleep 120 # Giving extra time for the daemonset's pods to be ready
-    check_daemonset_status "$1" "promtail"
-  elif [[ -n "$alloy" ]]; then
+  # We need alloy to be running on the workload cluster
+  if [[ -n "$alloy" ]]; then
     kubectl wait -n org-giantswarm --for=jsonpath='{.status.release.status}'=deployed app/loggingoperatortest-alloy-logs --timeout=10m
     sleep 120 # Giving extra time for the daemonset's pods to be ready
     check_daemonset_status "$1" "alloy-logs"
@@ -92,9 +87,9 @@ main() {
   fi
 
   configTypes=("config" "secret")
-  configNames=("grafana-agent" "logging")
+  configNames=("logging")
 
-  # Checking if the grafana-agent and logging cms and secrets have been created by the operator
+  # Checking if the logging cms and secrets have been created by the operator
   for type in "${configTypes[@]}"; do
     for name in "${configNames[@]}"; do
       check_configs "$name" "$type"

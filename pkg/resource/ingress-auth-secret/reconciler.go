@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
 	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
@@ -34,12 +33,12 @@ type Resource struct {
 }
 
 // ReconcileCreate ensures loki ingress auth map is created with the right credentials on CAPI
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	return r.createOrUpdateSecret(ctx, cluster)
 }
 
 // ReconcileDelete - Delete the loki ingress auth secret on capi
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	return r.createOrUpdateSecret(ctx, cluster)
 }
 

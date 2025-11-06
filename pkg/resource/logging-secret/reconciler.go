@@ -26,7 +26,7 @@ type Resource struct {
 }
 
 // ReconcileCreate ensures logging-secret is created with the right credentials
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-secret create")
 
@@ -45,7 +45,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get desired secret
-	desiredLoggingSecret, err := GenerateLoggingSecret(cluster, loggingAgent, &loggingCredentialsSecret, lokiURL, r.Config.InstallationName, r.Config.InsecureCA)
+	desiredLoggingSecret, err := GenerateLoggingSecret(cluster, &loggingCredentialsSecret, lokiURL, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -83,13 +83,13 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 }
 
 // ReconcileDelete - Not much to do here when a cluster is deleted
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-secret delete")
 
 	// Get expected secret.
 	var currentLoggingSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: GetLoggingSecretName(cluster), Namespace: cluster.GetNamespace()}, &currentLoggingSecret)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getLoggingSecretName(cluster), Namespace: cluster.GetNamespace()}, &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-secret not found, stop here")

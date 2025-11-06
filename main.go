@@ -18,7 +18,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strings"
 
@@ -42,7 +41,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"github.com/giantswarm/logging-operator/internal/controller"
-	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/resource"
 	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
@@ -86,8 +84,6 @@ func main() {
 	var enableLeaderElection bool
 	var enableLogging bool
 	var enableTracing bool
-	var loggingAgent string
-	var eventsLogger string
 	var includeEventsFromNamespaces StringSliceVar
 	var excludeEventsFromNamespaces StringSliceVar
 	var installationName string
@@ -101,8 +97,6 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.BoolVar(&enableTracing, "enable-tracing", false, "enable/disable tracing support for events logger")
-	flag.StringVar(&loggingAgent, "logging-agent", common.LoggingAgentAlloy, fmt.Sprintf("select logging agent to use (%s or %s)", common.LoggingAgentPromtail, common.LoggingAgentAlloy))
-	flag.StringVar(&eventsLogger, "events-logger", common.EventsLoggerAlloy, fmt.Sprintf("select events logger to use (%s or %s)", common.EventsLoggerAlloy, common.EventsLoggerGrafanaAgent))
 	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
 	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
@@ -160,12 +154,10 @@ func main() {
 
 	// Create Config for dependency injection
 	appConfig := config.Config{
-		EnableLoggingFlag:       enableLogging,
-		EnableTracingFlag:       enableTracing,
-		DefaultLoggingAgent:     loggingAgent,
-		DefaultKubeEventsLogger: eventsLogger,
-		InstallationName:        installationName,
-		InsecureCA:              insecureCA,
+		EnableLoggingFlag: enableLogging,
+		EnableTracingFlag: enableTracing,
+		InstallationName:  installationName,
+		InsecureCA:        insecureCA,
 	}
 
 	agentsToggle := agentstoggle.Resource{

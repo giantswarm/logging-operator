@@ -2,6 +2,7 @@ package eventsloggerconfig
 
 import (
 	_ "embed"
+	"flag"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,6 +11,10 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/google/go-cmp/cmp"
+)
+
+var (
+	update = flag.Bool("update", false, "update .golden files")
 )
 
 func TestGenerateAlloyEventsConfig(t *testing.T) {
