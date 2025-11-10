@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Remove Promtail app configuration
+- Remove Grafana Agent app configuration
+
 ## [0.35.0] - 2025-10-27
 
 ### Removed

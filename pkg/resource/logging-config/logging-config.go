@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/blang/semver"
-	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
@@ -16,23 +15,13 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
+func GenerateLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
-	switch loggingAgent.LoggingAgent {
-	case common.LoggingAgentPromtail:
-		values, err = GeneratePromtailLoggingConfig(cluster, installationName)
-		if err != nil {
-			return v1.ConfigMap{}, err
-		}
-	case common.LoggingAgentAlloy:
-		values, err = GenerateAlloyLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA)
-		if err != nil {
-			return v1.ConfigMap{}, err
-		}
-	default:
-		return v1.ConfigMap{}, errors.Errorf("unsupported logging agent %q", loggingAgent.LoggingAgent)
+	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA)
+	if err != nil {
+		return v1.ConfigMap{}, err
 	}
 
 	configmap := v1.ConfigMap{

@@ -42,8 +42,6 @@ loggingOperator:
   excludeEventsFromNamespaces: []
   includeEventsFromNamespaces: []
   loggingEnabled: true
-  loggingAgent: alloy
-  eventsLogger: alloy
 
 tracing:
   enabled: false

@@ -12,8 +12,6 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/google/go-cmp/cmp"
-
-	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
 var (
@@ -96,12 +94,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				},
 			}
 
-			loggingAgent := &common.LoggingAgent{
-				LoggingAgent:     common.LoggingAgentAlloy,
-				KubeEventsLogger: common.EventsLoggerAlloy,
-			}
-
-			config, err := GenerateAlloyLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
+			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

@@ -113,7 +113,7 @@ alloy:
         loki.source.file "kubernetes_pods" {
         	targets               = local.file_match.kubernetes_pods.targets
         	forward_to            = [loki.process.kubernetes_pods.receiver]
-        	legacy_positions_file = "/run/promtail/positions.yaml"
+        	legacy_positions_file = "/run/alloy/positions.yaml"
         }
         discovery.relabel "kubernetes_pods" {
         	targets = discovery.kubernetes.kubernetes_pods.targets

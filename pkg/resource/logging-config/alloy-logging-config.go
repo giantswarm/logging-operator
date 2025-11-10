@@ -33,7 +33,7 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(cluster *capi.Cluster, loggingAgent *common.LoggingAgent, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
+func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
 	var values bytes.Buffer
 
 	alloyConfig, err := generateAlloyConfig(cluster, observabilityBundleVersion, tenants, installationName, insecureCA)

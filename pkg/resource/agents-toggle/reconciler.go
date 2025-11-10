@@ -24,7 +24,7 @@ type Resource struct {
 }
 
 // ReconcileCreate ensure logging agents and events loggers are enabled in the given cluster.
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("agents toggle create")
 
@@ -33,7 +33,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &desiredConfigMap, func() error {
-		config, err := generateObservabilityBundleConfig(loggingAgent)
+		config, err := generateObservabilityBundleConfig()
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -52,7 +52,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 }
 
 // ReconcileDelete ensure logging agents and events loggers are disabled for the given cluster.
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("delete agents toggle config")
 

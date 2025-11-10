@@ -31,31 +31,18 @@ const (
 	// Configuration for ingresses are here: https://github.com/giantswarm/shared-configs/blob/main/default/apps/tempo/configmap-values.yaml.template#L144-L157
 	tempoIngressNamespace = "tempo"
 	tempoIngressName      = "tempo"
-	// grafana-agent secret name
-	//#nosec G101
-	grafanaAgentExtraSecretName = "grafana-agent-secret"
-
-	// Possible values for --logging-agent flag.
-	LoggingAgentPromtail = "promtail"
-	LoggingAgentAlloy    = "alloy"
-
-	// Possible values for --events-logger flag.
-	EventsLoggerAlloy        = "alloy"
-	EventsLoggerGrafanaAgent = "grafana-agent"
 
 	// App name keys in the observability bundle
-	AlloyObservabilityBundleAppName    = "alloyLogs"
-	PromtailObservabilityBundleAppName = "promtail"
+	AlloyLogsObservabilityBundleAppName   = "alloyLogs"
+	AlloyEventsObservabilityBundleAppName = "alloyEvents"
 
 	// Alloy app name and namespace when using Alloy as logging agent.
-	AlloyLogAgentAppName      = "alloy-logs"
-	AlloyLogAgentAppNamespace = "kube-system"
+	AlloyLogAgentAppName = "alloy-logs"
 
 	PriorityClassName = "giantswarm-critical"
 
 	// Alloy app name and namespace when using Alloy as events logger.
-	AlloyEventsLoggerAppName      = "alloy-events"
-	AlloyEventsLoggerAppNamespace = "kube-system"
+	AlloyEventsLoggerAppName = "alloy-events"
 
 	// LokiMaxBackoffPeriod specifies the maximum retry backoff duration for Loki writes.
 	LokiMaxBackoffPeriod = 10 * time.Minute
@@ -78,10 +65,6 @@ const (
 	TracingUsername = "tracing-username"
 	TracingPassword = "tracing-password"
 )
-
-func GrafanaAgentExtraSecretName() string {
-	return grafanaAgentExtraSecretName
-}
 
 func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 	// Logging should be enabled when all conditions are met:

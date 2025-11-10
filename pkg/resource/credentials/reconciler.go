@@ -14,7 +14,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
 )
 
@@ -26,7 +25,7 @@ type Resource struct {
 }
 
 // ReconcileCreate ensures a secret exists for the given cluster.
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("credentials checking secret for logging", "namespace", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Name)
@@ -55,7 +54,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 }
 
 // ReconcileDelete ensures a secret is removed for the current cluster
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	logger.Info("credentials secret delete logging", "namespace", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Name)
