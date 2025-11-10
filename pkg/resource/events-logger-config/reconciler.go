@@ -34,7 +34,7 @@ type Resource struct {
 }
 
 // ReconcileCreate ensures events-logger config is created with the right credentials
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-config create")
 
@@ -74,7 +74,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, loggingAgent, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tracingEnabled, tempoURL)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tracingEnabled, tempoURL)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -112,13 +112,13 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 
 }
 
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-config delete")
 
 	// Get expected configmap.
 	var currentEventsLoggerConfig v1.ConfigMap
-	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(cluster, loggingAgent), Namespace: cluster.GetNamespace()}, &currentEventsLoggerConfig)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: getEventsLoggerConfigName(cluster), Namespace: cluster.GetNamespace()}, &currentEventsLoggerConfig)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("events-logger-config not found, nothing to delete")

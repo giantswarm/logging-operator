@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix alloy clustering issues on big clusters by relying on the node_filter instead of clustering for pod logs support.
 
+## [0.36.0] - 2025-11-10
+
+### Removed
+
+- Remove Promtail app configuration
+- Remove Grafana Agent app configuration
+
 ## [0.35.0] - 2025-10-27
 
 ### Removed
@@ -626,7 +633,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.35.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.36.0...HEAD
+[0.36.0]: https://github.com/giantswarm/logging-operator/compare/v0.35.0...v0.36.0
 [0.35.0]: https://github.com/giantswarm/logging-operator/compare/v0.34.5...v0.35.0
 [0.34.5]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...v0.34.5
 [0.34.4]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...v0.34.4

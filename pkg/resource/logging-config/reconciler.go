@@ -29,7 +29,7 @@ type Resource struct {
 }
 
 // ReconcileCreate ensures logging-config is created with the right credentials
-func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config create")
 
@@ -51,7 +51,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 	}
 
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(cluster, loggingAgent, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA)
+	desiredLoggingConfig, err := GenerateLoggingConfig(cluster, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
@@ -89,7 +89,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster, l
 }
 
 // ReconcileDelete ensure logging-config is deleted for the given cluster.
-func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster, loggingAgent *common.LoggingAgent) (ctrl.Result, error) {
+func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-config delete")
 

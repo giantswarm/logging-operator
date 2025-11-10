@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	appv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -105,20 +104,9 @@ func (r *CapiClusterReconciler) reconcileCreate(ctx context.Context, cluster *ca
 		logger.Info("successfully added finalizer to logged cluster", "finalizer", key.Finalizer)
 	}
 
-	loggingAgentConfig, err := common.ToggleAgents(ctx, r.Client, cluster, r.Config)
-	if err != nil {
-		// Handle case where the app is not found.
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("observability bundle app not found, requeueing")
-			// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-			return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-		}
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
 	// Call all resources ReconcileCreate methods.
 	for _, resource := range r.Resources {
-		result, err := resource.ReconcileCreate(ctx, cluster, loggingAgentConfig)
+		result, err := resource.ReconcileCreate(ctx, cluster)
 		if err != nil || !result.IsZero() {
 			return result, errors.WithStack(err)
 		}
@@ -133,16 +121,9 @@ func (r *CapiClusterReconciler) reconcileDelete(ctx context.Context, cluster *ca
 	logger.Info("LOGGING disabled")
 
 	if controllerutil.ContainsFinalizer(cluster, key.Finalizer) {
-		// Get the current logging agent configuration
-		loggingAgentConfig, err := common.ToggleAgents(ctx, r.Client, cluster, r.Config)
-		if err != nil && !apimachineryerrors.IsNotFound(err) {
-			// Errors only if this is not a 404 because the apps are already deleted.
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-
 		// Call all resources ReconcileDelete methods.
 		for _, resource := range r.Resources {
-			result, err := resource.ReconcileDelete(ctx, cluster, loggingAgentConfig)
+			result, err := resource.ReconcileDelete(ctx, cluster)
 			if err != nil || !result.IsZero() {
 				return result, errors.WithStack(err)
 			}

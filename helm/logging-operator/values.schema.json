@@ -32,17 +32,11 @@
                 "defaultNamespaces": {
                     "type": "string"
                 },
-                "eventsLogger": {
-                    "type": "string"
-                },
                 "excludeEventsFromNamespaces": {
                     "type": "array"
                 },
                 "includeEventsFromNamespaces": {
                     "type": "array"
-                },
-                "loggingAgent": {
-                    "type": "string"
                 },
                 "loggingEnabled": {
                     "type": "boolean"

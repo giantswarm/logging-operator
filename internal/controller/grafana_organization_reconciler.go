@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	grafanaorganization "github.com/giantswarm/observability-operator/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -68,19 +67,8 @@ func (g *GrafanaOrganizationReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	for _, cluster := range clusters.Items {
 		if common.IsLoggingEnabled(&cluster, g.Resource.Config.EnableLoggingFlag) {
-			loggingAgentConfig, err := common.ToggleAgents(ctx, g.Client, &cluster, g.Resource.Config)
-			if err != nil {
-				// Handle case where the app is not found.
-				if apimachineryerrors.IsNotFound(err) {
-					logger.Info("observability bundle app not found, requeueing")
-					// If the app is not found we should requeue and try again later (5 minutes is the app platform default reconciliation time)
-					return ctrl.Result{RequeueAfter: time.Duration(5 * time.Minute)}, nil
-				}
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-
 			// Reconcile logging config for each cluster
-			result, err := g.Resource.ReconcileCreate(ctx, &cluster, loggingAgentConfig)
+			result, err := g.Resource.ReconcileCreate(ctx, &cluster)
 			if err != nil {
 				return result, errors.WithStack(err)
 			}
