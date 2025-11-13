@@ -8,10 +8,11 @@ import (
 	"testing"
 
 	"github.com/blang/semver"
-	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
+
+	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
 var (
