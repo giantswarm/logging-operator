@@ -75,7 +75,6 @@ otelcol.receiver.otlp "traces" {
 	grpc {
 		endpoint = "0.0.0.0:4317"
 	}
-
 	http {
 		endpoint = "0.0.0.0:4318"
 	}
@@ -146,7 +145,7 @@ otelcol.processor.transform "cleanup_{{ . }}" {
 	trace_statements {
 		context = "resource"
 		statements = [
-			`delete_key(attributes, "giantswarm.tenant")`,
+			`delete_key(resource.attributes, "giantswarm.tenant")`,
 		]
 	}
 

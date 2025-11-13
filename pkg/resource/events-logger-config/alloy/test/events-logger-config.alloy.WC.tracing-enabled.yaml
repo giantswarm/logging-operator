@@ -124,7 +124,7 @@ alloy:
         	trace_statements {
         		context = "resource"
         		statements = [
-        			`delete_key(attributes, "giantswarm.tenant")`,
+        			`delete_key(resource.attributes, "giantswarm.tenant")`,
         		]
         	}
         	output {
