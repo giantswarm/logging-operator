@@ -73,8 +73,14 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 		}
 	}
 
+	// Extract cluster labels once at this level where we have k8s client
+	clusterLabels, err := common.ExtractClusterLabels(ctx, r.Client, cluster, r.Config)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get desired config
-	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InstallationName, r.Config.InsecureCA, tracingEnabled, tempoURL)
+	desiredEventsLoggerConfig, err := generateEventsLoggerConfig(cluster, tenants, r.IncludeNamespaces, r.ExcludeNamespaces, r.Config.InsecureCA, tracingEnabled, tempoURL, clusterLabels)
 	if err != nil {
 		logger.Info("events-logger-config - failed generating events-logger config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

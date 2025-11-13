@@ -50,9 +50,11 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "test-cluster",
-        		installation = "test-installation",
-        		scrape_job = "kubernetes-events",
+        		cluster_id       = "test-cluster",
+        		cluster_type     = "workload_cluster",
+        		organization     = "test-organization",
+        		provider         = "test-provider",
+        		scrape_job       = "kubernetes-events",
         	}
         }
         otelcol.auth.basic "tracing_credentials" {
@@ -85,6 +87,21 @@ alloy:
         		otel_annotations = true
         	}
         	output {
+        		traces = [otelcol.processor.transform.default.input]
+        	}
+        }
+        otelcol.processor.transform "default" {
+        	error_mode = "ignore"
+        	trace_statements {
+        		context = "resource"
+        		statements = [
+        			`set(attributes["giantswarm.cluster.id"], "test-cluster")`,
+        			`set(attributes["giantswarm.cluster.type"], "workload_cluster")`,
+        			`set(attributes["giantswarm.cluster.organization"], "test-organization")`,
+        			`set(attributes["giantswarm.cluster.provider"], "test-provider")`,
+        		]
+        	}
+        	output {
         		traces = [
         			otelcol.processor.filter.giantswarm.input,
         		]
@@ -98,9 +115,23 @@ alloy:
         		]
         	}
         	output {
+        		traces = [otelcol.processor.transform.cleanup_giantswarm.input]
+        	}
+        }
+        // Remove giantswarm.tenant resource attribute after filtering
+        otelcol.processor.transform "cleanup_giantswarm" {
+        	error_mode = "ignore"
+        	trace_statements {
+        		context = "resource"
+        		statements = [
+        			`delete_key(resource.attributes, "giantswarm.tenant")`,
+        		]
+        	}
+        	output {
         		traces = [otelcol.exporter.otlp.giantswarm.input]
         	}
         }
+        // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
         		auth     = otelcol.auth.basic.tracing_credentials.handler

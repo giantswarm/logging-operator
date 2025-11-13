@@ -8,13 +8,3 @@ type Config struct {
 	InstallationName  string
 	InsecureCA        bool
 }
-
-// NewConfig creates a new Config instance
-func NewConfig(enableLogging, enableTracing bool, installationName string, insecureCA bool) *Config {
-	return &Config{
-		EnableLoggingFlag: enableLogging,
-		EnableTracingFlag: enableTracing,
-		InstallationName:  installationName,
-		InsecureCA:        insecureCA,
-	}
-}

@@ -14,11 +14,11 @@ const (
 	eventsLogggerConfigName = "events-logger-config"
 )
 
-func generateEventsLoggerConfig(cluster *capi.Cluster, tenants []string, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string) (v1.ConfigMap, error) {
+func generateEventsLoggerConfig(cluster *capi.Cluster, tenants []string, includeNamespaces []string, excludeNamespaces []string, insecureCA bool, tracingEnabled bool, tempoURL string, clusterLabels common.ClusterLabels) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
-	values, err = generateAlloyEventsConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tracingEnabled, tempoURL, tenants)
+	values, err = generateAlloyEventsConfig(includeNamespaces, excludeNamespaces, insecureCA, tracingEnabled, tempoURL, tenants, clusterLabels)
 	if err != nil {
 		return v1.ConfigMap{}, err
 	}

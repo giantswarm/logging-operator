@@ -12,6 +12,10 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/observability-operator/pkg/common/organization"
+	obsconfig "github.com/giantswarm/observability-operator/pkg/config"
+
+	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/key"
 )
 
@@ -65,6 +69,15 @@ const (
 	TracingUsername = "tracing-username"
 	TracingPassword = "tracing-password"
 )
+
+// ClusterLabels holds the extracted cluster labels used in templates
+type ClusterLabels struct {
+	ClusterID    string
+	ClusterType  string
+	Installation string
+	Organization string
+	Provider     string
+}
 
 func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 	// Logging should be enabled when all conditions are met:
@@ -141,4 +154,32 @@ func ReadTempoIngressURL(ctx context.Context, cluster *capi.Cluster, client clie
 		return "", fmt.Errorf("tempo ingress host not found")
 	}
 	return tempoIngress.Spec.Rules[0].Host, nil
+}
+
+// ExtractClusterLabels extracts all the cluster labels used in templates
+func ExtractClusterLabels(ctx context.Context, k8sClient client.Client, cluster *capi.Cluster, appConfig config.Config) (ClusterLabels, error) {
+	// Import observability-operator packages here to avoid import cycle
+	orgRepo := organization.NewNamespaceRepository(k8sClient)
+	organizationName, err := orgRepo.Read(ctx, cluster)
+	if err != nil {
+		return ClusterLabels{}, errors.WithStack(err)
+	}
+
+	provider, err := obsconfig.ClusterConfig{}.GetClusterProvider(cluster)
+	if err != nil {
+		return ClusterLabels{}, errors.WithStack(err)
+	}
+
+	clusterType := "management_cluster"
+	if IsWorkloadCluster(appConfig.InstallationName, cluster.GetName()) {
+		clusterType = "workload_cluster"
+	}
+
+	return ClusterLabels{
+		ClusterID:    cluster.GetName(),
+		ClusterType:  clusterType,
+		Installation: appConfig.InstallationName,
+		Organization: organizationName,
+		Provider:     provider,
+	}, nil
 }
