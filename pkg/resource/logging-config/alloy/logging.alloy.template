@@ -339,7 +339,9 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}",
-		installation = "{{ .Installation }}",
+		cluster_id       = "{{ .ClusterID }}",
+		cluster_type     = "{{ .ClusterType }}",
+		organization     = "{{ .Organization }}",
+		provider         = "{{ .Provider }}",
 	}
 }

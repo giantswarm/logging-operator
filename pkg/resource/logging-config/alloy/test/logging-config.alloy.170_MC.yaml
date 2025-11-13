@@ -298,8 +298,10 @@ alloy:
         		}
         	}
         	external_labels = {
-        		cluster_id   = "test-installation",
-        		installation = "test-installation",
+        		cluster_id       = "test-installation",
+        		cluster_type     = "management_cluster",
+        		organization     = "test-organization",
+        		provider         = "test-provider",
         	}
         }
     clustering:

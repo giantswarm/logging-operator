@@ -56,9 +56,11 @@ loki.write "default" {
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}",
-		installation = "{{ .Installation }}",
-		scrape_job = "kubernetes-events",
+		cluster_id       = "{{ .ClusterID }}",
+		cluster_type     = "{{ .ClusterType }}",
+		organization     = "{{ .Organization }}",
+		provider         = "{{ .Provider }}",
+		scrape_job       = "kubernetes-events",
 	}
 }
 
@@ -98,6 +100,31 @@ otelcol.processor.k8sattributes "default" {
 	}
 
 	output {
+		traces = [otelcol.processor.resource.default.input]
+	}
+}
+
+otelcol.processor.resource "default" {
+	attributes {
+		upsert {
+			key = "giantswarm.cluster.id"
+			value = "{{ .ClusterID }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.type"
+			value = "{{ .ClusterType }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.organization"
+			value = "{{ .Organization }}"
+		}
+		upsert {
+			key = "giantswarm.cluster.provider"
+			value = "{{ .Provider }}"
+		}
+	}
+
+	output {
 		traces = [
 			{{- range .Tenants }}
 			otelcol.processor.filter.{{ . }}.input,
@@ -115,10 +142,24 @@ otelcol.processor.filter "{{ . }}" {
 		]
 	}
 	output {
+		traces = [otelcol.processor.resource.cleanup_{{ . }}.input]
+	}
+}
+
+// Remove giantswarm.tenant attribute after filtering
+otelcol.processor.resource "cleanup_{{ . }}" {
+	attributes {
+		delete {
+			key = "giantswarm.tenant"
+		}
+	}
+
+	output {
 		traces = [otelcol.exporter.otlp.{{ . }}.input]
 	}
 }
 
+// one OTLP gRPC exporter for traces per tenant
 otelcol.exporter.otlp "{{ . }}" {
 	client {
 		{{- if $.IsWorkloadCluster }}
