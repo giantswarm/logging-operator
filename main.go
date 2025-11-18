@@ -156,11 +156,11 @@ func main() {
 
 	// Create Config for dependency injection
 	appConfig := config.Config{
-		EnableLoggingFlag:      enableLogging,
+		EnableLoggingFlag:       enableLogging,
 		EnableNodeFilteringFlag: enableNodeFiltering,
-		EnableTracingFlag:      enableTracing,
-		InstallationName:       installationName,
-		InsecureCA:             insecureCA,
+		EnableTracingFlag:       enableTracing,
+		InstallationName:        installationName,
+		InsecureCA:              insecureCA,
 	}
 
 	agentsToggle := agentstoggle.Resource{

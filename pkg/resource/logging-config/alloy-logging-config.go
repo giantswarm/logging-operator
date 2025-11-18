@@ -37,10 +37,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA, enableNodeFiltering bool) (string, error) {
+func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, clusterLabels common.ClusterLabels, insecureCA bool, enableNodeFiltering bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(cluster, observabilityBundleVersion, tenants, installationName, insecureCA, enableNodeFiltering)
+	alloyConfig, err := generateAlloyConfig(observabilityBundleVersion, tenants, clusterLabels, insecureCA, enableNodeFiltering)
 	if err != nil {
 		return "", err
 	}
@@ -60,7 +60,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               common.DefaultWriteTenant,
 		NodeFilteringEnabled:             enableNodeFiltering,
-		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, cluster.GetName()),
+		IsWorkloadCluster:                common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		PriorityClassName:                common.PriorityClassName,
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs: observabilityBundleVersion.GE(supportPodLogs),
@@ -82,10 +82,8 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 	return values.String(), nil
 }
 
-func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA, enableNodeFiltering bool) (string, error) {
+func generateAlloyConfig(observabilityBundleVersion semver.Version, tenants []string, clusterLabels common.ClusterLabels, insecureCA bool, enableNodeFiltering bool) (string, error) {
 	var values bytes.Buffer
-
-	clusterName := cluster.GetName()
 
 	// Ensure default tenant is included in the list of tenants
 	if !slices.Contains(tenants, common.DefaultWriteTenant) {
@@ -95,7 +93,8 @@ func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semve
 	data := struct {
 		ClusterID            string
 		ClusterType          string
-		Installation         string
+		Organization         string
+		Provider             string
 		MaxBackoffPeriod     string
 		RemoteTimeout        string
 		IsWorkloadCluster    bool
@@ -110,11 +109,13 @@ func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semve
 		LokiRulerAPIURLKey   string
 		Tenants              []string
 	}{
-		ClusterID:         clusterName,
-		Installation:      installationName,
+		ClusterID:         clusterLabels.ClusterID,
+		ClusterType:       clusterLabels.ClusterType,
+		Organization:      clusterLabels.Organization,
+		Provider:          clusterLabels.Provider,
 		MaxBackoffPeriod:  common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:     common.LokiRemoteTimeout.String(),
-		IsWorkloadCluster: common.IsWorkloadCluster(installationName, clusterName),
+		IsWorkloadCluster: common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		// Observability bundle in older versions do not support PodLogs
 		SupportPodLogs:       observabilityBundleVersion.GE(supportPodLogs),
 		NodeFilteringEnabled: enableNodeFiltering,
@@ -128,8 +129,7 @@ func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semve
 		Tenants:              tenants,
 	}
 
-	err := alloyLoggingTemplate.Execute(&values, data)
-	if err != nil {
+	if err := alloyLoggingTemplate.Execute(&values, data); err != nil {
 		return "", err
 	}
 

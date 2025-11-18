@@ -50,8 +50,14 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 		return ctrl.Result{}, errors.WithStack(err)
 	}
 
+	// Extract cluster labels once at this level where we have k8s client
+	clusterLabels, err := common.ExtractClusterLabels(ctx, r.Client, cluster, r.Config)
+	if err != nil {
+		return ctrl.Result{}, errors.WithStack(err)
+	}
+
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(cluster, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA, r.Config.EnableNodeFilteringFlag)
+	desiredLoggingConfig, err := r.GenerateLoggingConfig(cluster, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, clusterLabels)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

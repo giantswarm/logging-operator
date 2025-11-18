@@ -7,11 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/blang/semver"
+	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	"github.com/blang/semver"
-	"github.com/google/go-cmp/cmp"
+	"github.com/giantswarm/logging-operator/pkg/common"
 )
 
 var (
@@ -119,7 +120,20 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				},
 			}
 
-			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false, tc.enableNodeFiltering)
+			clusterLabels := common.ClusterLabels{
+				ClusterID: tc.clusterName,
+				ClusterType: func() string {
+					if tc.clusterName == tc.installationName {
+						return "management_cluster"
+					}
+					return "workload_cluster"
+				}(),
+				Installation: tc.installationName,
+				Organization: "test-organization",
+				Provider:     "test-provider",
+			}
+
+			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, clusterLabels, false, tc.enableNodeFiltering)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

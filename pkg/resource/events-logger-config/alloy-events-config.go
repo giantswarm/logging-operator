@@ -8,7 +8,6 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
@@ -28,10 +27,10 @@ func init() {
 	alloyEventsConfigTemplate = template.Must(template.New("events-logger-config.alloy.yaml").Funcs(sprig.FuncMap()).Parse(alloyEventsConfig))
 }
 
-func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
+func generateAlloyEventsConfig(includeNamespaces, excludeNamespaces []string, insecureCA, tracingEnabled bool, tempoURL string, tenants []string, clusterLabels common.ClusterLabels) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(cluster, includeNamespaces, excludeNamespaces, installationName, insecureCA, tracingEnabled, tempoURL, tenants)
+	alloyConfig, err := generateAlloyConfig(includeNamespaces, excludeNamespaces, insecureCA, tracingEnabled, tempoURL, tenants, clusterLabels)
 	if err != nil {
 		return "", err
 	}
@@ -43,7 +42,7 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 	}{
 		AlloyConfig:       alloyConfig,
 		TracingEnabled:    tracingEnabled,
-		IsWorkloadCluster: common.IsWorkloadCluster(installationName, cluster.GetName()),
+		IsWorkloadCluster: common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 	}
 
 	err = alloyEventsConfigTemplate.Execute(&values, data)
@@ -54,7 +53,7 @@ func generateAlloyEventsConfig(cluster *capi.Cluster, includeNamespaces []string
 	return values.String(), nil
 }
 
-func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excludeNamespaces []string, installationName string, insecureCA bool, tracingEnabled bool, tempoURL string, tenants []string) (string, error) {
+func generateAlloyConfig(includeNamespaces, excludeNamespaces []string, insecureCA, tracingEnabled bool, tempoURL string, tenants []string, clusterLabels common.ClusterLabels) (string, error) {
 	var values bytes.Buffer
 
 	// endpoint must be in host:port format which is required by the gRPC exporter.
@@ -65,7 +64,9 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 
 	data := struct {
 		ClusterID          string
-		Installation       string
+		ClusterType        string
+		Organization       string
+		Provider           string
 		InsecureSkipVerify string
 		MaxBackoffPeriod   string
 		RemoteTimeout      string
@@ -83,8 +84,10 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		TracingPasswordKey string
 		Tenants            []string
 	}{
-		ClusterID:          cluster.GetName(),
-		Installation:       installationName,
+		ClusterID:          clusterLabels.ClusterID,
+		ClusterType:        clusterLabels.ClusterType,
+		Organization:       clusterLabels.Organization,
+		Provider:           clusterLabels.Provider,
 		InsecureSkipVerify: fmt.Sprintf("%t", insecureCA),
 		MaxBackoffPeriod:   common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:      common.LokiRemoteTimeout.String(),
@@ -95,7 +98,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		LoggingTenantIDKey: common.LoggingTenantID,
 		LoggingUsernameKey: common.LoggingUsername,
 		LoggingPasswordKey: common.LoggingPassword,
-		IsWorkloadCluster:  common.IsWorkloadCluster(installationName, cluster.GetName()),
+		IsWorkloadCluster:  common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		TracingEnabled:     tracingEnabled,
 		TracingEndpoint:    endpoint,
 		TracingUsernameKey: common.TracingUsername,
@@ -103,8 +106,7 @@ func generateAlloyConfig(cluster *capi.Cluster, includeNamespaces []string, excl
 		Tenants:            tenants,
 	}
 
-	err := alloyEventsTemplate.Execute(&values, data)
-	if err != nil {
+	if err := alloyEventsTemplate.Execute(&values, data); err != nil {
 		return "", err
 	}
 
