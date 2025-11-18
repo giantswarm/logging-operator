@@ -15,11 +15,11 @@ const (
 	loggingConfigName = "logging-config"
 )
 
-func GenerateLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (v1.ConfigMap, error) {
+func GenerateLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA, enableNodeFiltering bool) (v1.ConfigMap, error) {
 	var values string
 	var err error
 
-	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA)
+	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, installationName, insecureCA, enableNodeFiltering)
 	if err != nil {
 		return v1.ConfigMap{}, err
 	}

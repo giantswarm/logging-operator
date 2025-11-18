@@ -37,10 +37,10 @@ func init() {
 
 // GenerateAlloyLoggingConfig returns a configmap for
 // the logging extra-config
-func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA bool) (string, error) {
+func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, installationName string, insecureCA, enableNodeFiltering bool) (string, error) {
 	var values bytes.Buffer
 
-	alloyConfig, err := generateAlloyConfig(cluster, observabilityBundleVersion, tenants, installationName, insecureCA)
+	alloyConfig, err := generateAlloyConfig(cluster, observabilityBundleVersion, tenants, installationName, insecureCA, enableNodeFiltering)
 	if err != nil {
 		return "", err
 	}
@@ -50,6 +50,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		AlloyImageTag                    *string
 		DefaultWorkloadClusterNamespaces []string
 		DefaultWriteTenant               string
+		NodeFilteringEnabled             bool
 		IsWorkloadCluster                bool
 		PriorityClassName                string
 		SupportPodLogs                   bool
@@ -58,6 +59,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               common.DefaultWriteTenant,
+		NodeFilteringEnabled:             enableNodeFiltering,
 		IsWorkloadCluster:                common.IsWorkloadCluster(installationName, cluster.GetName()),
 		PriorityClassName:                common.PriorityClassName,
 		// Observability bundle in older versions do not support PodLogs
@@ -66,7 +68,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		SupportVPA: observabilityBundleVersion.GE(supportVPA),
 	}
 
-	if observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
+	if enableNodeFiltering && observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
 		// Use fixed image version
 		imageTag := fmt.Sprintf("v%s", alloyNodeFilterImageVersion.String())
 		data.AlloyImageTag = &imageTag
@@ -80,7 +82,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 	return values.String(), nil
 }
 
-func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA bool) (string, error) {
+func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, tenants []string, installationName string, insecureCA, enableNodeFiltering bool) (string, error) {
 	var values bytes.Buffer
 
 	clusterName := cluster.GetName()
@@ -91,20 +93,22 @@ func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semve
 	}
 
 	data := struct {
-		ClusterID          string
-		Installation       string
-		MaxBackoffPeriod   string
-		RemoteTimeout      string
-		IsWorkloadCluster  bool
-		SupportPodLogs     bool
-		InsecureSkipVerify bool
-		SecretName         string
-		LoggingURLKey      string
-		LoggingTenantIDKey string
-		LoggingUsernameKey string
-		LoggingPasswordKey string
-		LokiRulerAPIURLKey string
-		Tenants            []string
+		ClusterID            string
+		ClusterType          string
+		Installation         string
+		MaxBackoffPeriod     string
+		RemoteTimeout        string
+		IsWorkloadCluster    bool
+		SupportPodLogs       bool
+		NodeFilteringEnabled bool
+		InsecureSkipVerify   bool
+		SecretName           string
+		LoggingURLKey        string
+		LoggingTenantIDKey   string
+		LoggingUsernameKey   string
+		LoggingPasswordKey   string
+		LokiRulerAPIURLKey   string
+		Tenants              []string
 	}{
 		ClusterID:         clusterName,
 		Installation:      installationName,
@@ -112,15 +116,16 @@ func generateAlloyConfig(cluster *capi.Cluster, observabilityBundleVersion semve
 		RemoteTimeout:     common.LokiRemoteTimeout.String(),
 		IsWorkloadCluster: common.IsWorkloadCluster(installationName, clusterName),
 		// Observability bundle in older versions do not support PodLogs
-		SupportPodLogs:     observabilityBundleVersion.GE(supportPodLogs),
-		InsecureSkipVerify: insecureCA,
-		SecretName:         common.AlloyLogAgentAppName,
-		LoggingURLKey:      common.LoggingURL,
-		LoggingTenantIDKey: common.LoggingTenantID,
-		LoggingUsernameKey: common.LoggingUsername,
-		LoggingPasswordKey: common.LoggingPassword,
-		LokiRulerAPIURLKey: common.LokiRulerAPIURL,
-		Tenants:            tenants,
+		SupportPodLogs:       observabilityBundleVersion.GE(supportPodLogs),
+		NodeFilteringEnabled: enableNodeFiltering,
+		InsecureSkipVerify:   insecureCA,
+		SecretName:           common.AlloyLogAgentAppName,
+		LoggingURLKey:        common.LoggingURL,
+		LoggingTenantIDKey:   common.LoggingTenantID,
+		LoggingUsernameKey:   common.LoggingUsername,
+		LoggingPasswordKey:   common.LoggingPassword,
+		LokiRulerAPIURLKey:   common.LokiRulerAPIURL,
+		Tenants:              tenants,
 	}
 
 	err := alloyLoggingTemplate.Execute(&values, data)

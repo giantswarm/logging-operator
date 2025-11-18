@@ -51,7 +51,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 	}
 
 	// Get desired config
-	desiredLoggingConfig, err := GenerateLoggingConfig(cluster, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA)
+	desiredLoggingConfig, err := GenerateLoggingConfig(cluster, observabilityBundleVersion, r.DefaultWorkloadClusterNamespaces, tenants, r.Config.InstallationName, r.Config.InsecureCA, r.Config.EnableNodeFilteringFlag)
 	if err != nil {
 		logger.Info("logging-config - failed generating logging config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)

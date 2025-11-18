@@ -42,6 +42,7 @@ loggingOperator:
   excludeEventsFromNamespaces: []
   includeEventsFromNamespaces: []
   loggingEnabled: true
+  nodeFilteringEnabled: false
 
 tracing:
   enabled: false

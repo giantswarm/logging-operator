@@ -26,18 +26,21 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 		installationName           string
 		clusterName                string
 		tenants                    []string
+		enableNodeFiltering        bool
 	}{
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.162_MC.yaml",
 			observabilityBundleVersion: "1.6.2",
 			installationName:           "test-installation",
 			clusterName:                "test-installation",
+			enableNodeFiltering:        false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.162_WC.yaml",
 			observabilityBundleVersion: "1.6.2",
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
+			enableNodeFiltering:        false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_MC.yaml",
@@ -45,6 +48,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			defaultNamespaces:          []string{"test-selector"},
 			installationName:           "test-installation",
 			clusterName:                "test-installation",
+			enableNodeFiltering:        false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC.yaml",
@@ -52,6 +56,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			defaultNamespaces:          []string{"test-selector"},
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
+			enableNodeFiltering:        false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_default_namespaces_nil.yaml",
@@ -59,6 +64,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			defaultNamespaces:          nil,
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
+			enableNodeFiltering:        false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_default_namespaces_empty.yaml",
@@ -66,6 +72,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			defaultNamespaces:          []string{""},
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
+			enableNodeFiltering:        false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_custom_tenants.yaml",
@@ -74,6 +81,24 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 			tenants:                    []string{"test-tenant-a", "test-tenant-b"},
+			enableNodeFiltering:        false,
+		},
+		// Tests with node filtering enabled
+		{
+			goldenFile:                 "alloy/test/logging-config.alloy.170_MC_node_filtering.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          []string{"test-selector"},
+			installationName:           "test-installation",
+			clusterName:                "test-installation",
+			enableNodeFiltering:        true,
+		},
+		{
+			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_node_filtering.yaml",
+			observabilityBundleVersion: "1.7.0",
+			defaultNamespaces:          []string{"test-selector"},
+			installationName:           "test-installation",
+			clusterName:                "test-cluster",
+			enableNodeFiltering:        true,
 		},
 	}
 
@@ -94,7 +119,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				},
 			}
 
-			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false)
+			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, tc.installationName, false, tc.enableNodeFiltering)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}

@@ -35,19 +35,35 @@ loki.rules.kubernetes "{{ . }}" {
 }
 {{- end }}
 
-// Kubernetes pods logs
 {{- if .SupportPodLogs }}
+// Native podlogs collection (preferred method for scalability)
 loki.source.podlogs "kubernetes_pods" {
-	forward_to      = [loki.relabel.kubernetes_pods.receiver]
+	forward_to = [loki.relabel.kubernetes_pods.receiver]
+	{{- if .NodeFilteringEnabled }}
 	node_filter {
 		enabled = true
 		node_name = env("NODE_NAME")
 	}
+	{{ else }}
+	// Workaround for broken cluster mode in Alloy 1.5.0
+	// Uses a non-existent key to effectively select all namespaces
+	namespace_selector {
+		match_expression {
+		key      = "nonexisting"
+			operator = "NotIn"
+			values   = ["nonexistant"]
+		}
+	}
+	clustering {
+		enabled = true
+	}
+	{{- end }}
 }
 
 loki.relabel "kubernetes_pods" {
-	forward_to      = [loki.process.kubernetes_pods.receiver]
+	forward_to = [loki.process.kubernetes_pods.receiver]
 {{- else }}
+// Legacy file-based log collection (fallback method)
 discovery.kubernetes "kubernetes_pods" {
 	role = "pod"
 }
@@ -59,7 +75,7 @@ local.file_match "kubernetes_pods" {
 loki.source.file "kubernetes_pods" {
 	targets               = local.file_match.kubernetes_pods.targets
 	forward_to            = [loki.process.kubernetes_pods.receiver]
-	legacy_positions_file = "/run/alloy/positions.yaml"
+	legacy_positions_file = "/run/promtail/positions.yaml"
 }
 
 discovery.relabel "kubernetes_pods" {
@@ -67,57 +83,47 @@ discovery.relabel "kubernetes_pods" {
 {{- end }}
 
 	rule {
-		source_labels = ["__meta_kubernetes_pod_controller_name"]
-		regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
-		target_label  = "__tmp_controller_name"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
-		regex         = "^;*([^;]+)(;.*)?$"
-		target_label  = "app"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_instance", "__meta_kubernetes_pod_label_instance"]
-		regex         = "^;*([^;]+)(;.*)?$"
-		target_label  = "instance"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component", "__meta_kubernetes_pod_label_component"]
-		regex         = "^;*([^;]+)(;.*)?$"
-		target_label  = "component"
-	}
-
-	rule {
 		target_label = "scrape_job"
 		replacement  = "kubernetes-pods"
 	}
 
-	rule {
-		source_labels = ["__meta_kubernetes_pod_node_name"]
-		target_label  = "node"
-	}
-
 	{{- if .SupportPodLogs }}
+	// Extract namespace, pod, and container from the structured instance label
+	// Format: "namespace/pod:container" (e.g., "kube-system/mimir-distributor-abc123:mimir")
 	rule {
 		source_labels = ["instance"]
-		regex         = "(.+)/.+"
+		regex         = "([^/]+)/.+"
 		target_label  = "namespace"
 	}
 
 	rule {
 		source_labels = ["instance"]
-		regex         = ".+/(.+):.+"
+		regex         = "[^/]+/([^:]+):.+"
 		target_label  = "pod"
 	}
 
 	rule {
 		source_labels = ["instance"]
-		regex         = ".+/.+:(.+)"
+		regex         = "[^/]+/[^:]+:(.+)"
 		target_label  = "container"
 	}
+
+	// Extract tenant ID for authorized tenants only - logs from unauthorized
+	// tenants will be dropped later in the processing pipeline
+	// Configured tenants: {{ join ", " .Tenants }}
+	rule {
+		source_labels = ["giantswarm_observability_tenant"]
+		regex         = "^({{ join "|" .Tenants }})$"
+		target_label  = "__tenant_id__"
+	}
+
+	// Remove the source tenant label to keep Loki labels clean
+	// `observability_giantswarm_io_tenant` is extracted from the labelmap in the pod logs
+	rule {
+		regex  = "giantswarm_observability_tenant|observability_giantswarm_io_tenant"
+		action = "labeldrop"
+	}
+
 	{{- else }}
 	rule {
 		source_labels = ["__meta_kubernetes_namespace"]
@@ -133,24 +139,7 @@ discovery.relabel "kubernetes_pods" {
 		source_labels = ["__meta_kubernetes_pod_container_name"]
 		target_label  = "container"
 	}
-	{{- end }}
 
-	{{- if .SupportPodLogs }}
-	// Keep only log lines with tenants specified in the regex.
-	// Log lines are dropped later in the loki.process stage.drop step.
-	rule {
-		source_labels = ["giantswarm_observability_tenant"]
-		regex         = "^({{ join "|" .Tenants }})$"
-		target_label  = "__tenant_id__"
-	}
-
-	// We drop the label to not have it ingested in loki
-	rule {
-		regex = "giantswarm_observability_tenant"
-		action = "labeldrop"
-	}
-
-	{{- else }}
 	rule {
 		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
 		separator     = "/"
@@ -166,7 +155,13 @@ discovery.relabel "kubernetes_pods" {
 		replacement   = "/var/log/pods/*$1/*.log"
 	}
 
+	rule {
+		source_labels = ["__meta_kubernetes_pod_node_name"]
+		target_label  = "node"
+	}
+
 	{{- if .IsWorkloadCluster }}
+	// Restrict collection to system namespaces only in workload clusters
 	rule {
 		source_labels = ["__meta_kubernetes_namespace"]
 		regex         = "kube-system|giantswarm"
@@ -174,15 +169,85 @@ discovery.relabel "kubernetes_pods" {
 	}
 	{{- end }}
 	{{- end }}
+
+	// Convert Kubernetes pod labels to clean names (removes __meta_kubernetes_pod_label_ prefix)
+	// This ensures consistent label names across both loki.source.podlogs and discovery.kubernetes collection methods
+	rule {
+		action = "labelmap"
+		regex  = "__meta_kubernetes_pod_label_(.+)"
+	}
+
+	// Extract and normalize standard k8s labels with priority-based fallbacks
+	// Priority: app.kubernetes.io/name > app > pod name
+	rule {
+		source_labels = ["app_kubernetes_io_name", "app", "__meta_kubernetes_pod_name"]
+		regex         = "^;*([^;]+)(;.*)?$"
+		target_label  = "app"
+	}
+
+	rule {
+		source_labels = ["app_kubernetes_io_instance", "instance"]
+		regex         = "^;*([^;]+)(;.*)?$"
+		target_label  = "instance"
+	}
+
+	rule {
+		source_labels = ["app_kubernetes_io_component", "component"]
+		regex         = "^;*([^;]+)(;.*)?$"
+		target_label  = "component"
+	}
+
+	rule {
+		source_labels = ["app_kubernetes_io_version", "version"]
+		regex         = "^;*([^;]+)(;.*)?$"
+		target_label  = "version"
+	}
+
+	// Create unified service name by combining app + component to align Loki and Tempo signals
+	// Only creates service label when BOTH app and component are non-empty
+	// Handles app names with hyphens like "alertmanager-to-github" or "background-controller"
+	// Examples: "mimir" + "distributor" → "mimir-distributor" (matches Tempo service.name)
+	//           "alertmanager-to-github" + "webhook" → "alertmanager-to-github-webhook"
+	rule {
+		source_labels = ["app", "component"]
+		separator     = "-"
+		regex         = "^(.+);(.+)$"
+		replacement   = "${1}-${2}"
+		target_label  = "service"
+	}
+
+	// Remove source app.kubernetes.io/* labels after processing to avoid duplication
+	rule {
+		regex  = "app_kubernetes_io_(component|instance|managed_by|name|part_of|version)"
+		action = "labeldrop"
+	}
+
+	rule {
+		regex  = "app_kubernetes_io_(component|instance|managed_by|name|part_of|version)"
+		action = "labeldrop"
+	}
+
+	// Remove workload labels that cause cardinality explosion
+	rule {
+		regex  = "controller_revision_hash|pod_template_hash|pod_template_generation|apps_kubernetes_io_pod_index|statefulset_kubernetes_io_pod_name"
+		action = "labeldrop"
+	}
+
+	// Remove operational/metadata labels not needed for log observability
+	rule {
+		regex  = "application_giantswarm_io_team|giantswarm_io_service_type|helm_sh_chart"
+		action = "labeldrop"
+	}
 }
 
 loki.process "kubernetes_pods" {
 	forward_to = [loki.write.default.receiver]
 
+	// Parse container runtime interface (CRI) log format
 	stage.cri { }
 
 	{{- if .SupportPodLogs }}
-	// Drop log lines that do not contain a tenant id
+	// Multi-tenant filtering: drop logs without valid tenant authorization
 	stage.drop {
 		drop_counter_reason = "no_tenant_id"
 		source              = "__tenant_id__"
@@ -190,6 +255,7 @@ loki.process "kubernetes_pods" {
 	}
 	{{- end }}
 
+	// Move high-cardinality metadata to structured metadata instead of labels
 	stage.structured_metadata {
 		values = {
 			"filename" = "",
@@ -197,6 +263,7 @@ loki.process "kubernetes_pods" {
 		}
 	}
 
+	// Clean up temporary labels used only for processing
 	stage.label_drop {
 		values = [
 			"filename",
@@ -257,12 +324,64 @@ loki.source.journal "systemd_journal_run" {
 	}
 }
 
+// journald logs from /var/log/journal
+loki.process "systemd_journal_var" {
+	forward_to = [loki.write.default.receiver]
+
+	stage.json {
+		expressions = {
+			SYSLOG_IDENTIFIER = "SYSLOG_IDENTIFIER",
+		}
+	}
+
+	stage.drop {
+		source = "SYSLOG_IDENTIFIER"
+		value  = "audit"
+	}
+}
+
+discovery.relabel "systemd_journal_var" {
+	targets = []
+
+	rule {
+		source_labels = ["__journal__systemd_unit"]
+		target_label  = "__tmp_systemd_unit"
+	}
+
+	rule {
+		source_labels = ["__journal__systemd_unit", "__journal_syslog_identifier"]
+		regex         = ";(.+)"
+		target_label  = "__tmp_systemd_unit"
+	}
+
+	rule {
+		source_labels = ["__tmp_systemd_unit"]
+		target_label  = "systemd_unit"
+	}
+
+	rule {
+		source_labels = ["__journal__hostname"]
+		target_label  = "node"
+	}
+}
+
+loki.source.journal "systemd_journal_var" {
+	format_as_json = true
+	max_age        = "12h0m0s"
+	path           = "/var/log/journal"
+	relabel_rules  = discovery.relabel.systemd_journal_var.rules
+	forward_to     = [loki.process.systemd_journal_var.receiver]
+	labels         = {
+		scrape_job = "system-logs",
+	}
+}
+
 // Kubernetes API server audit logs
 local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apiserver/audit.log",
-		node   = coalesce(env("NODE_NAME"), "unknown"),
+		node   = coalesce(env("NODENAME"), "unknown"),
 		scrape_job  = "audit-logs",
 	}]
 }
@@ -313,26 +432,24 @@ loki.source.file "kubernetes_audit" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		{{- if .IsWorkloadCluster }}
+		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		max_backoff_period = "{{ .MaxBackoffPeriod }}"
+		remote_timeout     = "{{ .RemoteTimeout }}"
+		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+
 		basic_auth {
 			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
-		{{- else }}
-		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
-		{{- end }}
-
-		max_backoff_period = "{{ .MaxBackoffPeriod }}"
-		remote_timeout     = "{{ .RemoteTimeout }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		tls_config {
 			insecure_skip_verify = {{ .InsecureSkipVerify }}
 		}
 	}
 	external_labels = {
-		cluster_id   = "{{ .ClusterID }}",
-		installation = "{{ .Installation }}",
+		cluster_id       = "{{ .ClusterID }}",
+		cluster_type     = "{{ .ClusterType }}",
+		organization     = "{{ .Organization }}",
+		provider         = "{{ .Provider }}",
 	}
 }

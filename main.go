@@ -83,6 +83,7 @@ func main() {
 	var defaultNamespaces StringSliceVar
 	var enableLeaderElection bool
 	var enableLogging bool
+	var enableNodeFiltering bool
 	var enableTracing bool
 	var includeEventsFromNamespaces StringSliceVar
 	var excludeEventsFromNamespaces StringSliceVar
@@ -96,6 +97,7 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
+	flag.BoolVar(&enableNodeFiltering, "enable-node-filtering", false, "enable/disable node filtering in Alloy logging configuration")
 	flag.BoolVar(&enableTracing, "enable-tracing", false, "enable/disable tracing support for events logger")
 	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
 	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
@@ -154,10 +156,11 @@ func main() {
 
 	// Create Config for dependency injection
 	appConfig := config.Config{
-		EnableLoggingFlag: enableLogging,
-		EnableTracingFlag: enableTracing,
-		InstallationName:  installationName,
-		InsecureCA:        insecureCA,
+		EnableLoggingFlag:      enableLogging,
+		EnableNodeFilteringFlag: enableNodeFiltering,
+		EnableTracingFlag:      enableTracing,
+		InstallationName:       installationName,
+		InsecureCA:             insecureCA,
 	}
 
 	agentsToggle := agentstoggle.Resource{
