@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Align labels accross signals.
 
-### Fixed
+### Added
 
-- Fix alloy clustering issues on big clusters by relying on the node_filter instead of clustering for pod logs support.
+- Add `--enable-node-filtering` flag to disable Alloy clustering which causes issues on big clusters, and instead rely on node_filter for pod logs support.
 
 ## [0.36.0] - 2025-11-10
 
