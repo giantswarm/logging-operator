@@ -75,7 +75,6 @@ alloy:
         		enabled = true
         		node_name = env("NODE_NAME")
         	}
-        	
         }
         loki.relabel "kubernetes_pods" {
         	forward_to = [loki.process.kubernetes_pods.receiver]

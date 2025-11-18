@@ -23,7 +23,7 @@ var (
 	alloyLoggingConfig         string
 	alloyLoggingConfigTemplate *template.Template
 
-	alloyNodeFilterFixedObservabilityBundleAppVersion = semver.MustParse("2.3.1")
+	alloyNodeFilterFixedObservabilityBundleAppVersion = semver.MustParse("2.4.0")
 	alloyNodeFilterImageVersion                       = semver.MustParse("1.12.0")
 
 	supportPodLogs = semver.MustParse("1.7.0")

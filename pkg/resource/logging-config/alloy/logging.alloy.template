@@ -44,7 +44,7 @@ loki.source.podlogs "kubernetes_pods" {
 		enabled = true
 		node_name = env("NODE_NAME")
 	}
-	{{ else }}
+	{{- else }}
 	// Workaround for broken cluster mode in Alloy 1.5.0
 	// Uses a non-existent key to effectively select all namespaces
 	namespace_selector {

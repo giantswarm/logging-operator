@@ -101,6 +101,14 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			clusterName:                "test-cluster",
 			enableNodeFiltering:        true,
 		},
+		{
+			goldenFile:                 "alloy/test/logging-config.alloy.240_WC_node_filtering.yaml",
+			observabilityBundleVersion: "2.4.0", // image version fixed case
+			defaultNamespaces:          []string{"test-selector"},
+			installationName:           "test-installation",
+			clusterName:                "test-cluster",
+			enableNodeFiltering:        true,
+		},
 	}
 
 	for _, tc := range testCases {
