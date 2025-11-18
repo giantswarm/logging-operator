@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix alloy clustering issues on big clusters by relying on the node_filter instead of clustering for pod logs support.
 
+### Removed
+
+- Removed legacy log collection (pre podlogs support) as we now run only newer alloy app versions.
+
 ## [0.36.0] - 2025-11-10
 
 ### Removed
