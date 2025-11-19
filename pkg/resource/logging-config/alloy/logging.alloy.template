@@ -39,7 +39,12 @@ loki.rules.kubernetes "{{ . }}" {
 // Native podlogs collection (preferred method for scalability)
 loki.source.podlogs "kubernetes_pods" {
 	forward_to = [loki.relabel.kubernetes_pods.receiver]
-
+	{{- if .NodeFilteringEnabled }}
+	node_filter {
+		enabled = true
+		node_name = env("NODE_NAME")
+	}
+	{{- else }}
 	// Workaround for broken cluster mode in Alloy 1.5.0
 	// Uses a non-existent key to effectively select all namespaces
 	namespace_selector {
@@ -53,6 +58,7 @@ loki.source.podlogs "kubernetes_pods" {
 	clustering {
 		enabled = true
 	}
+	{{- end }}
 }
 
 loki.relabel "kubernetes_pods" {
@@ -353,7 +359,7 @@ loki.process "kubernetes_audit" {
 loki.source.file "kubernetes_audit" {
 	targets               = local.file_match.kubernetes_audit.targets
 	forward_to            = [loki.process.kubernetes_audit.receiver]
-	legacy_positions_file = "/run/promtail/positions.yaml"
+	legacy_positions_file = "/run/alloy/positions.yaml"
 }
 
 // Loki target configuration
@@ -368,7 +374,6 @@ loki.write "default" {
 		{{- else }}
 		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
 		{{- end }}
-
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
 		remote_timeout     = "{{ .RemoteTimeout }}"
 		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])

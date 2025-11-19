@@ -19,7 +19,7 @@ func (r *Resource) GenerateLoggingConfig(cluster *capi.Cluster, observabilityBun
 	var values string
 	var err error
 
-	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, clusterLabels, r.Config.InsecureCA)
+	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, clusterLabels, r.Config.InsecureCA, r.Config.EnableNodeFilteringFlag)
 	if err != nil {
 		return v1.ConfigMap{}, err
 	}

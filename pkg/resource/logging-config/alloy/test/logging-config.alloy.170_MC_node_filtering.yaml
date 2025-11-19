@@ -60,15 +60,6 @@ networkPolicy:
           protocol: ANY
         - port: "443"
           protocol: ANY
-    # Allow clustering
-    - toEndpoints:
-      - matchLabels:
-          app.kubernetes.io/instance: alloy-logs
-          app.kubernetes.io/name: alloy
-      toPorts:
-      - ports:
-        - port: "12345"
-          protocol: TCP
   endpointSelector:
     matchLabels:
       app.kubernetes.io/instance: alloy-logs
@@ -103,65 +94,49 @@ alloy:
         		}
         	}
         }
-        // Legacy file-based log collection (fallback method)
-        discovery.kubernetes "kubernetes_pods" {
-        	role = "pod"
+        // Native podlogs collection (preferred method for scalability)
+        loki.source.podlogs "kubernetes_pods" {
+        	forward_to = [loki.relabel.kubernetes_pods.receiver]
+        	node_filter {
+        		enabled = true
+        		node_name = env("NODE_NAME")
+        	}
         }
-        local.file_match "kubernetes_pods" {
-        	path_targets = discovery.relabel.kubernetes_pods.output
-        }
-        loki.source.file "kubernetes_pods" {
-        	targets               = local.file_match.kubernetes_pods.targets
-        	forward_to            = [loki.process.kubernetes_pods.receiver]
-        	legacy_positions_file = "/run/alloy/positions.yaml"
-        }
-        discovery.relabel "kubernetes_pods" {
-        	targets = discovery.kubernetes.kubernetes_pods.targets
+        loki.relabel "kubernetes_pods" {
+        	forward_to = [loki.process.kubernetes_pods.receiver]
         	rule {
         		target_label = "scrape_job"
         		replacement  = "kubernetes-pods"
         	}
+        	// Extract namespace, pod, and container from the structured instance label
+        	// Format: "namespace/pod:container" (e.g., "kube-system/mimir-distributor-abc123:mimir")
         	rule {
-        		source_labels = ["__meta_kubernetes_namespace"]
+        		source_labels = ["instance"]
+        		regex         = "([^/]+)/.+"
         		target_label  = "namespace"
         	}
         	rule {
-        		source_labels = ["__meta_kubernetes_pod_name"]
+        		source_labels = ["instance"]
+        		regex         = "[^/]+/([^:]+):.+"
         		target_label  = "pod"
         	}
         	rule {
-        		source_labels = ["__meta_kubernetes_pod_container_name"]
+        		source_labels = ["instance"]
+        		regex         = "[^/]+/[^:]+:(.+)"
         		target_label  = "container"
         	}
+        	// Extract tenant ID for authorized tenants only - logs from unauthorized
+        	// tenants will be dropped later in the processing pipeline
+        	// Configured tenants: giantswarm
         	rule {
-        		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-        		separator     = "/"
-        		target_label  = "__path__"
-        		replacement   = "/var/log/pods/*$1/*.log"
+        		source_labels = ["giantswarm_observability_tenant"]
+        		regex         = "^(giantswarm)$"
+        		target_label  = "__tenant_id__"
         	}
+        	// Remove the source tenant label to keep Loki labels clean
         	rule {
-        		source_labels = ["__meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash", "__meta_kubernetes_pod_annotation_kubernetes_io_config_hash", "__meta_kubernetes_pod_container_name"]
-        		separator     = "/"
-        		regex         = "true/(.*)"
-        		target_label  = "__path__"
-        		replacement   = "/var/log/pods/*$1/*.log"
-        	}
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_node_name"]
-        		target_label  = "node"
-        	}
-        	// Convert specific Kubernetes pod labels to clean names (only for discovery.kubernetes path)
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
-        		target_label  = "app_kubernetes_io_name"
-        	}
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component"]
-        		target_label  = "app_kubernetes_io_component"
-        	}
-        	rule {
-        		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_version"]
-        		target_label  = "app_kubernetes_io_version"
+        		regex  = "giantswarm_observability_tenant"
+        		action = "labeldrop"
         	}
         	// Extract and normalize standard k8s labels with priority-based fallbacks
         	// Priority: app.kubernetes.io/name > app > pod name (pod logs then file-based discovery)
@@ -200,6 +175,12 @@ alloy:
         	forward_to = [loki.write.default.receiver]
         	// Parse container runtime interface (CRI) log format
         	stage.cri { }
+        	// Multi-tenant filtering: drop logs without valid tenant authorization
+        	stage.drop {
+        		drop_counter_reason = "no_tenant_id"
+        		source              = "__tenant_id__"
+        		expression          = "^$"
+        	}
         	// Move high-cardinality metadata to structured metadata instead of labels
         	stage.structured_metadata {
         		values = {
@@ -372,3 +353,35 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+  image:
+    tag: v1.12.0
+verticalPodAutoscaler:
+  enabled: true
+  # We decided to configure the alloy-logs vertical pod autoscaler as such after some investigation done https://github.com/giantswarm/giantswarm/issues/32655
+  resourcePolicy:
+    containerPolicies:
+    - containerName: alloy
+      controlledResources:
+      - memory
+      controlledValues: "RequestsAndLimits"
+      maxAllowed:
+        memory: 1Gi
+podLogs:
+- name: all-pods
+  namespace: kube-system
+  spec:
+    selector: {}
+    namespaceSelector: {}
+    relabelings:
+    - action: replace
+      targetLabel: "giantswarm_observability_tenant"
+      replacement: giantswarm
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+      targetLabel: "app_kubernetes_io_name"
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_pod_label_app_kubernetes_io_component"]
+      targetLabel: "app_kubernetes_io_component"
+    - action: replace
+      sourceLabels: ["__meta_kubernetes_pod_label_app_kubernetes_io_version"]
+      targetLabel: "app_kubernetes_io_version"

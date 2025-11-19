@@ -6,7 +6,7 @@
 #   from every machine in the cluster.
 # - Running as root user is required in order to be able to read log files within
 #   /run/log/journal directories.
-# - NODENAME env var is used as additional label for kubernetes_audit logs.
+# - NODE_NAME env var is used as additional label for kubernetes_audit logs.
 networkPolicy:
   cilium:
     egress:
@@ -299,7 +299,7 @@ alloy:
         loki.source.file "kubernetes_audit" {
         	targets               = local.file_match.kubernetes_audit.targets
         	forward_to            = [loki.process.kubernetes_audit.receiver]
-        	legacy_positions_file = "/run/promtail/positions.yaml"
+        	legacy_positions_file = "/run/alloy/positions.yaml"
         }
         // Loki target configuration
         loki.write "default" {
@@ -323,7 +323,7 @@ alloy:
       enabled: true
       name: alloy-logs
     extraEnv:
-    - name: NODENAME
+    - name: NODE_NAME
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
