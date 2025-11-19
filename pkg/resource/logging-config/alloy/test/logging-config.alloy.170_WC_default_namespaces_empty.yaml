@@ -4,8 +4,8 @@
 #   here and will be created by Alloy's chart.
 # - Alloy runs as a daemonset, with required tolerations in order to scrape logs
 #   from every machine in the cluster.
-# - Running as root user is required in order to be able to read log files
-#   within /run/log/journal directories.
+# - Running as root user is required in order to be able to read log files within
+#   /run/log/journal directories.
 # - NODE_NAME env var is used as additional label for kubernetes_audit logs.
 networkPolicy:
   cilium:
@@ -29,6 +29,15 @@ networkPolicy:
         - port: "53"
           protocol: UDP
         - port: "53"
+          protocol: TCP
+    # Allow clustering
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: alloy-logs
+          app.kubernetes.io/name: alloy
+      toPorts:
+      - ports:
+        - port: "12345"
           protocol: TCP
   endpointSelector:
     matchLabels:

@@ -43,7 +43,7 @@ loki.source.podlogs "kubernetes_pods" {
 		enabled = true
 		node_name = env("NODE_NAME")
 	}
-	{{ else }}
+	{{- else }}
 	clustering {
 		enabled = true
 	}

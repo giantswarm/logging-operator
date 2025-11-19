@@ -4,8 +4,8 @@
 #   here and will be created by Alloy's chart.
 # - Alloy runs as a daemonset, with required tolerations in order to scrape logs
 #   from every machine in the cluster.
-# - Running as root user is required in order to be able to read log files
-#   within /run/log/journal directories.
+# - Running as root user is required in order to be able to read log files within
+#   /run/log/journal directories.
 # - NODE_NAME env var is used as additional label for kubernetes_audit logs.
 networkPolicy:
   cilium:
@@ -101,7 +101,6 @@ alloy:
         		enabled = true
         		node_name = env("NODE_NAME")
         	}
-        	
         }
         loki.relabel "kubernetes_pods" {
         	forward_to = [loki.process.kubernetes_pods.receiver]
@@ -303,6 +302,9 @@ alloy:
         		provider         = "test-provider",
         	}
         }
+    clustering:
+      enabled: false
+      name: alloy-logs
     extraEnv:
     - name: NODE_NAME
       valueFrom:

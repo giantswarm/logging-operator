@@ -65,6 +65,12 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		data.AlloyImageTag = &imageTag
 	}
 
+	if enableNodeFiltering && observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
+		// Use fixed image version
+		imageTag := fmt.Sprintf("v%s", alloyNodeFilterImageVersion.String())
+		data.AlloyImageTag = &imageTag
+	}
+
 	err = alloyLoggingConfigTemplate.Execute(&values, data)
 	if err != nil {
 		return "", err
