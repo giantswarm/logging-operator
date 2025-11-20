@@ -35,7 +35,6 @@ loki.rules.kubernetes "{{ . }}" {
 }
 {{- end }}
 
-{{- if .SupportPodLogs }}
 // Native podlogs collection (preferred method for scalability)
 loki.source.podlogs "kubernetes_pods" {
 	forward_to = [loki.relabel.kubernetes_pods.receiver]
@@ -45,16 +44,6 @@ loki.source.podlogs "kubernetes_pods" {
 		node_name = env("NODE_NAME")
 	}
 	{{- else }}
-	// Workaround for broken cluster mode in Alloy 1.5.0
-	// Uses a non-existent key to effectively select all namespaces
-	namespace_selector {
-		match_expression {
-			key      = "nonexisting"
-			operator = "NotIn"
-			values   = ["nonexistant"]
-		}
-	}
-
 	clustering {
 		enabled = true
 	}
@@ -63,32 +52,12 @@ loki.source.podlogs "kubernetes_pods" {
 
 loki.relabel "kubernetes_pods" {
 	forward_to = [loki.process.kubernetes_pods.receiver]
-{{- else }}
-// Legacy file-based log collection (fallback method)
-discovery.kubernetes "kubernetes_pods" {
-	role = "pod"
-}
-
-local.file_match "kubernetes_pods" {
-	path_targets = discovery.relabel.kubernetes_pods.output
-}
-
-loki.source.file "kubernetes_pods" {
-	targets               = local.file_match.kubernetes_pods.targets
-	forward_to            = [loki.process.kubernetes_pods.receiver]
-	legacy_positions_file = "/run/alloy/positions.yaml"
-}
-
-discovery.relabel "kubernetes_pods" {
-	targets = discovery.kubernetes.kubernetes_pods.targets
-{{- end }}
 
 	rule {
 		target_label = "scrape_job"
 		replacement  = "kubernetes-pods"
 	}
 
-	{{- if .SupportPodLogs }}
 	// Extract namespace, pod, and container from the structured instance label
 	// Format: "namespace/pod:container" (e.g., "kube-system/mimir-distributor-abc123:mimir")
 	rule {
@@ -123,68 +92,6 @@ discovery.relabel "kubernetes_pods" {
 		regex  = "giantswarm_observability_tenant"
 		action = "labeldrop"
 	}
-
-	{{- else }}
-	rule {
-		source_labels = ["__meta_kubernetes_namespace"]
-		target_label  = "namespace"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_name"]
-		target_label  = "pod"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_container_name"]
-		target_label  = "container"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-		separator     = "/"
-		target_label  = "__path__"
-		replacement   = "/var/log/pods/*$1/*.log"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash", "__meta_kubernetes_pod_annotation_kubernetes_io_config_hash", "__meta_kubernetes_pod_container_name"]
-		separator     = "/"
-		regex         = "true/(.*)"
-		target_label  = "__path__"
-		replacement   = "/var/log/pods/*$1/*.log"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_node_name"]
-		target_label  = "node"
-	}
-
-	// Convert specific Kubernetes pod labels to clean names (only for discovery.kubernetes path)
-	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
-		target_label  = "app_kubernetes_io_name"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component"]
-		target_label  = "app_kubernetes_io_component"
-	}
-
-	rule {
-		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_version"]
-		target_label  = "app_kubernetes_io_version"
-	}
-
-	{{- if .IsWorkloadCluster }}
-	// Restrict collection to system namespaces only in workload clusters
-	rule {
-		source_labels = ["__meta_kubernetes_namespace"]
-		regex         = "kube-system|giantswarm"
-		action        = "keep"
-	}
-	{{- end }}
-	{{- end }}
 
 	// Extract and normalize standard k8s labels with priority-based fallbacks
 	// Priority: app.kubernetes.io/name > app > pod name (pod logs then file-based discovery)
@@ -231,14 +138,12 @@ loki.process "kubernetes_pods" {
 	// Parse container runtime interface (CRI) log format
 	stage.cri { }
 
-	{{- if .SupportPodLogs }}
 	// Multi-tenant filtering: drop logs without valid tenant authorization
 	stage.drop {
 		drop_counter_reason = "no_tenant_id"
 		source              = "__tenant_id__"
 		expression          = "^$"
 	}
-	{{- end }}
 
 	// Move high-cardinality metadata to structured metadata instead of labels
 	stage.structured_metadata {

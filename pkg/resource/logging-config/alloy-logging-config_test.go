@@ -30,20 +30,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 		enableNodeFiltering        bool
 	}{
 		{
-			goldenFile:                 "alloy/test/logging-config.alloy.162_MC.yaml",
-			observabilityBundleVersion: "1.6.2",
-			installationName:           "test-installation",
-			clusterName:                "test-installation",
-			enableNodeFiltering:        false,
-		},
-		{
-			goldenFile:                 "alloy/test/logging-config.alloy.162_WC.yaml",
-			observabilityBundleVersion: "1.6.2",
-			installationName:           "test-installation",
-			clusterName:                "test-cluster",
-			enableNodeFiltering:        false,
-		},
-		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_MC.yaml",
 			observabilityBundleVersion: "1.7.0",
 			defaultNamespaces:          []string{"test-selector"},
