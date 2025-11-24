@@ -22,6 +22,8 @@ require (
 	sigs.k8s.io/yaml v1.6.0
 )
 
+require sigs.k8s.io/randfill v1.0.0 // indirect
+
 require (
 	github.com/go-openapi/swag/cmdutils v0.24.0 // indirect
 	github.com/go-openapi/swag/conv v0.25.1 // indirect
@@ -38,7 +40,6 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/mod v0.29.0 // indirect
-	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 )
 

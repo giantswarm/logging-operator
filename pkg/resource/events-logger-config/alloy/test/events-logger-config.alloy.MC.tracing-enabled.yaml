@@ -39,10 +39,10 @@ alloy:
         	endpoint {
         		max_backoff_period = "10m0s"
         		remote_timeout     = "1m0s"
-        		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        		url                = nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
+        		tenant_id          = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        		url                = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
         		basic_auth {
-        			username = nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
+        			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
         			password = remote.kubernetes.secret.credentials.data["logging-password"]
         		}
         		tls_config {

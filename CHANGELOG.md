@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Align labels accross signals.
 
+### Fixed
+
+- Replace deprecated `nonsensitive` function with `convert.nonsensitive`.
+- Replace deprecated `env` function with `sys.env`.
+
 ### Removed
 
 - Removed legacy log collection (pre podlogs support) as we now run only newer alloy app versions.

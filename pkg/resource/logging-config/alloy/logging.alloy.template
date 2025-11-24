@@ -12,9 +12,9 @@ remote.kubernetes.secret "credentials" {
 // load rules for tenant {{ . }}
 loki.rules.kubernetes "{{ . }}" {
 	{{- if $.IsWorkloadCluster }}
-	address = nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LokiRulerAPIURLKey }}"])
+	address = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LokiRulerAPIURLKey }}"])
 	basic_auth {
-		username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LoggingUsernameKey }}"])
+		username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LoggingUsernameKey }}"])
 		password = remote.kubernetes.secret.credentials.data["{{ $.LoggingPasswordKey }}"]
 	}
 	{{- else }}
@@ -41,7 +41,7 @@ loki.source.podlogs "kubernetes_pods" {
 	{{- if .NodeFilteringEnabled }}
 	node_filter {
 		enabled = true
-		node_name = env("NODE_NAME")
+		node_name = sys.env("NODE_NAME")
 	}
 	{{- else }}
 	clustering {
@@ -219,7 +219,7 @@ local.file_match "kubernetes_audit" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apiserver/audit.log",
-		node   = coalesce(env("NODENAME"), "unknown"),
+		node   = coalesce(sys.env("NODE_NAME"), "unknown"),
 		scrape_job  = "audit-logs",
 	}]
 }
@@ -272,16 +272,16 @@ loki.write "default" {
 	endpoint {
 		{{- if .IsWorkloadCluster }}
 		basic_auth {
-			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
+			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		url                = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		{{- else }}
 		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
 		{{- end }}
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
 		remote_timeout     = "{{ .RemoteTimeout }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+		tenant_id          = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		tls_config {
 			insecure_skip_verify = {{ .InsecureSkipVerify }}

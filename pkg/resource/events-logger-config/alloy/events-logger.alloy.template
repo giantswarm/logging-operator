@@ -39,12 +39,12 @@ loki.write "default" {
 	endpoint {
 		max_backoff_period = "{{ .MaxBackoffPeriod }}"
 		remote_timeout     = "{{ .RemoteTimeout }}"
-		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
+		tenant_id          = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingTenantIDKey }}"])
 
 		{{- if .IsWorkloadCluster }}
-		url                = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
+		url                = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingURLKey }}"])
 		basic_auth {
-			username = nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
+			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
 		}
 		{{- else }}

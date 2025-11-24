@@ -99,7 +99,7 @@ alloy:
         	forward_to = [loki.relabel.kubernetes_pods.receiver]
         	node_filter {
         		enabled = true
-        		node_name = env("NODE_NAME")
+        		node_name = sys.env("NODE_NAME")
         	}
         }
         loki.relabel "kubernetes_pods" {
@@ -244,7 +244,7 @@ alloy:
         	path_targets = [{
         		__address__ = "localhost",
         		__path__    = "/var/log/apiserver/audit.log",
-        		node   = coalesce(env("NODENAME"), "unknown"),
+        		node   = coalesce(sys.env("NODE_NAME"), "unknown"),
         		scrape_job  = "audit-logs",
         	}]
         }
@@ -290,7 +290,7 @@ alloy:
         		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
         		max_backoff_period = "10m0s"
         		remote_timeout     = "1m0s"
-        		tenant_id          = nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
+        		tenant_id          = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
         		tls_config {
         			insecure_skip_verify = false
         		}
