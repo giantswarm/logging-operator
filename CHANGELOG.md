@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Replace deprecated `nonsensitive` function with `convert.nonsensitive`.
+- Replace deprecated `env` function with `sys.env`.
+
 ## [0.37.0] - 2025-11-24
 
 ### Added
