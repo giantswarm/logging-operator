@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.37.0] - 2025-11-24
+
 ### Added
 
 - Add `--enable-node-filtering` flag to disable Alloy clustering which causes issues on big clusters, and instead rely on node_filter for pod logs support.
@@ -641,7 +643,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.36.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.37.0...HEAD
+[0.37.0]: https://github.com/giantswarm/logging-operator/compare/v0.36.0...v0.37.0
 [0.36.0]: https://github.com/giantswarm/logging-operator/compare/v0.35.0...v0.36.0
 [0.35.0]: https://github.com/giantswarm/logging-operator/compare/v0.34.5...v0.35.0
 [0.34.5]: https://github.com/giantswarm/logging-operator/compare/v0.34.4...v0.34.5
