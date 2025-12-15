@@ -30,15 +30,6 @@ networkPolicy:
           protocol: UDP
         - port: "53"
           protocol: TCP
-    # Allow clustering
-    - toEndpoints:
-      - matchLabels:
-          app.kubernetes.io/instance: alloy-logs
-          app.kubernetes.io/name: alloy
-      toPorts:
-      - ports:
-        - port: "12345"
-          protocol: TCP
   endpointSelector:
     matchLabels:
       app.kubernetes.io/instance: alloy-logs
@@ -115,10 +106,10 @@ alloy:
         	endpoint {
         		enable_http2   = false
         		remote_timeout = "60s"
-        		url = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIURL"])
+        		url = convert.nonsensitive(remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIURL"])
         		basic_auth {
-        			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIUsername"])
-        			password = remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIPassword"]
+        			username = convert.nonsensitive(remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIUsername"])
+        			password = remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIPassword"]
         		}
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
@@ -171,8 +162,9 @@ alloy:
         // Native podlogs collection (preferred method for scalability)
         loki.source.podlogs "kubernetes_pods" {
         	forward_to = [loki.relabel.kubernetes_pods.receiver]
-        	clustering {
+        	node_filter {
         		enabled = true
+        		node_name = sys.env("NODE_NAME")
         	}
         }
         loki.relabel "kubernetes_pods" {
@@ -380,7 +372,7 @@ alloy:
         	}
         }
     clustering:
-      enabled: true
+      enabled: false
       name: alloy-logs
     extraEnv:
     - name: NODE_NAME
@@ -447,6 +439,8 @@ alloy:
           path: /run/log/journal
       - name: alloy-tmp
         emptyDir: {}
+  image:
+    tag: v1.12.0
 
 verticalPodAutoscaler:
   enabled: true

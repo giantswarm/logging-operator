@@ -37,6 +37,9 @@ func init() {
 func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, clusterLabels common.ClusterLabels, insecureCA bool, enableNodeFiltering bool, enableNetworkMonitoring bool) (string, error) {
 	var values bytes.Buffer
 
+	// If network monitoring is enabled, node filtering must also be enabled as clustering does not work with host network.
+	enableNodeFiltering = enableNodeFiltering || enableNetworkMonitoring
+
 	alloyConfig, err := generateAlloyConfig(tenants, clusterLabels, insecureCA, enableNodeFiltering, enableNetworkMonitoring)
 	if err != nil {
 		return "", err
@@ -59,12 +62,6 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		NodeFilteringEnabled:             enableNodeFiltering,
 		IsWorkloadCluster:                common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		PriorityClassName:                common.PriorityClassName,
-	}
-
-	if enableNodeFiltering && observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
-		// Use fixed image version
-		imageTag := fmt.Sprintf("v%s", alloyNodeFilterImageVersion.String())
-		data.AlloyImageTag = &imageTag
 	}
 
 	if enableNodeFiltering && observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {

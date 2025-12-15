@@ -106,10 +106,10 @@ alloy:
         	endpoint {
         		enable_http2   = false
         		remote_timeout = "60s"
-        		url = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIURL"])
+        		url = convert.nonsensitive(remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIURL"])
         		basic_auth {
-        			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIUsername"])
-        			password = remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIPassword"]
+        			username = convert.nonsensitive(remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIUsername"])
+        			password = remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIPassword"]
         		}
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
