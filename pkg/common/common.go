@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
-	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/observability-operator/pkg/common/organization"
