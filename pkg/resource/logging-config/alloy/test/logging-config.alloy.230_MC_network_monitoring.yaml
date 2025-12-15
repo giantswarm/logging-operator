@@ -165,12 +165,9 @@ alloy:
         	external_labels = {
         		cluster_id       = "test-installation",
         		cluster_type     = "management_cluster",
-        		customer         = "",
         		installation     = "test-installation",
         		organization     = "test-organization",
-        		pipeline         = "",
         		provider         = "test-provider",
-        		region           = "",
         		service_priority = "",
         	}
         }

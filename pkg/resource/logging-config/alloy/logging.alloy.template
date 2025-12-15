@@ -101,12 +101,9 @@ prometheus.remote_write "giantswarm" {
 	external_labels = {
 		cluster_id       = "{{ .ClusterID }}",
 		cluster_type     = "{{ .ClusterType }}",
-		customer         = "{{ .Customer }}",
 		installation     = "{{ .Installation }}",
 		organization     = "{{ .Organization }}",
-		pipeline         = "{{ .Pipeline }}",
 		provider         = "{{ .Provider }}",
-		region           = "{{ .Region }}",
 		service_priority = "{{ .ServicePriority }}",
 	}
 }
