@@ -132,7 +132,7 @@ alloy:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
-          - ALL
+        - ALL
       {{- end }}
       readOnlyRootFilesystem: true
       runAsUser: 0
