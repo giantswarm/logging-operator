@@ -34,6 +34,7 @@ spec:
         args:
           - -enable-logging={{ .Values.loggingOperator.loggingEnabled }}
           - -enable-node-filtering={{ .Values.loggingOperator.nodeFilteringEnabled }}
+          - -enable-network-monitoring={{ .Values.loggingOperator.networkMonitoringEnabled }}
           - -enable-tracing={{ .Values.tracing.enabled }}
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}

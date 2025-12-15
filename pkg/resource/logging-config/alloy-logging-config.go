@@ -47,6 +47,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		AlloyImageTag                    *string
 		DefaultWorkloadClusterNamespaces []string
 		DefaultWriteTenant               string
+		NetworkMonitoringEnabled         bool
 		NodeFilteringEnabled             bool
 		IsWorkloadCluster                bool
 		PriorityClassName                string
@@ -54,6 +55,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               common.DefaultWriteTenant,
+		NetworkMonitoringEnabled:         enableNetworkMonitoring,
 		NodeFilteringEnabled:             enableNodeFiltering,
 		IsWorkloadCluster:                common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		PriorityClassName:                common.PriorityClassName,
