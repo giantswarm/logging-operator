@@ -57,12 +57,6 @@ alloy:
         	namespace = "kube-system"
         	name = "alloy-logs"
         }
-        // Network monitoring with Beyla
-        // The metrics credentials secret is managed by observability-operator's authmanager
-        remote.kubernetes.secret "metrics_credentials" {
-        	name      = "alloy-metrics"
-        	namespace = "kube-system"
-        }
         beyla.ebpf "default" {
         	attributes {
         		kubernetes {
@@ -102,47 +96,6 @@ alloy:
         			"network",
         			"network_inter_zone",
         		]
-        	}
-        }
-        //TODO scrape this instead api/v0/component/beyla.ebpf.default/metric via service monitor?
-        prometheus.scrape "beyla" {
-        	targets      = beyla.ebpf.default.targets
-        	honor_labels = true
-        	forward_to   = [prometheus.remote_write.giantswarm.receiver]
-        }
-        // remote write pipeline configuration for tenant giantswarm
-        prometheus.remote_write "giantswarm" {
-        	endpoint {
-        		enable_http2   = false
-        		remote_timeout = "60s"
-        		url = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIURL"])
-        		basic_auth {
-        			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIUsername"])
-        			password = remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIPassword"]
-        		}
-        		headers = {
-        			"X-Scope-OrgID" = "giantswarm",
-        		}
-        		tls_config {
-        			insecure_skip_verify = false
-        		}
-        		queue_config {
-        			capacity             = 30000
-        			max_samples_per_send = 150000
-        			max_shards           = 10
-        			sample_age_limit     = "30m"
-        		}
-        	}
-        	wal {
-        		truncate_frequency = "15m0s"
-        	}
-        	external_labels = {
-        		cluster_id       = "test-cluster",
-        		cluster_type     = "workload_cluster",
-        		installation     = "test-installation",
-        		organization     = "test-organization",
-        		provider         = "test-provider",
-        		service_priority = "",
         	}
         }
         // load rules for tenant giantswarm
@@ -492,3 +445,97 @@ podLogs:
     - action: replace
       sourceLabels: ["__meta_kubernetes_pod_label_app_kubernetes_io_version"]
       targetLabel: "app_kubernetes_io_version"
+kyvernoPolicyExceptions:
+  enabled: true
+  namespace: giantswarm
+  exceptions:
+  - policyName: restrict-volume-types
+    ruleNames:
+    - "*"
+  - policyName: always-allow-heartbeats-and-all-pipelines-alerts
+    ruleNames:
+    - "*"
+  - policyName: block-k8s-initiator-app-deployment-capa
+    ruleNames:
+    - "*"
+  - policyName: disallow-capabilities
+    ruleNames:
+    - "*"
+  - policyName: disallow-capabilities-strict
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-namespaces
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-path
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-ports
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-process
+    ruleNames:
+    - "*"
+  - policyName: disallow-noisy-policy-contexts
+    ruleNames:
+    - "*"
+  - policyName: disallow-privilege-escalation
+    ruleNames:
+    - "*"
+  - policyName: disallow-privileged-containers
+    ruleNames:
+    - "*"
+  - policyName: disallow-proc-mount
+    ruleNames:
+    - "*"
+  - policyName: disallow-selinux
+    ruleNames:
+    - "*"
+  - policyName: require-emptydir-requests-and-limits
+    ruleNames:
+    - "*"
+  - policyName: require-run-as-non-root-user
+    ruleNames:
+    - "*"
+  - policyName: require-run-as-nonroot
+    ruleNames:
+    - "*"
+  - policyName: restrict-apparmor-profiles
+    ruleNames:
+    - "*"
+  - policyName: restrict-polex-namespaces
+    ruleNames:
+    - "*"
+  - policyName: restrict-policy-kind-wildcards
+    ruleNames:
+    - "*"
+  - policyName: restrict-seccomp
+    ruleNames:
+    - "*"
+  - policyName: restrict-seccomp-strict
+    ruleNames:
+    - "*"
+  - policyName: restrict-sysctls
+    ruleNames:
+    - "*"
+  - policyName: restrict-volume-types
+    ruleNames:
+    - "*"
+extraObjects:
+- apiVersion: monitoring.coreos.com/v1
+  kind: ServiceMonitor
+  metadata:
+    labels:
+      observability.giantswarm.io/tenant: giantswarm
+    name: alloy-logs-beyla
+    namespace: monitoring
+  spec:
+    endpoints:
+    - honorLabels: true
+      port: http-metrics
+      path: /api/v0/component/beyla.ebpf.default/metric
+      scheme: http
+    selector:
+      matchLabels:
+        app.kubernetes.io/instance: alloy-logs
+        app.kubernetes.io/name: alloy
