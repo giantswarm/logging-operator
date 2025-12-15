@@ -9,13 +9,6 @@ remote.kubernetes.secret "credentials" {
 }
 
 {{- if .NetworkMonitoringEnabled }}
-// Network monitoring with Beyla
-// The metrics credentials secret is managed by observability-operator's authmanager
-remote.kubernetes.secret "metrics_credentials" {
-	name      = "alloy-metrics"
-	namespace = "kube-system"
-}
-
 beyla.ebpf "default" {
 	attributes {
 		kubernetes {
@@ -57,54 +50,6 @@ beyla.ebpf "default" {
 			"network",
 			"network_inter_zone",
 		]
-	}
-}
-
-//TODO scrape this instead api/v0/component/beyla.ebpf.default/metric via service monitor?
-prometheus.scrape "beyla" {
-	targets      = beyla.ebpf.default.targets
-	honor_labels = true
-	forward_to   = [prometheus.remote_write.giantswarm.receiver]
-}
-
-// remote write pipeline configuration for tenant giantswarm
-prometheus.remote_write "giantswarm" {
-	endpoint {
-		enable_http2   = false
-		remote_timeout = "60s"
-		{{- if $.IsWorkloadCluster }}
-		url = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIURL"])
-		basic_auth {
-			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIUsername"])
-			password = remote.kubernetes.secret.credentials.data["mimirRemoteWriteAPIPassword"]
-		}
-		{{- else }}
-		url = "http://mimir-gateway.mimir.svc:80/api/v1/push"
-		{{- end }}
-
-		headers = {
-			"X-Scope-OrgID" = "giantswarm",
-		}
-		tls_config {
-			insecure_skip_verify = false
-		}
-		queue_config {
-			capacity             = 30000
-			max_samples_per_send = 150000
-			max_shards           = 10
-			sample_age_limit     = "30m"
-		}
-	}
-	wal {
-		truncate_frequency = "15m0s"
-	}
-	external_labels = {
-		cluster_id       = "{{ .ClusterID }}",
-		cluster_type     = "{{ .ClusterType }}",
-		installation     = "{{ .Installation }}",
-		organization     = "{{ .Organization }}",
-		provider         = "{{ .Provider }}",
-		service_priority = "{{ .ServicePriority }}",
 	}
 }
 {{- end }}

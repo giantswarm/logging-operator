@@ -9,7 +9,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/blang/semver"
-	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
@@ -81,7 +81,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 	return values.String(), nil
 }
 
-func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, insecureCA bool, enableNodeFiltering bool, enableNetworkMonitoring bool) (string, error) {
+func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, insecureCA bool, enableNodeFiltering bool) (string, error) {
 	var values bytes.Buffer
 
 	// Ensure default tenant is included in the list of tenants
@@ -90,47 +90,39 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 	}
 
 	data := struct {
-		ClusterID                string
-		ClusterType              string
-		Organization             string
-		Installation             string
-		Provider                 string
-		ServicePriority          string
-		MaxBackoffPeriod         string
-		EnableNetworkMonitoring  bool
-		RemoteTimeout            string
-		IsWorkloadCluster        bool
-		NodeFilteringEnabled     bool
-		NetworkMonitoringEnabled bool
-		InsecureSkipVerify       bool
-		SecretName               string
-		LoggingURLKey            string
-		LoggingTenantIDKey       string
-		LoggingUsernameKey       string
-		LoggingPasswordKey       string
-		LokiRulerAPIURLKey       string
-		Tenants                  []string
+		ClusterID            string
+		ClusterType          string
+		Organization         string
+		Provider             string
+		MaxBackoffPeriod     string
+		RemoteTimeout        string
+		IsWorkloadCluster    bool
+		NodeFilteringEnabled bool
+		InsecureSkipVerify   bool
+		SecretName           string
+		LoggingURLKey        string
+		LoggingTenantIDKey   string
+		LoggingUsernameKey   string
+		LoggingPasswordKey   string
+		LokiRulerAPIURLKey   string
+		Tenants              []string
 	}{
-		ClusterID:                clusterLabels.ClusterID,
-		ClusterType:              clusterLabels.ClusterType,
-		Organization:             clusterLabels.Organization,
-		Installation:             clusterLabels.Installation,
-		Provider:                 clusterLabels.Provider,
-		ServicePriority:          clusterLabels.ServicePriority,
-		MaxBackoffPeriod:         common.LokiMaxBackoffPeriod.String(),
-		EnableNetworkMonitoring:  enableNetworkMonitoring,
-		RemoteTimeout:            common.LokiRemoteTimeout.String(),
-		IsWorkloadCluster:        common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
-		NodeFilteringEnabled:     enableNodeFiltering,
-		NetworkMonitoringEnabled: enableNetworkMonitoring,
-		InsecureSkipVerify:       insecureCA,
-		SecretName:               common.AlloyLogAgentAppName,
-		LoggingURLKey:            common.LoggingURL,
-		LoggingTenantIDKey:       common.LoggingTenantID,
-		LoggingUsernameKey:       common.LoggingUsername,
-		LoggingPasswordKey:       common.LoggingPassword,
-		LokiRulerAPIURLKey:       common.LokiRulerAPIURL,
-		Tenants:                  tenants,
+		ClusterID:            clusterLabels.ClusterID,
+		ClusterType:          clusterLabels.ClusterType,
+		Organization:         clusterLabels.Organization,
+		Provider:             clusterLabels.Provider,
+		MaxBackoffPeriod:     common.LokiMaxBackoffPeriod.String(),
+		RemoteTimeout:        common.LokiRemoteTimeout.String(),
+		IsWorkloadCluster:    common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
+		NodeFilteringEnabled: enableNodeFiltering,
+		InsecureSkipVerify:   insecureCA,
+		SecretName:           common.AlloyLogAgentAppName,
+		LoggingURLKey:        common.LoggingURL,
+		LoggingTenantIDKey:   common.LoggingTenantID,
+		LoggingUsernameKey:   common.LoggingUsername,
+		LoggingPasswordKey:   common.LoggingPassword,
+		LokiRulerAPIURLKey:   common.LokiRulerAPIURL,
+		Tenants:              tenants,
 	}
 
 	if err := alloyLoggingTemplate.Execute(&values, data); err != nil {
