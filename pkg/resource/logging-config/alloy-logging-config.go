@@ -98,6 +98,7 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 		Region                   string
 		ServicePriority          string
 		MaxBackoffPeriod         string
+		EnableNetworkMonitoring  bool
 		RemoteTimeout            string
 		IsWorkloadCluster        bool
 		NodeFilteringEnabled     bool
@@ -121,6 +122,7 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 		Region:                   clusterLabels.Region,
 		ServicePriority:          clusterLabels.ServicePriority,
 		MaxBackoffPeriod:         common.LokiMaxBackoffPeriod.String(),
+		EnableNetworkMonitoring:  enableNetworkMonitoring,
 		RemoteTimeout:            common.LokiRemoteTimeout.String(),
 		IsWorkloadCluster:        common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		NodeFilteringEnabled:     enableNodeFiltering,
