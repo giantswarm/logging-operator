@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Add network monitoring support to alloy-logs.
+- Add kyverno policy exceptions to alloy-logs.
 
 ### Fixed
 
