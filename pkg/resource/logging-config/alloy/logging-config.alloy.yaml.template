@@ -144,7 +144,6 @@ alloy:
         {{- else }}
         type: RuntimeDefault
         {{- end }}
-
   controller:
     type: daemonset
     {{- if .NetworkMonitoringEnabled }}
