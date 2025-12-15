@@ -60,58 +60,6 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (
 	return ctrl.Result{}, errors.WithStack(err)
 }
 
-func (r *Resource) createCredentialsSecret(ctx context.Context, cluster *capi.Cluster, credentialsSecret *v1.Secret, secretName string, secretNamespace string) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
-	// Retrieve existing secret if it exists
-	err := r.Client.Get(ctx, types.NamespacedName{Name: CredentialsSecretMeta(secretName, secretNamespace).Name, Namespace: CredentialsSecretMeta(secretName, secretNamespace).Namespace}, credentialsSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("loggingcredentials secret not found, initializing one")
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	// update the secret's contents if needed
-	loggingSecretUpdated, err := AddCredentials(cluster, credentialsSecret)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	// Check if metadata has been updated
-	if !reflect.DeepEqual(credentialsSecret.Labels, CredentialsSecretMeta(secretName, secretNamespace).Labels) {
-		logger.Info("loggingCredentials - metatada update required")
-		credentialsSecret.ObjectMeta = CredentialsSecretMeta(secretName, secretNamespace)
-		loggingSecretUpdated = true
-	}
-
-	if !loggingSecretUpdated {
-		// If there were no changes to either secret, we're done here.
-		logger.Info("loggingCredentials and tracingCredentials - up to date")
-		return ctrl.Result{}, nil
-	}
-
-	// commit our changes
-	if loggingSecretUpdated {
-		logger.Info("loggingCredentials - Updating secret")
-		err = r.Client.Update(ctx, credentialsSecret)
-		if err != nil {
-			if apimachineryerrors.IsNotFound(err) {
-				logger.Info("loggingCredentials - Secret does not exist, creating it")
-				err = r.Client.Create(ctx, credentialsSecret)
-				if err != nil {
-					return ctrl.Result{}, errors.WithStack(err)
-				}
-			} else {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		}
-	}
-
-	return ctrl.Result{}, nil
-}
-
 func (r *Resource) deleteCredentialsSecret(ctx context.Context, cluster *capi.Cluster, credentialsSecret *v1.Secret, secretName string, secretNamespace string) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
