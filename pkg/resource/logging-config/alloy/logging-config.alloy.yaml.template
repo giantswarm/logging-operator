@@ -233,3 +233,82 @@ podLogs:
       sourceLabels: ["__meta_kubernetes_pod_label_app_kubernetes_io_version"]
       targetLabel: "app_kubernetes_io_version"
 {{- end }}
+
+{{- if .NetworkMonitoringEnabled }}
+kyvernoPolicyExceptions:
+  enabled: true
+  namespace: giantswarm
+  exceptions:
+  - policyName: restrict-volume-types
+    ruleNames:
+    - "*"
+  - policyName: always-allow-heartbeats-and-all-pipelines-alerts
+    ruleNames:
+    - "*"
+  - policyName: block-k8s-initiator-app-deployment-capa
+    ruleNames:
+    - "*"
+  - policyName: disallow-capabilities
+    ruleNames:
+    - "*"
+  - policyName: disallow-capabilities-strict
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-namespaces
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-path
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-ports
+    ruleNames:
+    - "*"
+  - policyName: disallow-host-process
+    ruleNames:
+    - "*"
+  - policyName: disallow-noisy-policy-contexts
+    ruleNames:
+    - "*"
+  - policyName: disallow-privilege-escalation
+    ruleNames:
+    - "*"
+  - policyName: disallow-privileged-containers
+    ruleNames:
+    - "*"
+  - policyName: disallow-proc-mount
+    ruleNames:
+    - "*"
+  - policyName: disallow-selinux
+    ruleNames:
+    - "*"
+  - policyName: require-emptydir-requests-and-limits
+    ruleNames:
+    - "*"
+  - policyName: require-run-as-non-root-user
+    ruleNames:
+    - "*"
+  - policyName: require-run-as-nonroot
+    ruleNames:
+    - "*"
+  - policyName: restrict-apparmor-profiles
+    ruleNames:
+    - "*"
+  - policyName: restrict-polex-namespaces
+    ruleNames:
+    - "*"
+  - policyName: restrict-policy-kind-wildcards
+    ruleNames:
+    - "*"
+  - policyName: restrict-seccomp
+    ruleNames:
+    - "*"
+  - policyName: restrict-seccomp-strict
+    ruleNames:
+    - "*"
+  - policyName: restrict-sysctls
+    ruleNames:
+    - "*"
+  - policyName: restrict-volume-types
+    ruleNames:
+    - "*"
+{{- end }}
