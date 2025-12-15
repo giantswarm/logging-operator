@@ -34,9 +34,13 @@ spec:
         args:
           - -enable-logging={{ .Values.loggingOperator.loggingEnabled }}
           - -enable-node-filtering={{ .Values.loggingOperator.nodeFilteringEnabled }}
+          - -enable-network-monitoring={{ .Values.loggingOperator.networkMonitoringEnabled }}
           - -enable-tracing={{ .Values.tracing.enabled }}
           - -insecure-ca={{ .Values.managementCluster.insecureCA }}
           - -installation-name={{ .Values.managementCluster.name }}
+          - -customer={{ .Values.managementCluster.customer | default "unknown" }}
+          - -pipeline={{ .Values.managementCluster.pipeline | default "unknown" }}
+          - -region={{ .Values.managementCluster.region | default "unknown" }}
           - -default-namespaces={{ .Values.loggingOperator.defaultNamespaces }}
           {{- if .Values.loggingOperator.excludeEventsFromNamespaces }}
           - -exclude-events-from-namespaces={{ .Values.loggingOperator.excludeEventsFromNamespaces | join "," }}

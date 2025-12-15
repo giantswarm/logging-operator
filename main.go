@@ -85,9 +85,13 @@ func main() {
 	var enableLogging bool
 	var enableNodeFiltering bool
 	var enableTracing bool
+	var enableNetworkMonitoring bool
 	var includeEventsFromNamespaces StringSliceVar
 	var excludeEventsFromNamespaces StringSliceVar
 	var installationName string
+	var customer string
+	var pipeline string
+	var region string
 	var insecureCA bool
 	var metricsAddr string
 	var profilesAddr string
@@ -99,9 +103,13 @@ func main() {
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
 	flag.BoolVar(&enableNodeFiltering, "enable-node-filtering", false, "enable/disable node filtering in Alloy logging configuration")
 	flag.BoolVar(&enableTracing, "enable-tracing", false, "enable/disable tracing support for events logger")
+	flag.BoolVar(&enableNetworkMonitoring, "enable-network-monitoring", false, "enable/disable network monitoring for the whole installation")
 	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
 	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
+	flag.StringVar(&customer, "customer", "unknown", "Name of the customer")
+	flag.StringVar(&pipeline, "pipeline", "unknown", "Name of the pipeline")
+	flag.StringVar(&region, "region", "unknown", "Region where the installation is deployed")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&profilesAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
@@ -156,11 +164,15 @@ func main() {
 
 	// Create Config for dependency injection
 	appConfig := config.Config{
-		EnableLoggingFlag:       enableLogging,
-		EnableNodeFilteringFlag: enableNodeFiltering,
-		EnableTracingFlag:       enableTracing,
-		InstallationName:        installationName,
-		InsecureCA:              insecureCA,
+		EnableLoggingFlag:           enableLogging,
+		EnableNodeFilteringFlag:     enableNodeFiltering,
+		EnableTracingFlag:           enableTracing,
+		EnableNetworkMonitoringFlag: enableNetworkMonitoring,
+		InstallationName:            installationName,
+		Customer:                    customer,
+		Pipeline:                    pipeline,
+		Region:                      region,
+		InsecureCA:                  insecureCA,
 	}
 
 	agentsToggle := agentstoggle.Resource{

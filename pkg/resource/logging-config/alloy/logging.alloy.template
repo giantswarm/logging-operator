@@ -8,10 +8,109 @@ remote.kubernetes.secret "credentials" {
 	name = "{{ .SecretName }}"
 }
 
+{{- if .NetworkMonitoringEnabled }}
+// Network monitoring with Beyla
+// The metrics credentials secret is managed by observability-operator's authmanager
+remote.kubernetes.secret "metrics_credentials" {
+	name      = "alloy-metrics"
+	namespace = "kube-system"
+}
+
+beyla.ebpf "default" {
+	attributes {
+		kubernetes {
+			cluster_name = "{{ .ClusterID }}"
+			enable = "true"
+		}
+		select {
+			attr = "beyla_network_flow_bytes"
+			include = [
+				"k8s.src.namespace",
+				"k8s.src.name",
+				"k8s.src.type",
+				"k8s.dst.namespace",
+				"k8s.dst.name",
+				"k8s.dst.type",
+				"src.cidr",
+				"src.address",
+				"src.name",
+				"dst.cidr",
+				"dst.address",
+				"src.zone",
+				"dst.zone",
+				"dst.name",
+				"transport",
+				"direction",
+			]
+		}
+	}
+
+	filters {
+		network {
+			attr = "direction"
+			match = "request"
+		}
+	}
+
+	metrics {
+		features = [
+			"network",
+			"network_inter_zone",
+		]
+	}
+}
+
+//TODO scrape this instead api/v0/component/beyla.ebpf.default/metric via service monitor?
+prometheus.scrape "beyla" {
+	targets      = beyla.ebpf.default.targets
+	honor_labels = true
+	forward_to   = [prometheus.remote_write.giantswarm.receiver]
+}
+
+// remote write pipeline configuration for tenant giantswarm
+prometheus.remote_write "giantswarm" {
+	endpoint {
+		enable_http2   = false
+		remote_timeout = "60s"
+		url = convert.nonsensitive(remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIURL"])
+		basic_auth {
+			username = convert.nonsensitive(remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIUsername"])
+			password = remote.kubernetes.secret.metrics_credentials.data["mimirRemoteWriteAPIPassword"]
+		}
+		headers = {
+			"X-Scope-OrgID" = "giantswarm",
+		}
+		tls_config {
+			insecure_skip_verify = false
+		}
+		queue_config {
+			capacity             = 30000
+			max_samples_per_send = 150000
+			max_shards           = 10
+			sample_age_limit     = "30m"
+		}
+	}
+	wal {
+		truncate_frequency = "15m0s"
+	}
+	external_labels = {
+		cluster_id       = "{{ .ClusterID }}",
+		cluster_type     = "{{ .ClusterType }}",
+		customer         = "{{ .Customer }}",
+		installation     = "{{ .Installation }}",
+		organization     = "{{ .Organization }}",
+		pipeline         = "{{ .Pipeline }}",
+		provider         = "{{ .Provider }}",
+		region           = "{{ .Region }}",
+		service_priority = "{{ .ServicePriority }}",
+	}
+}
+{{- end }}
+
 {{- range .Tenants }}
 // load rules for tenant {{ . }}
 loki.rules.kubernetes "{{ . }}" {
-	{{- if $.IsWorkloadCluster }}
+	{{- if or $.IsWorkloadCluster $.NetworkMonitoringEnabled }}
 	address = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LokiRulerAPIURLKey }}"])
 	basic_auth {
 		username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ $.LoggingUsernameKey }}"])
@@ -270,7 +369,7 @@ loki.source.file "kubernetes_audit" {
 // Loki target configuration
 loki.write "default" {
 	endpoint {
-		{{- if .IsWorkloadCluster }}
+		{{- if or .IsWorkloadCluster .NetworkMonitoringEnabled }}
 		basic_auth {
 			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["{{ .LoggingUsernameKey }}"])
 			password = remote.kubernetes.secret.credentials.data["{{ .LoggingPasswordKey }}"]
