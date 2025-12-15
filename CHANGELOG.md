@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Add network monitoring support to alloy-logs.
+
 ### Fixed
 
 - Replace deprecated `nonsensitive` function with `convert.nonsensitive`.
