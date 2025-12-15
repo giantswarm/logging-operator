@@ -13,10 +13,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/giantswarm/observability-operator/pkg/auth"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	config "github.com/giantswarm/logging-operator/pkg/config"
 	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
-	"github.com/giantswarm/observability-operator/pkg/auth"
 )
 
 // Resource implements a resource.Interface to handle

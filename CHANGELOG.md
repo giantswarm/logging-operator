@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Add network monitoring support to alloy-logs.
+- Switch authentication to the new format managed by the observability-operator (1 secret per cluster) using the AuthManager interface. This means this operator not longer needs to generate passwords nor ingress secrets.
 
 ### Fixed
 
