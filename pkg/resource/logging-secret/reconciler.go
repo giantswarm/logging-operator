@@ -3,7 +3,9 @@ package loggingsecret
 import (
 	"context"
 	"reflect"
+	"time"
 
+	"github.com/giantswarm/observability-operator/pkg/auth"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -15,28 +17,21 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	"github.com/giantswarm/logging-operator/pkg/config"
-	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 // Resource implements a resource.Interface to handle
 // Logging secret: extra logging secret about where and how to send logs
 type Resource struct {
-	Client client.Client
-	Config config.Config
+	Client            client.Client
+	Config            config.Config
+	LogsAuthManager   auth.AuthManager
+	TracesAuthManager auth.AuthManager
 }
 
 // ReconcileCreate ensures logging-secret is created with the right credentials
 func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("logging-secret create")
-
-	// Retrieve secret containing credentials
-	var loggingCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace},
-		&loggingCredentialsSecret)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
 
 	// Retrieve Loki ingress name
 	lokiURL, err := common.ReadLokiIngressURL(ctx, cluster, r.Client)
@@ -45,8 +40,13 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 	}
 
 	// Get desired secret
-	desiredLoggingSecret, err := GenerateLoggingSecret(cluster, &loggingCredentialsSecret, lokiURL, r.Config.InstallationName, r.Config.InsecureCA)
+	desiredLoggingSecret, err := GenerateLoggingSecret(ctx, cluster, r.LogsAuthManager, r.TracesAuthManager, lokiURL, r.Config.EnableTracingFlag)
 	if err != nil {
+		// If the auth secret doesn't exist yet (race condition), requeue
+		if apimachineryerrors.IsNotFound(err) {
+			logger.Info("logging-secret - auth secret not found yet, requeueing", "error", err)
+			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+		}
 		logger.Info("logging-secret - failed generating auth config!", "error", err)
 		return ctrl.Result{}, errors.WithStack(err)
 	}
@@ -54,7 +54,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 	// Check if secret already exists.
 	logger.Info("logging-secret - getting", "namespace", desiredLoggingSecret.GetNamespace(), "name", desiredLoggingSecret.GetName())
 	var currentLoggingSecret v1.Secret
-	err = r.Client.Get(ctx, types.NamespacedName{Name: desiredLoggingSecret.Name, Namespace: desiredLoggingSecret.Namespace}, &currentLoggingSecret)
+	err = r.Client.Get(ctx, client.ObjectKeyFromObject(&desiredLoggingSecret), &currentLoggingSecret)
 	if err != nil {
 		if apimachineryerrors.IsNotFound(err) {
 			logger.Info("logging-secret not found, creating")

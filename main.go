@@ -27,6 +27,7 @@ import (
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/observability-operator/api/v1alpha1"
+	"github.com/giantswarm/observability-operator/pkg/auth"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -175,6 +176,28 @@ func main() {
 		InsecureCA:                  insecureCA,
 	}
 
+	// Initialize auth managers for logs and traces
+	// These read cluster passwords from observability-operator managed secrets
+	logsAuthManager := auth.NewAuthManager(
+		mgr.GetClient(),
+		auth.NewConfig(
+			auth.AuthTypeLogs,
+			"loki",
+			"loki-gateway-ingress-auth",
+			"loki-gateway-httproute-auth",
+		),
+	)
+
+	tracesAuthManager := auth.NewAuthManager(
+		mgr.GetClient(),
+		auth.NewConfig(
+			auth.AuthTypeTraces,
+			"tempo",
+			"tempo-gateway-ingress-auth",
+			"tempo-gateway-httproute-auth",
+		),
+	)
+
 	agentsToggle := agentstoggle.Resource{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -196,8 +219,10 @@ func main() {
 	}
 
 	loggingSecret := loggingsecret.Resource{
-		Client: mgr.GetClient(),
-		Config: appConfig,
+		Client:            mgr.GetClient(),
+		Config:            appConfig,
+		LogsAuthManager:   logsAuthManager,
+		TracesAuthManager: tracesAuthManager,
 	}
 
 	loggingConfig := loggingconfig.Resource{
@@ -214,8 +239,10 @@ func main() {
 	}
 
 	eventsLoggerSecret := eventsloggersecret.Resource{
-		Client: mgr.GetClient(),
-		Config: appConfig,
+		Client:            mgr.GetClient(),
+		Config:            appConfig,
+		LogsAuthManager:   logsAuthManager,
+		TracesAuthManager: tracesAuthManager,
 	}
 
 	if err = (&controller.CapiClusterReconciler{

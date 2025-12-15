@@ -24,33 +24,10 @@ type Resource struct {
 	Config config.Config
 }
 
-// ReconcileCreate ensures a secret exists for the given cluster.
+// ReconcileCreate always calls ReconcileDelete to clean up old credentials.
+// Credential generation is now handled by observability-operator's auth manager.
 func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
-	logger.Info("credentials checking secret for logging", "namespace", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Name)
-
-	// Start with some empty secret
-	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
-	_, err := r.createCredentialsSecret(ctx, cluster, loggingCredentialsSecret, LoggingCredentialsName, LoggingCredentialsNamespace)
-	if err != nil {
-		logger.Error(err, "failed to create or update logging credentials secret")
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	if r.Config.EnableTracingFlag {
-		logger.Info("credentials checking secret for tracing", "namespace", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Name)
-
-		tracingCredentialsSecret := GenerateTracingCredentialsBasicSecret(cluster)
-		_, err = r.createCredentialsSecret(ctx, cluster, tracingCredentialsSecret, TracingCredentialsName, TracingCredentialsNamespace)
-		if err != nil {
-			logger.Error(err, "failed to create or update tracing credentials secret")
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
-
-	// Will return Secret's update error if any
-	return ctrl.Result{}, errors.WithStack(err)
+	return r.ReconcileDelete(ctx, cluster)
 }
 
 // ReconcileDelete ensures a secret is removed for the current cluster

@@ -10,7 +10,7 @@ import (
 	"github.com/blang/semver"
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
@@ -28,7 +28,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 		clusterName                string
 		tenants                    []string
 		enableNodeFiltering        bool
-		enableNetworkMonitoring    bool
 	}{
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_MC.yaml",
@@ -37,7 +36,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-installation",
 			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC.yaml",
@@ -46,7 +44,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_default_namespaces_nil.yaml",
@@ -55,7 +52,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_default_namespaces_empty.yaml",
@@ -64,7 +60,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_custom_tenants.yaml",
@@ -74,7 +69,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			clusterName:                "test-cluster",
 			tenants:                    []string{"test-tenant-a", "test-tenant-b"},
 			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    false,
 		},
 		// Tests with node filtering enabled
 		{
@@ -84,7 +78,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-installation",
 			enableNodeFiltering:        true,
-			enableNetworkMonitoring:    false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.170_WC_node_filtering.yaml",
@@ -93,7 +86,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 			enableNodeFiltering:        true,
-			enableNetworkMonitoring:    false,
 		},
 		{
 			goldenFile:                 "alloy/test/logging-config.alloy.240_WC_node_filtering.yaml",
@@ -102,35 +94,6 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 			installationName:           "test-installation",
 			clusterName:                "test-cluster",
 			enableNodeFiltering:        true,
-			enableNetworkMonitoring:    false,
-		},
-		// Tests with network monitoring enabled
-		{
-			goldenFile:                 "alloy/test/logging-config.alloy.230_MC_network_monitoring.yaml",
-			observabilityBundleVersion: "2.3.0",
-			defaultNamespaces:          []string{"test-selector"},
-			installationName:           "test-installation",
-			clusterName:                "test-installation",
-			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    true,
-		},
-		{
-			goldenFile:                 "alloy/test/logging-config.alloy.230_WC_network_monitoring.yaml",
-			observabilityBundleVersion: "2.3.0",
-			defaultNamespaces:          []string{"test-selector"},
-			installationName:           "test-installation",
-			clusterName:                "test-cluster",
-			enableNodeFiltering:        false,
-			enableNetworkMonitoring:    true,
-		},
-		{
-			goldenFile:                 "alloy/test/logging-config.alloy.230_WC_network_monitoring_node_filtering.yaml",
-			observabilityBundleVersion: "2.3.0",
-			defaultNamespaces:          []string{"test-selector"},
-			installationName:           "test-installation",
-			clusterName:                "test-cluster",
-			enableNodeFiltering:        true,
-			enableNetworkMonitoring:    true,
 		},
 	}
 
@@ -141,7 +104,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				t.Fatalf("Failed to parse observability bundle version: %v", err)
 			}
 			golden, err := os.ReadFile(tc.goldenFile)
-			if err != nil && !*update {
+			if err != nil {
 				t.Fatalf("Failed to read golden file: %v", err)
 			}
 
@@ -164,7 +127,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				Provider:     "test-provider",
 			}
 
-			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, clusterLabels, false, tc.enableNodeFiltering, tc.enableNetworkMonitoring)
+			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, clusterLabels, false, tc.enableNodeFiltering, false)
 			if err != nil {
 				t.Fatalf("Failed to generate alloy config: %v", err)
 			}
