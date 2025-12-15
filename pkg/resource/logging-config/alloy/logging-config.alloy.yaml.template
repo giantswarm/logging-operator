@@ -117,15 +117,15 @@ alloy:
         type: Unconfined
       capabilities:
         add:
-          - BPF
-          - CHECKPOINT_RESTORE
-          - DAC_READ_SEARCH
-          - NET_RAW
-          - NET_ADMIN
-          - PERFMON
-          - SYS_PTRACE
-          - SYS_RESOURCE
-          - SYS_ADMIN
+        - BPF
+        - CHECKPOINT_RESTORE
+        - DAC_READ_SEARCH
+        - NET_RAW
+        - NET_ADMIN
+        - PERFMON
+        - SYS_PTRACE
+        - SYS_RESOURCE
+        - SYS_ADMIN
         drop: []
       privileged: true
       {{- else }}
