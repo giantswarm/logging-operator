@@ -111,18 +111,45 @@ alloy:
         cpu: 25m
         memory: 200Mi
     securityContext:
+      {{- if .NetworkMonitoringEnabled }}
+      allowPrivilegeEscalation: true
+      appArmorProfile:
+        type: Unconfined
+      capabilities:
+        add:
+        - BPF
+        - CHECKPOINT_RESTORE
+        - DAC_READ_SEARCH
+        - NET_RAW
+        - NET_ADMIN
+        - PERFMON
+        - SYS_PTRACE
+        - SYS_RESOURCE
+        - SYS_ADMIN
+        drop: []
+      privileged: true
+      {{- else }}
       allowPrivilegeEscalation: false
       capabilities:
         drop:
         - ALL
+      {{- end }}
       readOnlyRootFilesystem: true
       runAsUser: 0
       runAsGroup: 0
       runAsNonRoot: false
       seccompProfile:
+        {{- if .NetworkMonitoringEnabled }}
+        type: Unconfined
+        {{- else }}
         type: RuntimeDefault
+        {{- end }}
   controller:
     type: daemonset
+    {{- if .NetworkMonitoringEnabled }}
+    hostPID: true
+    hostNetwork: true
+    {{- end }}
     priorityClassName: {{ .PriorityClassName }}
     tolerations:
     - effect: NoSchedule
@@ -234,7 +261,7 @@ podLogs:
       targetLabel: "app_kubernetes_io_version"
 {{- end }}
 
-{{- if .EnableNetworkMonitoring }}
+{{- if .NetworkMonitoringEnabled }}
 kyvernoPolicyExceptions:
   enabled: true
   namespace: giantswarm

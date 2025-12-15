@@ -75,9 +75,12 @@ const (
 type ClusterLabels struct {
 	ClusterID       string
 	ClusterType     string
+	Customer        string
 	Installation    string
 	Organization    string
+	Pipeline        string
 	Provider        string
+	Region          string
 	ServicePriority string
 }
 
@@ -211,9 +214,12 @@ func ExtractClusterLabels(ctx context.Context, k8sClient client.Client, cluster 
 	return ClusterLabels{
 		ClusterID:       cluster.GetName(),
 		ClusterType:     clusterType,
+		Customer:        appConfig.Customer,
 		Installation:    appConfig.InstallationName,
 		Organization:    organizationName,
+		Pipeline:        appConfig.Pipeline,
 		Provider:        provider,
+		Region:          appConfig.Region,
 		ServicePriority: monitoring.GetServicePriority(cluster),
 	}, nil
 }

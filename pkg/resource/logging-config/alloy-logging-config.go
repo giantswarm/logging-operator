@@ -37,6 +37,9 @@ func init() {
 func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersion semver.Version, defaultNamespaces, tenants []string, clusterLabels common.ClusterLabels, insecureCA bool, enableNodeFiltering bool, enableNetworkMonitoring bool) (string, error) {
 	var values bytes.Buffer
 
+	// If network monitoring is enabled, node filtering must also be enabled as clustering does not work with host network.
+	enableNodeFiltering = enableNodeFiltering || enableNetworkMonitoring
+
 	alloyConfig, err := generateAlloyConfig(tenants, clusterLabels, insecureCA, enableNodeFiltering, enableNetworkMonitoring)
 	if err != nil {
 		return "", err
@@ -47,7 +50,7 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		AlloyImageTag                    *string
 		DefaultWorkloadClusterNamespaces []string
 		DefaultWriteTenant               string
-		EnableNetworkMonitoring          bool
+		NetworkMonitoringEnabled         bool
 		NodeFilteringEnabled             bool
 		IsWorkloadCluster                bool
 		PriorityClassName                string
@@ -55,16 +58,10 @@ func GenerateAlloyLoggingConfig(cluster *capi.Cluster, observabilityBundleVersio
 		AlloyConfig:                      alloyConfig,
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 		DefaultWriteTenant:               common.DefaultWriteTenant,
-		EnableNetworkMonitoring:          enableNetworkMonitoring,
+		NetworkMonitoringEnabled:         enableNetworkMonitoring,
 		NodeFilteringEnabled:             enableNodeFiltering,
 		IsWorkloadCluster:                common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
 		PriorityClassName:                common.PriorityClassName,
-	}
-
-	if enableNodeFiltering && observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
-		// Use fixed image version
-		imageTag := fmt.Sprintf("v%s", alloyNodeFilterImageVersion.String())
-		data.AlloyImageTag = &imageTag
 	}
 
 	if enableNodeFiltering && observabilityBundleVersion.LT(alloyNodeFilterFixedObservabilityBundleAppVersion) {
@@ -92,8 +89,13 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 	data := struct {
 		ClusterID                string
 		ClusterType              string
+		Customer                 string
 		Organization             string
+		Installation             string
+		Pipeline                 string
 		Provider                 string
+		Region                   string
+		ServicePriority          string
 		MaxBackoffPeriod         string
 		RemoteTimeout            string
 		IsWorkloadCluster        bool
@@ -110,8 +112,13 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 	}{
 		ClusterID:                clusterLabels.ClusterID,
 		ClusterType:              clusterLabels.ClusterType,
+		Customer:                 clusterLabels.Customer,
 		Organization:             clusterLabels.Organization,
+		Installation:             clusterLabels.Installation,
+		Pipeline:                 clusterLabels.Pipeline,
 		Provider:                 clusterLabels.Provider,
+		Region:                   clusterLabels.Region,
+		ServicePriority:          clusterLabels.ServicePriority,
 		MaxBackoffPeriod:         common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:            common.LokiRemoteTimeout.String(),
 		IsWorkloadCluster:        common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),
