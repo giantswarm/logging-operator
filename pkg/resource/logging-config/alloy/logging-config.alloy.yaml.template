@@ -234,7 +234,7 @@ podLogs:
       targetLabel: "app_kubernetes_io_version"
 {{- end }}
 
-{{- if .NetworkMonitoringEnabled }}
+{{- if .EnableNetworkMonitoring }}
 kyvernoPolicyExceptions:
   enabled: true
   namespace: giantswarm
