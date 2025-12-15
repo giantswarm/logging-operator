@@ -424,18 +424,32 @@ alloy:
         cpu: 25m
         memory: 200Mi
     securityContext:
-      allowPrivilegeEscalation: false
+      allowPrivilegeEscalation: true
+      appArmorProfile:
+        type: Unconfined
       capabilities:
-        drop:
-        - ALL
+        add:
+        - BPF
+        - CHECKPOINT_RESTORE
+        - DAC_READ_SEARCH
+        - NET_RAW
+        - NET_ADMIN
+        - PERFMON
+        - SYS_PTRACE
+        - SYS_RESOURCE
+        - SYS_ADMIN
+        drop: []
+      privileged: true
       readOnlyRootFilesystem: true
       runAsUser: 0
       runAsGroup: 0
       runAsNonRoot: false
       seccompProfile:
-        type: RuntimeDefault
+        type: Unconfined
   controller:
     type: daemonset
+    hostPID: true
+    hostNetwork: true
     priorityClassName: giantswarm-critical
     tolerations:
     - effect: NoSchedule
