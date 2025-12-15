@@ -90,23 +90,23 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 	}
 
 	data := struct {
-		ClusterID                  string
-		ClusterType                string
-		Organization               string
-		Provider                   string
-		MaxBackoffPeriod           string
-		RemoteTimeout              string
-		IsWorkloadCluster          bool
-		NodeFilteringEnabled       bool
-		NetworkMonitoringEnabled   bool
-		InsecureSkipVerify         bool
-		SecretName                 string
-		LoggingURLKey              string
-		LoggingTenantIDKey         string
-		LoggingUsernameKey         string
-		LoggingPasswordKey         string
-		LokiRulerAPIURLKey         string
-		Tenants                    []string
+		ClusterID                string
+		ClusterType              string
+		Organization             string
+		Provider                 string
+		MaxBackoffPeriod         string
+		RemoteTimeout            string
+		IsWorkloadCluster        bool
+		NodeFilteringEnabled     bool
+		NetworkMonitoringEnabled bool
+		InsecureSkipVerify       bool
+		SecretName               string
+		LoggingURLKey            string
+		LoggingTenantIDKey       string
+		LoggingUsernameKey       string
+		LoggingPasswordKey       string
+		LokiRulerAPIURLKey       string
+		Tenants                  []string
 	}{
 		ClusterID:                clusterLabels.ClusterID,
 		ClusterType:              clusterLabels.ClusterType,
