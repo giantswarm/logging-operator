@@ -12,6 +12,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/observability-operator/pkg/common/monitoring"
 	"github.com/giantswarm/observability-operator/pkg/common/organization"
 	obsconfig "github.com/giantswarm/observability-operator/pkg/config"
 
@@ -72,11 +73,15 @@ const (
 
 // ClusterLabels holds the extracted cluster labels used in templates
 type ClusterLabels struct {
-	ClusterID    string
-	ClusterType  string
-	Installation string
-	Organization string
-	Provider     string
+	ClusterID       string
+	ClusterType     string
+	Customer        string
+	Installation    string
+	Organization    string
+	Pipeline        string
+	Provider        string
+	Region          string
+	ServicePriority string
 }
 
 func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
@@ -112,6 +117,37 @@ func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
 
 func AddCommonLabels(labels map[string]string) {
 	labels["giantswarm.io/managed-by"] = "logging-operator"
+}
+
+func IsNetworkMonitoringEnabled(cluster *capi.Cluster, enableNetworkMonitoringFlag bool) bool {
+	// Network monitoring should be enabled when all conditions are met:
+	//   - network monitoring label is set and true on the cluster
+	//   - cluster is not being deleted
+	//   - global network monitoring flag is enabled
+
+	// If the cluster is being deleted, always return false
+	if !cluster.GetDeletionTimestamp().IsZero() {
+		return false
+	}
+
+	// If network monitoring is disabled at the installation level, return false
+	if !enableNetworkMonitoringFlag {
+		return false
+	}
+
+	// Check cluster-specific network monitoring label
+	labels := cluster.GetLabels()
+	networkMonitoringLabelValue, ok := labels[key.NetworkMonitoringLabel]
+	if !ok {
+		// Default to disabled for network monitoring
+		return false
+	}
+
+	networkMonitoringEnabled, err := strconv.ParseBool(networkMonitoringLabelValue)
+	if err != nil {
+		return false
+	}
+	return networkMonitoringEnabled
 }
 
 func IsWorkloadCluster(installationName, clusterName string) bool {
@@ -176,10 +212,14 @@ func ExtractClusterLabels(ctx context.Context, k8sClient client.Client, cluster 
 	}
 
 	return ClusterLabels{
-		ClusterID:    cluster.GetName(),
-		ClusterType:  clusterType,
-		Installation: appConfig.InstallationName,
-		Organization: organizationName,
-		Provider:     provider,
+		ClusterID:       cluster.GetName(),
+		ClusterType:     clusterType,
+		Customer:        appConfig.Customer,
+		Installation:    appConfig.InstallationName,
+		Organization:    organizationName,
+		Pipeline:        appConfig.Pipeline,
+		Provider:        provider,
+		Region:          appConfig.Region,
+		ServicePriority: monitoring.GetServicePriority(cluster),
 	}, nil
 }

@@ -48,7 +48,10 @@ tracing:
   enabled: false
 
 managementCluster:
+  customer: ""
   name: unknown
+  pipeline: ""
+  region: ""
   insecureCA: false
 
 profiling:

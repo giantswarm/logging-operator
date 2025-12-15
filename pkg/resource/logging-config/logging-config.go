@@ -19,7 +19,14 @@ func (r *Resource) GenerateLoggingConfig(cluster *capi.Cluster, observabilityBun
 	var values string
 	var err error
 
-	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, clusterLabels, r.Config.InsecureCA, r.Config.EnableNodeFilteringFlag)
+	// Check if network monitoring should be enabled
+	networkMonitoringEnabled := common.IsNetworkMonitoringEnabled(cluster, r.Config.EnableNetworkMonitoringFlag)
+	// Beyla network monitoring requires observability bundle >= 2.3.0
+	if networkMonitoringEnabled && observabilityBundleVersion.LT(semver.MustParse("2.3.0")) {
+		networkMonitoringEnabled = false
+	}
+
+	values, err = GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, defaultNamespaces, tenants, clusterLabels, r.Config.InsecureCA, r.Config.EnableNodeFilteringFlag, networkMonitoringEnabled)
 	if err != nil {
 		return v1.ConfigMap{}, err
 	}
