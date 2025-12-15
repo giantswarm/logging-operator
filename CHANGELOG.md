@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace deprecated `nonsensitive` function with `convert.nonsensitive`.
 - Replace deprecated `env` function with `sys.env`.
 
+### Removed
+
+- Remove bundle wiring in the logging-operator as it is moved to the observability operator.
+
 ## [0.37.0] - 2025-11-24
 
 ### Added
