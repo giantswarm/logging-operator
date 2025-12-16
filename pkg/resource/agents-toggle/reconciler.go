@@ -12,7 +12,6 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -25,30 +24,7 @@ type Resource struct {
 
 // ReconcileCreate ensure logging agents and events loggers are enabled in the given cluster.
 func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-	logger.Info("agents toggle create")
-
-	desiredConfigMap := v1.ConfigMap{
-		ObjectMeta: common.ObservabilityBundleConfigMapMeta(cluster),
-	}
-
-	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, &desiredConfigMap, func() error {
-		config, err := generateObservabilityBundleConfig()
-		if err != nil {
-			return errors.WithStack(err)
-		}
-
-		desiredConfigMap.Data = map[string]string{"values": config}
-		return nil
-	})
-	if err != nil {
-		logger.Error(err, "failed to toggle logging agents")
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	logger.Info("agents toggle up to date")
-
-	return ctrl.Result{}, nil
+	return r.ReconcileDelete(ctx, cluster)
 }
 
 // ReconcileDelete ensure logging agents and events loggers are disabled for the given cluster.

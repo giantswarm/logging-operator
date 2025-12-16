@@ -19,7 +19,6 @@ require (
 	k8s.io/client-go v0.34.3
 	sigs.k8s.io/cluster-api v1.12.0
 	sigs.k8s.io/controller-runtime v0.22.4
-	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
@@ -40,6 +39,7 @@ require (
 	golang.org/x/mod v0.30.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
+	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
 require (

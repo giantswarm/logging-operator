@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Remove bundle wiring in the logging-operator as it is moved to the observability operator.
+
 ## [0.38.0] - 2025-12-16
 
 ### Changed
