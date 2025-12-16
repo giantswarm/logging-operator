@@ -8,8 +8,5 @@ type Config struct {
 	EnableTracingFlag           bool
 	EnableNetworkMonitoringFlag bool
 	InstallationName            string
-	Customer                    string
-	Pipeline                    string
-	Region                      string
 	InsecureCA                  bool
 }
