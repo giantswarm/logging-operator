@@ -2,12 +2,10 @@ package credentials
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,10 +34,7 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (
 
 	logger.Info("credentials secret delete logging", "namespace", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(LoggingCredentialsName, LoggingCredentialsNamespace).Name)
 
-	// Start with some empty secret
-	loggingCredentialsSecret := GenerateLoggingCredentialsBasicSecret(cluster)
-
-	_, err := r.deleteCredentialsSecret(ctx, cluster, loggingCredentialsSecret, LoggingCredentialsName, LoggingCredentialsNamespace)
+	_, err := r.deleteSecret(ctx, LoggingCredentialsName, LoggingCredentialsNamespace)
 	if err != nil {
 		logger.Error(err, "failed to delete logging credentials secret")
 		return ctrl.Result{}, errors.WithStack(err)
@@ -48,8 +43,7 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (
 	if r.Config.EnableTracingFlag {
 		logger.Info("credentials secret delete for tracing", "namespace", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Namespace, "name", CredentialsSecretMeta(TracingCredentialsName, TracingCredentialsNamespace).Name)
 
-		tracingCredentialsSecret := GenerateTracingCredentialsBasicSecret(cluster)
-		_, err = r.deleteCredentialsSecret(ctx, cluster, tracingCredentialsSecret, TracingCredentialsName, TracingCredentialsNamespace)
+		_, err = r.deleteSecret(ctx, TracingCredentialsName, TracingCredentialsNamespace)
 		if err != nil {
 			logger.Error(err, "failed to delete tracing credentials secret")
 			return ctrl.Result{}, errors.WithStack(err)
@@ -60,51 +54,20 @@ func (r *Resource) ReconcileDelete(ctx context.Context, cluster *capi.Cluster) (
 	return ctrl.Result{}, errors.WithStack(err)
 }
 
-func (r *Resource) deleteCredentialsSecret(ctx context.Context, cluster *capi.Cluster, credentialsSecret *v1.Secret, secretName string, secretNamespace string) (ctrl.Result, error) {
+func (r *Resource) deleteSecret(ctx context.Context, secretName string, secretNamespace string) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	// Retrieve existing secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: CredentialsSecretMeta(secretName, secretNamespace).Name, Namespace: CredentialsSecretMeta(secretName, secretNamespace).Namespace}, credentialsSecret)
-	if err != nil {
-		if apimachineryerrors.IsNotFound(err) {
-			logger.Info("loggingcredentials secret not found, initializing one")
-			return ctrl.Result{}, nil
-		} else {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
+	secret := v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: secretNamespace,
+		},
 	}
 
-	// update the secret's contents if needed
-	loggingSecretUpdated := RemoveCredentials(cluster, credentialsSecret)
-
-	// Check if metadata has been updated
-	if !reflect.DeepEqual(credentialsSecret.Labels, CredentialsSecretMeta(secretName, secretNamespace).Labels) {
-		logger.Info("loggingCredentials - metatada update required")
-		credentialsSecret.ObjectMeta = CredentialsSecretMeta(secretName, secretNamespace)
-		loggingSecretUpdated = true
-	}
-
-	if !loggingSecretUpdated {
-		// If there were no changes to either secret, we're done here.
-		logger.Info("loggingCredentials and tracingCredentials - up to date")
-		return ctrl.Result{}, nil
-	}
-
-	// commit our changes
-	if loggingSecretUpdated {
-		logger.Info("loggingCredentials - Updating secret")
-		err = r.Client.Update(ctx, credentialsSecret)
-		if err != nil {
-			if apimachineryerrors.IsNotFound(err) {
-				logger.Info("loggingCredentials - Secret does not exist, creating it")
-				err = r.Client.Create(ctx, credentialsSecret)
-				if err != nil {
-					return ctrl.Result{}, errors.WithStack(err)
-				}
-			} else {
-				return ctrl.Result{}, errors.WithStack(err)
-			}
-		}
+	err := r.Client.Delete(ctx, &secret)
+	if client.IgnoreNotFound(err) != nil {
+		logger.Error(err, "failed to delete ingress auth secret")
+		return ctrl.Result{}, errors.WithStack(err)
 	}
 
 	return ctrl.Result{}, nil
