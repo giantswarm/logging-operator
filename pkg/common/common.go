@@ -23,8 +23,6 @@ const (
 	// LoggingEnabledDefault defines if WCs logs are collected by default
 	LoggingEnabledDefault = true
 
-	// ReadUser is the global user for reading logs
-	ReadUser = "read"
 	// DefaultWriteTenant is the default tenant for writing logs
 	DefaultWriteTenant = "giantswarm"
 	// Loki Gateway Ingress
