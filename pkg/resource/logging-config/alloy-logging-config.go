@@ -89,13 +89,9 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 	data := struct {
 		ClusterID                string
 		ClusterType              string
-		Customer                 string
 		Organization             string
 		Installation             string
-		Pipeline                 string
 		Provider                 string
-		Region                   string
-		ServicePriority          string
 		MaxBackoffPeriod         string
 		RemoteTimeout            string
 		IsWorkloadCluster        bool
@@ -112,13 +108,9 @@ func generateAlloyConfig(tenants []string, clusterLabels common.ClusterLabels, i
 	}{
 		ClusterID:                clusterLabels.ClusterID,
 		ClusterType:              clusterLabels.ClusterType,
-		Customer:                 clusterLabels.Customer,
 		Organization:             clusterLabels.Organization,
 		Installation:             clusterLabels.Installation,
-		Pipeline:                 clusterLabels.Pipeline,
 		Provider:                 clusterLabels.Provider,
-		Region:                   clusterLabels.Region,
-		ServicePriority:          clusterLabels.ServicePriority,
 		MaxBackoffPeriod:         common.LokiMaxBackoffPeriod.String(),
 		RemoteTimeout:            common.LokiRemoteTimeout.String(),
 		IsWorkloadCluster:        common.IsWorkloadCluster(clusterLabels.Installation, clusterLabels.ClusterID),

@@ -90,9 +90,6 @@ func main() {
 	var includeEventsFromNamespaces StringSliceVar
 	var excludeEventsFromNamespaces StringSliceVar
 	var installationName string
-	var customer string
-	var pipeline string
-	var region string
 	var insecureCA bool
 	var metricsAddr string
 	var profilesAddr string
@@ -108,9 +105,6 @@ func main() {
 	flag.Var(&includeEventsFromNamespaces, "include-events-from-namespaces", "List of namespaces to collect events from on workload clusters (if empty, collect from all namespaces)")
 	flag.Var(&excludeEventsFromNamespaces, "exclude-events-from-namespaces", "List of namespaces to exclude events from on workload clusters")
 	flag.StringVar(&installationName, "installation-name", "unknown", "Name of the installation")
-	flag.StringVar(&customer, "customer", "unknown", "Name of the customer")
-	flag.StringVar(&pipeline, "pipeline", "unknown", "Name of the pipeline")
-	flag.StringVar(&region, "region", "unknown", "Region where the installation is deployed")
 	flag.BoolVar(&insecureCA, "insecure-ca", false, "Is the management cluter CA insecure?")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&profilesAddr, "pprof-bind-address", ":6060", "The address the pprof endpoint binds to.")
@@ -170,9 +164,6 @@ func main() {
 		EnableTracingFlag:           enableTracing,
 		EnableNetworkMonitoringFlag: enableNetworkMonitoring,
 		InstallationName:            installationName,
-		Customer:                    customer,
-		Pipeline:                    pipeline,
-		Region:                      region,
 		InsecureCA:                  insecureCA,
 	}
 
