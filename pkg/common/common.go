@@ -12,7 +12,6 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/observability-operator/pkg/common/monitoring"
 	"github.com/giantswarm/observability-operator/pkg/common/organization"
 	obsconfig "github.com/giantswarm/observability-operator/pkg/config"
 
@@ -73,15 +72,11 @@ const (
 
 // ClusterLabels holds the extracted cluster labels used in templates
 type ClusterLabels struct {
-	ClusterID       string
-	ClusterType     string
-	Customer        string
-	Installation    string
-	Organization    string
-	Pipeline        string
-	Provider        string
-	Region          string
-	ServicePriority string
+	ClusterID    string
+	ClusterType  string
+	Installation string
+	Organization string
+	Provider     string
 }
 
 func IsLoggingEnabled(cluster *capi.Cluster, enableLoggingFlag bool) bool {
@@ -212,14 +207,10 @@ func ExtractClusterLabels(ctx context.Context, k8sClient client.Client, cluster 
 	}
 
 	return ClusterLabels{
-		ClusterID:       cluster.GetName(),
-		ClusterType:     clusterType,
-		Customer:        appConfig.Customer,
-		Installation:    appConfig.InstallationName,
-		Organization:    organizationName,
-		Pipeline:        appConfig.Pipeline,
-		Provider:        provider,
-		Region:          appConfig.Region,
-		ServicePriority: monitoring.GetServicePriority(cluster),
+		ClusterID:    cluster.GetName(),
+		ClusterType:  clusterType,
+		Installation: appConfig.InstallationName,
+		Organization: organizationName,
+		Provider:     provider,
 	}, nil
 }
