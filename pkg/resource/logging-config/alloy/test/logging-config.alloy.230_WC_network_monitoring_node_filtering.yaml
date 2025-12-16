@@ -391,6 +391,24 @@ alloy:
         emptyDir: {}
   image:
     tag: v1.12.0
+  extraObjects:
+  - apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      labels:
+        observability.giantswarm.io/tenant: giantswarm
+      name: alloy-logs-beyla
+      namespace: kube-system
+    spec:
+      endpoints:
+      - honorLabels: true
+        port: http-metrics
+        path: /api/v0/component/beyla.ebpf.default/metric
+        scheme: http
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: alloy-logs
+          app.kubernetes.io/name: alloy
 
 verticalPodAutoscaler:
   enabled: true
@@ -529,21 +547,3 @@ kyvernoPolicyExceptions:
   - policyName: restrict-volume-types
     ruleNames:
     - "*"
-extraObjects:
-- apiVersion: monitoring.coreos.com/v1
-  kind: ServiceMonitor
-  metadata:
-    labels:
-      observability.giantswarm.io/tenant: giantswarm
-    name: alloy-logs-beyla
-    namespace: monitoring
-  spec:
-    endpoints:
-    - honorLabels: true
-      port: http-metrics
-      path: /api/v0/component/beyla.ebpf.default/metric
-      scheme: http
-    selector:
-      matchLabels:
-        app.kubernetes.io/instance: alloy-logs
-        app.kubernetes.io/name: alloy
