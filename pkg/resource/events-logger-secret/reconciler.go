@@ -19,13 +19,6 @@ import (
 	config "github.com/giantswarm/logging-operator/pkg/config"
 )
 
-const (
-	LoggingCredentialsName      = "logging-credentials" // #nosec G101
-	LoggingCredentialsNamespace = "monitoring"
-	TracingCredentialsName      = "tracing-credentials" // #nosec G101
-	TracingCredentialsNamespace = "monitoring"
-)
-
 // Resource implements a resource.Interface to handle
 // Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
 type Resource struct {
@@ -39,24 +32,6 @@ type Resource struct {
 func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-secret create")
-
-	// Retrieve secret containing credentials
-	var eventsLoggerCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsName, Namespace: LoggingCredentialsNamespace},
-		&eventsLoggerCredentialsSecret)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	var tracingCredentialsSecret v1.Secret
-	if r.Config.EnableTracingFlag {
-		// Retrieve secret containing tracing credentials
-		err = r.Client.Get(ctx, types.NamespacedName{Name: TracingCredentialsName, Namespace: TracingCredentialsNamespace},
-			&tracingCredentialsSecret)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
 
 	// Retrieve Loki ingress name
 	lokiURL, err := common.ReadLokiIngressURL(ctx, cluster, r.Client)
