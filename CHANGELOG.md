@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.40.0] - 2025-12-17
+
 ### Changed
 
 - Switch authentication to the new format managed by the observability-operator (1 secret per cluster) using the AuthManager interface. This means this operator not longer needs to generate passwords nor ingress secrets.
@@ -669,7 +671,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.39.0...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.40.0...HEAD
+[0.40.0]: https://github.com/giantswarm/logging-operator/compare/v0.39.0...v0.40.0
 [0.39.0]: https://github.com/giantswarm/logging-operator/compare/v0.38.0...v0.39.0
 [0.38.0]: https://github.com/giantswarm/logging-operator/compare/v0.37.0...v0.38.0
 [0.37.0]: https://github.com/giantswarm/logging-operator/compare/v0.36.0...v0.37.0
