@@ -44,10 +44,8 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/resource"
-	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
-	ingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/ingress-auth-secret"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	//+kubebuilder:scaffold:imports
@@ -187,16 +185,6 @@ func main() {
 		),
 	)
 
-	credentialSecrets := credentials.Resource{
-		Client: mgr.GetClient(),
-		Config: appConfig,
-	}
-
-	ingressAuthSecret := ingressauthsecret.Resource{
-		Client: mgr.GetClient(),
-		Config: appConfig,
-	}
-
 	loggingSecret := loggingsecret.Resource{
 		Client:            mgr.GetClient(),
 		Config:            appConfig,
@@ -229,8 +217,6 @@ func main() {
 		Scheme: mgr.GetScheme(),
 		Config: appConfig,
 		Resources: []resource.Interface{
-			&credentialSecrets,
-			&ingressAuthSecret,
 			&loggingSecret,
 			&loggingConfig,
 			&eventsLoggerSecret,
