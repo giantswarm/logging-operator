@@ -17,7 +17,6 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	config "github.com/giantswarm/logging-operator/pkg/config"
-	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 // Resource implements a resource.Interface to handle
@@ -33,24 +32,6 @@ type Resource struct {
 func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.Info("events-logger-secret create")
-
-	// Retrieve secret containing credentials
-	var eventsLoggerCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace},
-		&eventsLoggerCredentialsSecret)
-	if err != nil {
-		return ctrl.Result{}, errors.WithStack(err)
-	}
-
-	var tracingCredentialsSecret v1.Secret
-	if r.Config.EnableTracingFlag {
-		// Retrieve secret containing tracing credentials
-		err = r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace},
-			&tracingCredentialsSecret)
-		if err != nil {
-			return ctrl.Result{}, errors.WithStack(err)
-		}
-	}
 
 	// Retrieve Loki ingress name
 	lokiURL, err := common.ReadLokiIngressURL(ctx, cluster, r.Client)
