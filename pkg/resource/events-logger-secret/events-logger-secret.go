@@ -1,6 +1,7 @@
 package eventsloggersecret
 
 import (
+	"context"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -16,12 +17,12 @@ const (
 	eventsLoggerSecretName = "events-logger-secret" // #nosec G101
 )
 
-func generateEventsLoggerSecret(cluster *capi.Cluster, loggingCredentialsSecret *v1.Secret, lokiURL string, tracingEnabled bool, tracingCredentialsSecret *v1.Secret) (v1.Secret, error) {
+func (r *Resource) generateEventsLoggerSecret(ctx context.Context, cluster *capi.Cluster, lokiURL string, tracingEnabled bool) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
 	// In the case of Alloy being the events logger, we reuse the secret generation from the logging-secret package
-	data, err = loggingsecret.GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL, tracingEnabled, tracingCredentialsSecret)
+	data, err = loggingsecret.GenerateAlloyLoggingSecret(ctx, cluster, r.LogsAuthManager, r.TracesAuthManager, lokiURL, tracingEnabled)
 	if err != nil {
 		return v1.Secret{}, err
 	}

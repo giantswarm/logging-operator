@@ -13,6 +13,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/giantswarm/observability-operator/pkg/auth"
+
 	"github.com/giantswarm/logging-operator/pkg/common"
 	config "github.com/giantswarm/logging-operator/pkg/config"
 	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
@@ -21,8 +23,10 @@ import (
 // Resource implements a resource.Interface to handle
 // Events-logger secret: extra events-logger secret about where and how to send logs (in this case : k8S events)
 type Resource struct {
-	Client client.Client
-	Config config.Config
+	Client            client.Client
+	Config            config.Config
+	LogsAuthManager   auth.AuthManager
+	TracesAuthManager auth.AuthManager
 }
 
 // ReconcileCreate ensures events-logger-secret is created with the right credentials
@@ -55,7 +59,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 	}
 
 	// Get desired secret
-	desiredEventsLoggerSecret, err := generateEventsLoggerSecret(cluster, &eventsLoggerCredentialsSecret, lokiURL, r.Config.EnableTracingFlag, &tracingCredentialsSecret)
+	desiredEventsLoggerSecret, err := r.generateEventsLoggerSecret(ctx, cluster, lokiURL, r.Config.EnableTracingFlag)
 	if err != nil {
 		logger.Error(err, "failed generating events logger secret")
 		return ctrl.Result{}, errors.WithStack(err)

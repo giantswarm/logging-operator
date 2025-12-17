@@ -2,17 +2,17 @@ package loggingsecret
 
 import (
 	"bytes"
+	"context"
 	_ "embed"
 	"fmt"
 	"text/template"
 
-	v1 "k8s.io/api/core/v1"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/giantswarm/observability-operator/pkg/auth"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
-	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 )
 
 var (
@@ -25,11 +25,11 @@ func init() {
 	alloySecretTemplate = template.Must(template.New("logging-secret.yaml").Funcs(sprig.FuncMap()).Parse(alloySecret))
 }
 
-func GenerateAlloyLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.Secret, lokiURL string, tracingEnabled bool, tracingCredentialsSecret *v1.Secret) (map[string][]byte, error) {
+func GenerateAlloyLoggingSecret(ctx context.Context, cluster *capi.Cluster, logsAuthManager, tracesAuthManager auth.AuthManager, lokiURL string, tracingEnabled bool) (map[string][]byte, error) {
 	clusterName := cluster.GetName()
 	var values bytes.Buffer
 
-	writePassword, err := credentials.GetPassword(cluster, credentialsSecret, clusterName)
+	writePassword, err := logsAuthManager.GetClusterPassword(ctx, cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func GenerateAlloyLoggingSecret(cluster *capi.Cluster, credentialsSecret *v1.Sec
 	}
 
 	if tracingEnabled {
-		tracingPassword, err := credentials.GetPassword(cluster, tracingCredentialsSecret, clusterName)
+		tracingPassword, err := tracesAuthManager.GetClusterPassword(ctx, cluster)
 		if err != nil {
 			return nil, err
 		}

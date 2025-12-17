@@ -1,11 +1,14 @@
 package loggingsecret
 
 import (
+	"context"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta1" //nolint:staticcheck // SA1019 deprecated package
+
+	"github.com/giantswarm/observability-operator/pkg/auth"
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 )
@@ -14,11 +17,11 @@ const (
 	loggingClientSecretName = "logging-secret"
 )
 
-func GenerateLoggingSecret(cluster *capi.Cluster, loggingCredentialsSecret *v1.Secret, lokiURL string, installationName string, insecureCA bool) (v1.Secret, error) {
+func GenerateLoggingSecret(ctx context.Context, cluster *capi.Cluster, logsAuthManager auth.AuthManager, tracesAuthManager auth.AuthManager, lokiURL string, tracingEnabled bool) (v1.Secret, error) {
 	var data map[string][]byte
 	var err error
 
-	data, err = GenerateAlloyLoggingSecret(cluster, loggingCredentialsSecret, lokiURL, false, nil)
+	data, err = GenerateAlloyLoggingSecret(ctx, cluster, logsAuthManager, tracesAuthManager, lokiURL, tracingEnabled)
 	if err != nil {
 		return v1.Secret{}, err
 	}
