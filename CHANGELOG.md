@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.40.1] - 2025-12-17
 
+### Fixed
+
+- Fix reconciliation of the events-logger-secret by not trying to access a secret that does not exist anymore
+
 ## [0.40.0] - 2025-12-17
 
 ### Changed
