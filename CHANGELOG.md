@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Switch authentication to the new format managed by the observability-operator (1 secret per cluster) using the AuthManager interface. This means this operator not longer needs to generate passwords nor ingress secrets.
 
+### Removed
+
+- Remove unused bundle wiring and agents toggle reconcilers.
+
 ## [0.39.0] - 2025-12-16
 
 ### Removed

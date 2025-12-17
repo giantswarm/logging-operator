@@ -44,14 +44,12 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/resource"
-	agentstoggle "github.com/giantswarm/logging-operator/pkg/resource/agents-toggle"
 	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
 	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
 	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	ingressauthsecret "github.com/giantswarm/logging-operator/pkg/resource/ingress-auth-secret"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
-	loggingwiring "github.com/giantswarm/logging-operator/pkg/resource/logging-wiring"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -189,16 +187,6 @@ func main() {
 		),
 	)
 
-	agentsToggle := agentstoggle.Resource{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}
-
-	loggingWiring := loggingwiring.Resource{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}
-
 	credentialSecrets := credentials.Resource{
 		Client: mgr.GetClient(),
 		Config: appConfig,
@@ -241,8 +229,6 @@ func main() {
 		Scheme: mgr.GetScheme(),
 		Config: appConfig,
 		Resources: []resource.Interface{
-			&agentsToggle,
-			&loggingWiring,
 			&credentialSecrets,
 			&ingressAuthSecret,
 			&loggingSecret,
