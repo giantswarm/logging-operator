@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Remove unused credentials reconcilers.
+
 ## [0.40.0] - 2025-12-17
 
 ### Changed

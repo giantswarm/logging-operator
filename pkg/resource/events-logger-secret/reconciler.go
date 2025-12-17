@@ -17,7 +17,13 @@ import (
 
 	"github.com/giantswarm/logging-operator/pkg/common"
 	config "github.com/giantswarm/logging-operator/pkg/config"
-	credentials "github.com/giantswarm/logging-operator/pkg/resource/credentials"
+)
+
+const (
+	LoggingCredentialsName      = "logging-credentials" // #nosec G101
+	LoggingCredentialsNamespace = "monitoring"
+	TracingCredentialsName      = "tracing-credentials" // #nosec G101
+	TracingCredentialsNamespace = "monitoring"
 )
 
 // Resource implements a resource.Interface to handle
@@ -36,7 +42,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 
 	// Retrieve secret containing credentials
 	var eventsLoggerCredentialsSecret v1.Secret
-	err := r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.LoggingCredentialsName, credentials.LoggingCredentialsNamespace).Namespace},
+	err := r.Client.Get(ctx, types.NamespacedName{Name: LoggingCredentialsName, Namespace: LoggingCredentialsNamespace},
 		&eventsLoggerCredentialsSecret)
 	if err != nil {
 		return ctrl.Result{}, errors.WithStack(err)
@@ -45,7 +51,7 @@ func (r *Resource) ReconcileCreate(ctx context.Context, cluster *capi.Cluster) (
 	var tracingCredentialsSecret v1.Secret
 	if r.Config.EnableTracingFlag {
 		// Retrieve secret containing tracing credentials
-		err = r.Client.Get(ctx, types.NamespacedName{Name: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Name, Namespace: credentials.CredentialsSecretMeta(credentials.TracingCredentialsName, credentials.TracingCredentialsNamespace).Namespace},
+		err = r.Client.Get(ctx, types.NamespacedName{Name: TracingCredentialsName, Namespace: TracingCredentialsNamespace},
 			&tracingCredentialsSecret)
 		if err != nil {
 			return ctrl.Result{}, errors.WithStack(err)
