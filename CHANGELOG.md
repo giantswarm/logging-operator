@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Remove events-logging-configuration now handled by the observability-operator.
 - Remove unused credentials reconcilers.
 
 ## [0.40.1] - 2025-12-17

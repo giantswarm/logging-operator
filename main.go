@@ -44,8 +44,6 @@ import (
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/config"
 	"github.com/giantswarm/logging-operator/pkg/resource"
-	eventsloggerconfig "github.com/giantswarm/logging-operator/pkg/resource/events-logger-config"
-	eventsloggersecret "github.com/giantswarm/logging-operator/pkg/resource/events-logger-secret"
 	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
 	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
 	//+kubebuilder:scaffold:imports
@@ -198,19 +196,8 @@ func main() {
 		DefaultWorkloadClusterNamespaces: defaultNamespaces,
 	}
 
-	eventsLoggerConfig := eventsloggerconfig.Resource{
-		Client:            mgr.GetClient(),
-		Config:            appConfig,
-		IncludeNamespaces: includeEventsFromNamespaces,
-		ExcludeNamespaces: excludeEventsFromNamespaces,
-	}
-
-	eventsLoggerSecret := eventsloggersecret.Resource{
-		Client:            mgr.GetClient(),
-		Config:            appConfig,
-		LogsAuthManager:   logsAuthManager,
-		TracesAuthManager: tracesAuthManager,
-	}
+	// Note: eventsLoggerConfig and eventsLoggerSecret have been disabled and removed
+	// The alloy events logger configuration is now handled by observability-operator
 
 	if err = (&controller.CapiClusterReconciler{
 		Client: mgr.GetClient(),
@@ -219,8 +206,6 @@ func main() {
 		Resources: []resource.Interface{
 			&loggingSecret,
 			&loggingConfig,
-			&eventsLoggerSecret,
-			&eventsLoggerConfig,
 		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
