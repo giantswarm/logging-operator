@@ -26,8 +26,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	appv1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
-	"github.com/giantswarm/observability-operator/api/v1alpha1"
-	"github.com/giantswarm/observability-operator/pkg/auth"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -43,9 +41,7 @@ import (
 
 	"github.com/giantswarm/logging-operator/internal/controller"
 	"github.com/giantswarm/logging-operator/pkg/config"
-	"github.com/giantswarm/logging-operator/pkg/resource"
-	loggingconfig "github.com/giantswarm/logging-operator/pkg/resource/logging-config"
-	loggingsecret "github.com/giantswarm/logging-operator/pkg/resource/logging-secret"
+
 	//+kubebuilder:scaffold:imports
 )
 
@@ -58,7 +54,6 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(capiv1beta1.AddToScheme(scheme))
 	utilruntime.Must(appv1.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
 
 	//+kubebuilder:scaffold:scheme
 }
@@ -161,66 +156,19 @@ func main() {
 		InsecureCA:                  insecureCA,
 	}
 
-	// Initialize auth managers for logs and traces
-	// These read cluster passwords from observability-operator managed secrets
-	logsAuthManager := auth.NewAuthManager(
-		mgr.GetClient(),
-		auth.NewConfig(
-			auth.AuthTypeLogs,
-			"loki",
-			"loki-gateway-ingress-auth",
-			"loki-gateway-httproute-auth",
-		),
-	)
-
-	tracesAuthManager := auth.NewAuthManager(
-		mgr.GetClient(),
-		auth.NewConfig(
-			auth.AuthTypeTraces,
-			"tempo",
-			"tempo-gateway-ingress-auth",
-			"tempo-gateway-httproute-auth",
-		),
-	)
-
-	loggingSecret := loggingsecret.Resource{
-		Client:            mgr.GetClient(),
-		Config:            appConfig,
-		LogsAuthManager:   logsAuthManager,
-		TracesAuthManager: tracesAuthManager,
-	}
-
-	loggingConfig := loggingconfig.Resource{
-		Client:                           mgr.GetClient(),
-		Config:                           appConfig,
-		DefaultWorkloadClusterNamespaces: defaultNamespaces,
-	}
-
-	// Note: eventsLoggerConfig and eventsLoggerSecret have been disabled and removed
-	// The alloy events logger configuration is now handled by observability-operator
+	// Note: This operator has been decommissioned.
+	// All logging and events configuration is now handled by observability-operator.
+	// The only remaining function is to clean up finalizers from existing cluster objects.
 
 	if err = (&controller.CapiClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Config: appConfig,
-		Resources: []resource.Interface{
-			&loggingSecret,
-			&loggingConfig,
-		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 		os.Exit(1)
 	}
 
-	// The GrafanaOrganizationReconciler is only used in CAPI mode
-	if err = (&controller.GrafanaOrganizationReconciler{
-		Client:   mgr.GetClient(),
-		Scheme:   mgr.GetScheme(),
-		Resource: loggingConfig,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create GrafanaOrganization controller", "controller", "GrafanaOrganization")
-		os.Exit(1)
-	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
