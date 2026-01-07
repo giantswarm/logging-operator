@@ -4,6 +4,8 @@ package config
 // This replaces the loggedcluster.Options struct
 type Config struct {
 	EnableLoggingFlag           bool
+	LogsReconciliationEnabled   bool
+	EventsReconciliationEnabled bool
 	EnableNodeFilteringFlag     bool
 	EnableTracingFlag           bool
 	EnableNetworkMonitoringFlag bool

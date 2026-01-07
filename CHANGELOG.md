@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added feature flags to disable alloy events and alloy logs reconciliations.
+
+### Fixed
+
+- Fix tests templates for alloy-events (due to incorrect ClusterLabels).
+
 ### Removed
 
 - Remove unused credentials reconcilers.
