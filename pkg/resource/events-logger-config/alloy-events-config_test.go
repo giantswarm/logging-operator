@@ -74,10 +74,16 @@ func TestGenerateAlloyEventsConfig(t *testing.T) {
 			}
 
 			clusterLabels := common.ClusterLabels{
-				ClusterID:    tc.clusterName,
-				ClusterType:  "workload_cluster",
+				ClusterID: tc.clusterName,
+				ClusterType: func() string {
+					if tc.clusterName == tc.installationName {
+						return "management_cluster"
+					}
+					return "workload_cluster"
+				}(),
+				Installation: tc.installationName,
 				Organization: "test-organization",
-				Provider:     "test-provider",
+				Provider:     "capa",
 			}
 			config, err := generateAlloyEventsConfig(tc.includeNamespaces, tc.excludeNamespaces, false, tc.tracingEnabled, "<tempo-url>", []string{"giantswarm"}, clusterLabels)
 			if err != nil {

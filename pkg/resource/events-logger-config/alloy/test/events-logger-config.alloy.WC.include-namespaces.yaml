@@ -39,7 +39,7 @@ alloy:
         		cluster_id       = "include-namespaces",
         		cluster_type     = "workload_cluster",
         		organization     = "test-organization",
-        		provider         = "test-provider",
+        		provider         = "capa",
         		scrape_job       = "kubernetes-events",
         	}
         }

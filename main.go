@@ -80,6 +80,8 @@ func main() {
 	var defaultNamespaces StringSliceVar
 	var enableLeaderElection bool
 	var enableLogging bool
+	var logsReconciliationEnabled bool
+	var eventsReconciliationEnabled bool
 	var enableNodeFiltering bool
 	var enableTracing bool
 	var enableNetworkMonitoring bool
@@ -95,6 +97,8 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "enable/disable logging for the whole installation")
+	flag.BoolVar(&logsReconciliationEnabled, "logs-reconciliation-enabled", true, "enable/disable alloy logs reconcilers")
+	flag.BoolVar(&eventsReconciliationEnabled, "events-reconciliation-enabled", true, "enable/disable events logging reconcilers")
 	flag.BoolVar(&enableNodeFiltering, "enable-node-filtering", false, "enable/disable node filtering in Alloy logging configuration")
 	flag.BoolVar(&enableTracing, "enable-tracing", false, "enable/disable tracing support for events logger")
 	flag.BoolVar(&enableNetworkMonitoring, "enable-network-monitoring", false, "enable/disable network monitoring for the whole installation")
@@ -156,6 +160,8 @@ func main() {
 	// Create Config for dependency injection
 	appConfig := config.Config{
 		EnableLoggingFlag:           enableLogging,
+		LogsReconciliationEnabled:   logsReconciliationEnabled,
+		EventsReconciliationEnabled: eventsReconciliationEnabled,
 		EnableNodeFilteringFlag:     enableNodeFiltering,
 		EnableTracingFlag:           enableTracing,
 		EnableNetworkMonitoringFlag: enableNetworkMonitoring,
@@ -212,16 +218,20 @@ func main() {
 		TracesAuthManager: tracesAuthManager,
 	}
 
+	// Conditionally add resources based on feature flags
+	var resources []resource.Interface
+	if logsReconciliationEnabled {
+		resources = append(resources, &loggingSecret, &loggingConfig)
+	}
+	if eventsReconciliationEnabled {
+		resources = append(resources, &eventsLoggerSecret, &eventsLoggerConfig)
+	}
+
 	if err = (&controller.CapiClusterReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Config: appConfig,
-		Resources: []resource.Interface{
-			&loggingSecret,
-			&loggingConfig,
-			&eventsLoggerSecret,
-			&eventsLoggerConfig,
-		},
+		Client:    mgr.GetClient(),
+		Scheme:    mgr.GetScheme(),
+		Config:    appConfig,
+		Resources: resources,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create CAPI controller", "controller", "Cluster")
 		os.Exit(1)

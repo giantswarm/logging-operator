@@ -40,6 +40,18 @@
                 },
                 "loggingEnabled": {
                     "type": "boolean"
+                },
+                "logsReconciliationEnabled": {
+                    "type": "boolean"
+                },
+                "eventsReconciliationEnabled": {
+                    "type": "boolean"
+                },
+                "nodeFilteringEnabled": {
+                    "type": "boolean"
+                },
+                "networkMonitoringEnabled": {
+                    "type": "boolean"
                 }
             }
         },

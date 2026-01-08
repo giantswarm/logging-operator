@@ -5,6 +5,62 @@
 # - Alloy runs as a deployment, with only 1 replica.
 networkPolicy:
   cilium:
+    egress:
+    - toEntities:
+      - kube-apiserver
+      - world
+    # Allow direct access to loki-gateway
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/component: gateway
+          app.kubernetes.io/name: loki
+          io.kubernetes.pod.namespace: loki
+      toPorts:
+      - ports:
+        - port: "8080"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s-app: coredns
+      - matchLabels:
+          k8s-app: k8s-dns-node-cache
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+        - port: "1053"
+          protocol: ANY
+        rules:
+          dns:
+          - matchPattern: '*'
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: ANY
+        - port: "443"
+          protocol: ANY
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: alloy-events
+          app.kubernetes.io/name: alloy
+      toPorts:
+      - ports:
+        - port: "12345"
+          protocol: TCP
+    # Allow direct access to tempo
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: tempo
+          io.kubernetes.pod.namespace: tempo
+      toPorts:
+      - ports:
+        - port: "4317"
+          protocol: TCP
+        - port: "4318"
+          protocol: TCP
     ingress:
     - toPorts:
       - ports:
@@ -40,20 +96,16 @@ alloy:
         		max_backoff_period = "10m0s"
         		remote_timeout     = "1m0s"
         		tenant_id          = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-tenant-id"])
-        		url                = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-url"])
-        		basic_auth {
-        			username = convert.nonsensitive(remote.kubernetes.secret.credentials.data["logging-username"])
-        			password = remote.kubernetes.secret.credentials.data["logging-password"]
-        		}
+        		url                = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
         		tls_config {
         			insecure_skip_verify = false
         		}
         	}
         	external_labels = {
         		cluster_id       = "test-installation",
-        		cluster_type     = "workload_cluster",
+        		cluster_type     = "management_cluster",
         		organization     = "test-organization",
-        		provider         = "test-provider",
+        		provider         = "capa",
         		scrape_job       = "kubernetes-events",
         	}
         }
@@ -96,9 +148,9 @@ alloy:
         		context = "resource"
         		statements = [
         			`set(attributes["giantswarm.cluster.id"], "test-installation")`,
-        			`set(attributes["giantswarm.cluster.type"], "workload_cluster")`,
+        			`set(attributes["giantswarm.cluster.type"], "management_cluster")`,
         			`set(attributes["giantswarm.cluster.organization"], "test-organization")`,
-        			`set(attributes["giantswarm.cluster.provider"], "test-provider")`,
+        			`set(attributes["giantswarm.cluster.provider"], "capa")`,
         		]
         	}
         	output {
@@ -134,11 +186,11 @@ alloy:
         // one OTLP gRPC exporter for traces per tenant
         otelcol.exporter.otlp "giantswarm" {
         	client {
-        		auth     = otelcol.auth.basic.tracing_credentials.handler
-        		endpoint = "<tempo-url>:443"
         		tls {
-        			insecure_skip_verify = false
+        			// Use insecure connection since this exporter uses a (direct) internal Tempo endpoint which is not behind a TLS reverse proxy.
+        			insecure = true
         		}
+        		endpoint = "tempo-distributor.tempo.svc:4317"
         		headers = {
         			"X-Scope-OrgID" = "giantswarm",
         		}
