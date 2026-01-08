@@ -42,6 +42,8 @@ loggingOperator:
   excludeEventsFromNamespaces: []
   includeEventsFromNamespaces: []
   loggingEnabled: true
+  logsReconciliationEnabled: true
+  eventsReconciliationEnabled: true
   nodeFilteringEnabled: false
   networkMonitoringEnabled: false
 

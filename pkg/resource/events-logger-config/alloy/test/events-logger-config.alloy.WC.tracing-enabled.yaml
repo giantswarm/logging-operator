@@ -53,7 +53,7 @@ alloy:
         		cluster_id       = "test-cluster",
         		cluster_type     = "workload_cluster",
         		organization     = "test-organization",
-        		provider         = "test-provider",
+        		provider         = "capa",
         		scrape_job       = "kubernetes-events",
         	}
         }
@@ -98,7 +98,7 @@ alloy:
         			`set(attributes["giantswarm.cluster.id"], "test-cluster")`,
         			`set(attributes["giantswarm.cluster.type"], "workload_cluster")`,
         			`set(attributes["giantswarm.cluster.organization"], "test-organization")`,
-        			`set(attributes["giantswarm.cluster.provider"], "test-provider")`,
+        			`set(attributes["giantswarm.cluster.provider"], "capa")`,
         		]
         	}
         	output {

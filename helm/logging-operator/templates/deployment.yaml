@@ -33,6 +33,8 @@ spec:
         image: "{{ .Values.registry.domain }}/{{ .Values.image.name }}:{{ default .Chart.Version .Values.image.tag }}"
         args:
           - -enable-logging={{ .Values.loggingOperator.loggingEnabled }}
+          - -logs-reconciliation-enabled={{ .Values.loggingOperator.logsReconciliationEnabled }}
+          - -events-reconciliation-enabled={{ .Values.loggingOperator.eventsReconciliationEnabled }}
           - -enable-node-filtering={{ .Values.loggingOperator.nodeFilteringEnabled }}
           - -enable-network-monitoring={{ .Values.loggingOperator.networkMonitoringEnabled }}
           - -enable-tracing={{ .Values.tracing.enabled }}

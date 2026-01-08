@@ -161,7 +161,7 @@ func TestGenerateAlloyLoggingConfig(t *testing.T) {
 				}(),
 				Installation: tc.installationName,
 				Organization: "test-organization",
-				Provider:     "test-provider",
+				Provider:     "capa",
 			}
 
 			config, err := GenerateAlloyLoggingConfig(cluster, observabilityBundleVersion, tc.defaultNamespaces, tc.tenants, clusterLabels, false, tc.enableNodeFiltering, tc.enableNetworkMonitoring)
