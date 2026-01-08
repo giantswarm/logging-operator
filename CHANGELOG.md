@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added feature flags to disable alloy events and alloy logs reconciliations.
 
+### Changed
+
+- Remove the clean up of the giantswarm.tenant resource attribute in traces so we can count the number of unique trace datasources (https://github.com/giantswarm/roadmap/issues/4024)
+
 ### Fixed
 
 - Fix tests templates for alloy-events (due to incorrect ClusterLabels).
