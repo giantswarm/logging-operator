@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-01-12
+
 ### Added
 
 - Added feature flags to disable alloy events and alloy logs reconciliations.
@@ -693,7 +695,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add '--vintage' toggle
 - Add controller for Workload Management Cluster using cluster.x-k8s.io/v1beta1```
 
-[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.40.1...HEAD
+[Unreleased]: https://github.com/giantswarm/logging-operator/compare/v0.41.0...HEAD
+[0.41.0]: https://github.com/giantswarm/logging-operator/compare/v0.40.1...v0.41.0
 [0.40.1]: https://github.com/giantswarm/logging-operator/compare/v0.40.0...v0.40.1
 [0.40.0]: https://github.com/giantswarm/logging-operator/compare/v0.39.0...v0.40.0
 [0.39.0]: https://github.com/giantswarm/logging-operator/compare/v0.38.0...v0.39.0
