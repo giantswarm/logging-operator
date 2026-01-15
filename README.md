@@ -4,7 +4,7 @@
 
 ## ⚠️ DEPRECATED
 
-**This project is deprecated and no longer maintained.** It has been superseded by functionality integrated into the observability-operator.
+**This project is deprecated and no longer maintained.** It has been superseded by functionality integrated into the [observability-operator](https://github.com/giantswarm/observability-operator/).
 
 ---
 
