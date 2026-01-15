@@ -2,6 +2,12 @@
 
 # logging-operator
 
+## ⚠️ DEPRECATED
+
+**This project is deprecated and no longer maintained.** It has been superseded by functionality integrated into the [observability-operator](https://github.com/giantswarm/observability-operator/).
+
+---
+
 This operator is in charge of handling the setup and configuration of the logging stack at Giant Swarm.
 
 It reconciles `cluster.cluster.x-k8s.io` objects and makes sure each `Cluster` is provided with its alloy agents:
